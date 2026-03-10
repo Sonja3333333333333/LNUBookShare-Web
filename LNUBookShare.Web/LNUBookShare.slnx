@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="LNUBookShare.Application/LNUBookShare.Application.csproj" />
+  <Project Path="LNUBookShare.Domain/LNUBookShare.Domain.csproj" />
+  <Project Path="LNUBookShare.Infrastrucuture/LNUBookShare.Infrastructure.csproj" />
+  <Project Path="LNUBookShare.Web/LNUBookShare.Web.csproj" />
+</Solution>
