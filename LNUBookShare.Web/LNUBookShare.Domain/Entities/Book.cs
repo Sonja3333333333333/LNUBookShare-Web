@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace LNUBookShare.Infrastructure.Data;
+namespace LNUBookShare.Domain.Entities;
 
 public partial class Book
 {

@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace LNUBookShare.Infrastructure.Data;
+namespace LNUBookShare.Domain.Entities;
 
-public partial class Favorite
+public partial class ReservationQueue
 {
-    public int FavoriteId { get; set; }
-
-    public int UserId { get; set; }
+    public int QueueId { get; set; }
 
     public int BookId { get; set; }
+
+    public int UserId { get; set; }
 
     public DateTime CreatedAt { get; set; }
 
