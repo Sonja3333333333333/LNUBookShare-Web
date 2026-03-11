@@ -1,12 +1,15 @@
-﻿
+﻿using LNUBookShare.Domain.Entities;
+
 namespace LNUBookShare.Application.Interfaces
 {
-    internal interface IUserRepository
+    public interface IUserRepository
     {
-        // Read (всі)
-        // Read (одна)
-        // Create
-        // Update
-        // Delete
+        Task<IEnumerable<User>> GetAllAsync();// Read (всі)
+        Task<User?> GetByIdAsync(int id);// Read (одна)
+        Task AddAsync(User user);// Create
+        Task UpdateAsync(User user);// Update
+        Task DeleteAsync(User user);// Delete
+
+        Task ClearAllAsync();
     }
 }

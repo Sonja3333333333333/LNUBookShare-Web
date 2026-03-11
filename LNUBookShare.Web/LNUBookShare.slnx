@@ -1,4 +1,5 @@
 <Solution>
+  <Project Path="ConsoleApp/ConsoleApp.csproj" Id="36776339-e212-4849-88f7-6c373ce411f1" />
   <Project Path="LNUBookShare.Application/LNUBookShare.Application.csproj" />
   <Project Path="LNUBookShare.Domain/LNUBookShare.Domain.csproj" />
   <Project Path="LNUBookShare.Infrastrucuture/LNUBookShare.Infrastructure.csproj" />

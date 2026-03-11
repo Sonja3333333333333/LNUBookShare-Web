@@ -1,8 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using LNUBookShare.Domain.Entities;
 
-namespace LNUBookShare.Domain.Data;
+namespace LNUBookShare.Infrastructure;
+
 
 public partial class AppDbContext : DbContext
 {
