@@ -117,4 +117,23 @@ catch (Exception ex)
     }
 }
 
-Console.ReadLine(); 
+Console.ReadLine();
+
+//public class UglyTestClass
+//{
+//    // 1. Властивість з маленької літери (Аналізатори іменування це ненавидять)
+//    public string badNamingProperty { get; set; }
+
+//    // 2. Метод без вказаного public/private 
+//    void do_something_weird()
+//    {
+//        // 3. Змінна, яку створили, але ніде не використали
+//        int uselessVariable = 42;
+
+//        // 4. Порожній блок if
+//        if (true)
+//        {
+//        }
+//    }
+//}
+
