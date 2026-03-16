@@ -1,6 +1,10 @@
+// <copyright file="HomeController.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
+using System.Diagnostics;
 using LNUBookShare.Web.Models;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
 
 namespace LNUBookShare.Web.Controllers
 {

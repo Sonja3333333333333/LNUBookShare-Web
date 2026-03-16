@@ -1,4 +1,8 @@
-﻿using LNUBookShare.Domain.Entities;
+﻿// <copyright file="IFacultyRepository.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
+using LNUBookShare.Domain.Entities;
 
 namespace LNUBookShare.Application.Interfaces
 {

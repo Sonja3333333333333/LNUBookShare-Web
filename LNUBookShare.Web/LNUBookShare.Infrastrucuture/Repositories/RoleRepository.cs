@@ -1,4 +1,8 @@
-﻿using LNUBookShare.Application.Interfaces;
+﻿// <copyright file="RoleRepository.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
+using LNUBookShare.Application.Interfaces;
 using LNUBookShare.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,10 +21,9 @@ namespace LNUBookShare.Infrastructure.Repositories
         {
             await _context.Roles.AddAsync(role);
             await _context.SaveChangesAsync();
-
         }
 
-        public async Task  ClearAllAsync()
+        public async Task ClearAllAsync()
         {
             await _context.Roles.ExecuteDeleteAsync();
         }
