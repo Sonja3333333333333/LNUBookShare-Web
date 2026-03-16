@@ -1,10 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using LNUBookShare.Domain.Entities;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace LNUBookShare.Infrastructure;
 
 
-public partial class AppDbContext : DbContext
+public partial class AppDbContext : IdentityDbContext<User, Role, int>
 {
     public AppDbContext()
     {
@@ -41,6 +43,8 @@ public partial class AppDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
+
         modelBuilder.Entity<Book>(entity =>
         {
             entity.HasKey(e => e.BookId).HasName("book_pkey");
@@ -279,21 +283,21 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<Role>(entity =>
         {
-            entity.HasKey(e => e.RoleId).HasName("role_pkey");
+            entity.HasKey(e => e.Id).HasName("role_pkey");
 
             entity.ToTable("role");
 
-            entity.HasIndex(e => e.RoleName, "role_role_name_key").IsUnique();
+            entity.HasIndex(e => e.Name, "role_role_name_key").IsUnique();
 
-            entity.Property(e => e.RoleId).HasColumnName("role_id");
-            entity.Property(e => e.RoleName)
+            entity.Property(e => e.Id).HasColumnName("role_id");
+            entity.Property(e => e.Name)
                 .HasMaxLength(50)
                 .HasColumnName("role_name");
         });
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.UserId).HasName("user_pkey");
+            entity.HasKey(e => e.Id).HasName("user_pkey");
 
             entity.ToTable("user");
 
@@ -301,7 +305,7 @@ public partial class AppDbContext : DbContext
 
             entity.HasIndex(e => e.Email, "user_email_key").IsUnique();
 
-            entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.Property(e => e.Id).HasColumnName("user_id");
             entity.Property(e => e.ApiToken)
                 .HasMaxLength(255)
                 .HasColumnName("api_token");
@@ -380,7 +384,71 @@ public partial class AppDbContext : DbContext
             entity.HasOne(d => d.Reviewer).WithMany(p => p.UserReviewReviewers)
                 .HasForeignKey(d => d.ReviewerId)
                 .HasConstraintName("user_review_reviewer_id_fkey");
+
         });
+
+
+        modelBuilder.Entity<Faculty>().HasData(
+            new Faculty { FacultyId = 1, FacultyName = "Прикладна математика та інформатика" }
+        );
+
+        modelBuilder.Entity<Category>().HasData(
+            new Category { CategoryId = 1, CategoryName = "Програмування" }
+        );
+
+        modelBuilder.Entity<Role>().HasData(
+           new Role
+           {
+               Id = 2,
+               Name = "authorized",
+               NormalizedName = "AUTHORIZED", // Identity теж любить це поле
+               ConcurrencyStamp = "STATIC-ROLE-STAMP-0000"
+           } // <--- ОСЬ НАШ ФІКС}
+            );
+
+
+        //var hasher = new PasswordHasher<User>();
+
+        var testUser = new User
+        {
+            Id = 1, 
+            Email = "student1@lnu.edu.ua",
+            UserName = "student1@lnu.edu.ua", 
+            NormalizedEmail = "STUDENT1@LNU.EDU.UA", 
+            NormalizedUserName = "STUDENT1@LNU.EDU.UA", 
+            FirstName = "Іван",
+            LastName = "Франко",
+            FacultyId = 1,
+            RoleId = 2, 
+            IsActive = true,
+            IsEmailConfirmed = true
+            ,
+            PasswordHash = "AQAAAAIAAYagAAAAEKA2vL5nQ69q4rQxG+E+mO2e8q1b9wXYZ...",
+
+    
+            SecurityStamp = "STATIC-STAMP-1111-2222-3333",
+            ConcurrencyStamp = "STATIC-USER-STAMP-4444"
+        };
+
+        //testUser.PasswordHash = hasher.HashPassword(testUser, "Password123!");
+
+        modelBuilder.Entity<User>().HasData(testUser);
+
+        modelBuilder.Entity<Book>().HasData(
+            new Book
+            {
+                BookId = 1,
+                Title = "Чиста Архітектура",
+                Author = "Роберт Мартін",
+                Isbn = "978-0134494166",
+                Year = 2017,
+                CategoryId = 1,
+                OwnerId = testUser.Id, 
+                Status = "available",
+                Language = "Українська",
+                Publisher = "Фабула"
+            }
+        );
 
         OnModelCreatingPartial(modelBuilder);
     }
