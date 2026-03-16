@@ -1,10 +1,12 @@
-// Це читає рядок з appsettings.json безпечно!
+// <copyright file="Program.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
 using LNUBookShare.Infrastructure;
 using Microsoft.EntityFrameworkCore;
-using Serilog; 
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
-
 
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration) // Дозволяє зчитувати додаткові налаштування з appsettings.json
@@ -38,6 +40,7 @@ try
     if (!app.Environment.IsDevelopment())
     {
         app.UseExceptionHandler("/Home/Error");
+
         // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
         app.UseHsts();
     }
@@ -56,7 +59,7 @@ try
 
     app.Run();
 }
-catch(Exception ex)
+catch (Exception ex)
 {
     Log.Fatal(ex, "Додаток не зміг запуститися");
 }

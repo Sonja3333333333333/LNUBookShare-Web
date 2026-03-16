@@ -1,10 +1,13 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿// <copyright file="AppDbContext.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
 using LNUBookShare.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 
 namespace LNUBookShare.Infrastructure;
-
 
 public partial class AppDbContext : IdentityDbContext<User, Role, int>
 {
@@ -35,10 +38,9 @@ public partial class AppDbContext : IdentityDbContext<User, Role, int>
 
     public virtual DbSet<ReservationQueue> ReservationQueues { get; set; }
 
-    public virtual DbSet<Role> Roles { get; set; }
+    // public virtual DbSet<Role> Roles { get; set; }
 
-    public virtual DbSet<User> Users { get; set; }
-
+    // public virtual DbSet<User> Users { get; set; }
     public virtual DbSet<UserReview> UserReviews { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -384,54 +386,44 @@ public partial class AppDbContext : IdentityDbContext<User, Role, int>
             entity.HasOne(d => d.Reviewer).WithMany(p => p.UserReviewReviewers)
                 .HasForeignKey(d => d.ReviewerId)
                 .HasConstraintName("user_review_reviewer_id_fkey");
-
         });
 
-
         modelBuilder.Entity<Faculty>().HasData(
-            new Faculty { FacultyId = 1, FacultyName = "Прикладна математика та інформатика" }
-        );
+            new Faculty { FacultyId = 1, FacultyName = "Прикладна математика та інформатика" });
 
         modelBuilder.Entity<Category>().HasData(
-            new Category { CategoryId = 1, CategoryName = "Програмування" }
-        );
+            new Category { CategoryId = 1, CategoryName = "Програмування" });
 
         modelBuilder.Entity<Role>().HasData(
            new Role
            {
                Id = 2,
                Name = "authorized",
-               NormalizedName = "AUTHORIZED", // Identity теж любить це поле
-               ConcurrencyStamp = "STATIC-ROLE-STAMP-0000"
-           } // <--- ОСЬ НАШ ФІКС}
-            );
+               NormalizedName = "AUTHORIZED",
+               ConcurrencyStamp = "STATIC-ROLE-STAMP-0000",
+           });
 
-
-        //var hasher = new PasswordHasher<User>();
-
+        // var hasher = new PasswordHasher<User>();
         var testUser = new User
         {
-            Id = 1, 
+            Id = 1,
             Email = "student1@lnu.edu.ua",
-            UserName = "student1@lnu.edu.ua", 
-            NormalizedEmail = "STUDENT1@LNU.EDU.UA", 
-            NormalizedUserName = "STUDENT1@LNU.EDU.UA", 
+            UserName = "student1@lnu.edu.ua",
+            NormalizedEmail = "STUDENT1@LNU.EDU.UA",
+            NormalizedUserName = "STUDENT1@LNU.EDU.UA",
             FirstName = "Іван",
             LastName = "Франко",
             FacultyId = 1,
-            RoleId = 2, 
+            RoleId = 2,
             IsActive = true,
-            IsEmailConfirmed = true
-            ,
+            IsEmailConfirmed = true,
             PasswordHash = "AQAAAAIAAYagAAAAEKA2vL5nQ69q4rQxG+E+mO2e8q1b9wXYZ...",
 
-    
             SecurityStamp = "STATIC-STAMP-1111-2222-3333",
-            ConcurrencyStamp = "STATIC-USER-STAMP-4444"
+            ConcurrencyStamp = "STATIC-USER-STAMP-4444",
         };
 
-        //testUser.PasswordHash = hasher.HashPassword(testUser, "Password123!");
-
+        // testUser.PasswordHash = hasher.HashPassword(testUser, "Password123!");
         modelBuilder.Entity<User>().HasData(testUser);
 
         modelBuilder.Entity<Book>().HasData(
@@ -443,12 +435,11 @@ public partial class AppDbContext : IdentityDbContext<User, Role, int>
                 Isbn = "978-0134494166",
                 Year = 2017,
                 CategoryId = 1,
-                OwnerId = testUser.Id, 
+                OwnerId = testUser.Id,
                 Status = "available",
                 Language = "Українська",
-                Publisher = "Фабула"
-            }
-        );
+                Publisher = "Фабула",
+            });
 
         OnModelCreatingPartial(modelBuilder);
     }

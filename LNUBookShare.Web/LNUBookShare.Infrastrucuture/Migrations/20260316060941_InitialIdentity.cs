@@ -1,4 +1,8 @@
-﻿using System;
+﻿// <copyright file="20260316060941_InitialIdentity.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -18,7 +22,7 @@ namespace LNUBookShare.Infrastructure.Migrations
                 {
                     category_id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    category_name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false)
+                    category_name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                 },
                 constraints: table =>
                 {
@@ -31,7 +35,7 @@ namespace LNUBookShare.Infrastructure.Migrations
                 {
                     faculty_id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    faculty_name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false)
+                    faculty_name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                 },
                 constraints: table =>
                 {
@@ -46,7 +50,7 @@ namespace LNUBookShare.Infrastructure.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     image_path = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
                     uploaded_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: false, defaultValueSql: "now()"),
-                    image_type = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false)
+                    image_type = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
                 },
                 constraints: table =>
                 {
@@ -61,7 +65,7 @@ namespace LNUBookShare.Infrastructure.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     role_name = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
                     NormalizedName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
-                    ConcurrencyStamp = table.Column<string>(type: "text", nullable: true)
+                    ConcurrencyStamp = table.Column<string>(type: "text", nullable: true),
                 },
                 constraints: table =>
                 {
@@ -76,7 +80,7 @@ namespace LNUBookShare.Infrastructure.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     RoleId = table.Column<int>(type: "integer", nullable: false),
                     ClaimType = table.Column<string>(type: "text", nullable: true),
-                    ClaimValue = table.Column<string>(type: "text", nullable: true)
+                    ClaimValue = table.Column<string>(type: "text", nullable: true),
                 },
                 constraints: table =>
                 {
@@ -119,7 +123,7 @@ namespace LNUBookShare.Infrastructure.Migrations
                     TwoFactorEnabled = table.Column<bool>(type: "boolean", nullable: false),
                     LockoutEnd = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     LockoutEnabled = table.Column<bool>(type: "boolean", nullable: false),
-                    AccessFailedCount = table.Column<int>(type: "integer", nullable: false)
+                    AccessFailedCount = table.Column<int>(type: "integer", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -152,7 +156,7 @@ namespace LNUBookShare.Infrastructure.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     UserId = table.Column<int>(type: "integer", nullable: false),
                     ClaimType = table.Column<string>(type: "text", nullable: true),
-                    ClaimValue = table.Column<string>(type: "text", nullable: true)
+                    ClaimValue = table.Column<string>(type: "text", nullable: true),
                 },
                 constraints: table =>
                 {
@@ -172,7 +176,7 @@ namespace LNUBookShare.Infrastructure.Migrations
                     LoginProvider = table.Column<string>(type: "text", nullable: false),
                     ProviderKey = table.Column<string>(type: "text", nullable: false),
                     ProviderDisplayName = table.Column<string>(type: "text", nullable: true),
-                    UserId = table.Column<int>(type: "integer", nullable: false)
+                    UserId = table.Column<int>(type: "integer", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -190,7 +194,7 @@ namespace LNUBookShare.Infrastructure.Migrations
                 columns: table => new
                 {
                     UserId = table.Column<int>(type: "integer", nullable: false),
-                    RoleId = table.Column<int>(type: "integer", nullable: false)
+                    RoleId = table.Column<int>(type: "integer", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -216,7 +220,7 @@ namespace LNUBookShare.Infrastructure.Migrations
                     UserId = table.Column<int>(type: "integer", nullable: false),
                     LoginProvider = table.Column<string>(type: "text", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false),
-                    Value = table.Column<string>(type: "text", nullable: true)
+                    Value = table.Column<string>(type: "text", nullable: true),
                 },
                 constraints: table =>
                 {
@@ -245,7 +249,7 @@ namespace LNUBookShare.Infrastructure.Migrations
                     owner_id = table.Column<int>(type: "integer", nullable: false),
                     status = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false, defaultValueSql: "'available'::character varying"),
                     created_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: false, defaultValueSql: "now()"),
-                    cover_id = table.Column<int>(type: "integer", nullable: true)
+                    cover_id = table.Column<int>(type: "integer", nullable: true),
                 },
                 constraints: table =>
                 {
@@ -279,7 +283,7 @@ namespace LNUBookShare.Infrastructure.Migrations
                     sender_id = table.Column<int>(type: "integer", nullable: false),
                     receiver_id = table.Column<int>(type: "integer", nullable: false),
                     content_ = table.Column<string>(type: "text", nullable: false),
-                    sent_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: false, defaultValueSql: "now()")
+                    sent_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: false, defaultValueSql: "now()"),
                 },
                 constraints: table =>
                 {
@@ -305,7 +309,7 @@ namespace LNUBookShare.Infrastructure.Migrations
                     user_id = table.Column<int>(type: "integer", nullable: false),
                     confirmation_token = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     created_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: false, defaultValueSql: "now()"),
-                    expires_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: false)
+                    expires_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -328,7 +332,7 @@ namespace LNUBookShare.Infrastructure.Migrations
                     reviewer_id = table.Column<int>(type: "integer", nullable: false),
                     rating = table.Column<int>(type: "integer", nullable: false),
                     comment_ = table.Column<string>(type: "text", nullable: true),
-                    created_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: false, defaultValueSql: "now()")
+                    created_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: false, defaultValueSql: "now()"),
                 },
                 constraints: table =>
                 {
@@ -357,7 +361,7 @@ namespace LNUBookShare.Infrastructure.Migrations
                     reviewer_id = table.Column<int>(type: "integer", nullable: false),
                     rating = table.Column<int>(type: "integer", nullable: false),
                     comment_ = table.Column<string>(type: "text", nullable: true),
-                    created_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: false, defaultValueSql: "now()")
+                    created_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: false, defaultValueSql: "now()"),
                 },
                 constraints: table =>
                 {
@@ -384,7 +388,7 @@ namespace LNUBookShare.Infrastructure.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     user_id = table.Column<int>(type: "integer", nullable: false),
                     book_id = table.Column<int>(type: "integer", nullable: false),
-                    created_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: false, defaultValueSql: "now()")
+                    created_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: false, defaultValueSql: "now()"),
                 },
                 constraints: table =>
                 {
@@ -411,7 +415,7 @@ namespace LNUBookShare.Infrastructure.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     book_id = table.Column<int>(type: "integer", nullable: false),
                     user_id = table.Column<int>(type: "integer", nullable: false),
-                    created_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: false, defaultValueSql: "now()")
+                    created_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: false, defaultValueSql: "now()"),
                 },
                 constraints: table =>
                 {

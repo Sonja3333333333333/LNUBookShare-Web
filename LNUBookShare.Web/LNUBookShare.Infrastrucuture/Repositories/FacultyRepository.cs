@@ -1,4 +1,8 @@
-﻿using LNUBookShare.Application.Interfaces;
+﻿// <copyright file="FacultyRepository.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
+using LNUBookShare.Application.Interfaces;
 using LNUBookShare.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -6,7 +10,6 @@ namespace LNUBookShare.Infrastructure.Repositories
 {
     public class FacultyRepository : IFacultyRepository
     {
-
         private readonly AppDbContext _context;
         public FacultyRepository(AppDbContext context)
         {
