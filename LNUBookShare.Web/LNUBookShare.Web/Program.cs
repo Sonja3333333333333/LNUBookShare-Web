@@ -2,7 +2,10 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
+using LNUBookShare.Application.Interfaces;
+using LNUBookShare.Application.Services;
 using LNUBookShare.Infrastructure;
+using LNUBookShare.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 
@@ -27,9 +30,11 @@ try
     {
         options.UseNpgsql(connectionString);
     });
+    builder.Services.AddScoped<IBookRepository, BookRepository>();
 
     // Add services to the container.
     builder.Services.AddControllersWithViews();
+    builder.Services.AddScoped<BookSearchService>();
 
     var app = builder.Build();
 
