@@ -1,4 +1,8 @@
-﻿using LNUBookShare.Application.Interfaces;
+﻿// <copyright file="CategoryRepository.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
+using LNUBookShare.Application.Interfaces;
 using LNUBookShare.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 

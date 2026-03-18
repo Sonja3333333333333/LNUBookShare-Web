@@ -46,7 +46,7 @@ builder.Services.AddScoped<IFacultyRepository, FacultyRepository>();
 
 builder.Services.AddControllersWithViews();
 
-var app = builder.Build();
+    var app = builder.Build();
 
 app.UseSerilogRequestLogging();
 
@@ -69,4 +69,13 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-app.Run();
+    app.Run();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Додаток не зміг запуститися");
+}
+finally
+{
+    Log.CloseAndFlush();
+}

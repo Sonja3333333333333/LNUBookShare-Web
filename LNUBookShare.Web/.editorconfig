@@ -1,0 +1,35 @@
+# Це означає, що це головний файл конфігурації для всього рішення
+root = true
+
+# Застосовувати ці правила до всіх C# файлів
+[*.cs]
+
+# Глушимо помилку SA0001 (зламаний аналіз коментарів)
+dotnet_diagnostic.SA0001.severity = none
+
+# Вимикаємо обов'язкові заголовки файлів (Copyright)
+dotnet_diagnostic.SA1633.severity = none
+
+# Вимикаємо вимогу писати "this." перед кожним полем (дуже бісить)
+dotnet_diagnostic.SA1101.severity = none
+
+# Вимикаємо вимогу XML-документації для кожного методу (якщо не вимагає викладач)
+dotnet_diagnostic.SA1600.severity = none
+
+# Дозволяємо використовувати змінні, що починаються з підкреслення (_fieldName)
+dotnet_diagnostic.SA1309.severity = none
+
+# Вимикаємо порядок використання using (StyleCop хоче алфавітний порядок)
+dotnet_diagnostic.SA1200.severity = none
+
+# Дозволяємо порожні рядки в кінці файлу або на початку
+dotnet_diagnostic.SA1516.severity = none
+
+# Вимикаємо вимогу писати <summary> для всіх елементів
+dotnet_diagnostic.SA1600.severity = none
+
+# Вимикаємо вимогу писати <summary> для partial класів
+dotnet_diagnostic.SA1601.severity = none
+
+# Наперед вимкнемо вимогу для enum (він 100% скоро вилізе)
+dotnet_diagnostic.SA1602.severity = none

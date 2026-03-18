@@ -1,4 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿// <copyright file="AppDbContext.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
 using LNUBookShare.Domain.Entities;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
@@ -22,12 +25,14 @@ public partial class AppDbContext : IdentityDbContext<User, Role, int>
     public virtual DbSet<ReservationQueue> ReservationQueues { get; set; }
     public override DbSet<Role> Roles { get; set; }
     public override DbSet<User> Users { get; set; }
+
+
     public virtual DbSet<UserReview> UserReviews { get; set; }
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
         // ВАЖЛИВО для Identity
         base.OnModelCreating(modelBuilder);
+            entity.HasKey(e => e.BookId).HasName("book_pkey");
+            entity.HasKey(e => e.BookId).HasName("book_pkey");
 
         // --- USER (Identity) ---
         modelBuilder.Entity<User>(entity =>
@@ -134,16 +139,16 @@ public partial class AppDbContext : IdentityDbContext<User, Role, int>
             entity.ToTable("reservation_queue");
             entity.Property(e => e.QueueId).HasColumnName("queue_id");
             entity.Property(e => e.BookId).HasColumnName("book_id");
-            entity.Property(e => e.UserId).HasColumnName("user_id");
-
             entity.HasOne(d => d.Book).WithMany(p => p.ReservationQueues).HasForeignKey(d => d.BookId);
             entity.HasOne(d => d.User).WithMany(p => p.ReservationQueues).HasForeignKey(d => d.UserId);
-        });
-
+                .HasColumnName("role_name");
+                .HasColumnName("role_name");
         // --- FACULTY & CATEGORY ---
         modelBuilder.Entity<Faculty>(entity => {
             entity.HasKey(e => e.FacultyId);
             entity.ToTable("faculty");
+                .HasColumnName("email");
+                .HasColumnName("email");
             entity.Property(e => e.FacultyId).HasColumnName("faculty_id");
             entity.Property(e => e.FacultyName).HasColumnName("faculty_name");
         });
@@ -168,6 +173,59 @@ public partial class AppDbContext : IdentityDbContext<User, Role, int>
             entity.Property(e => e.ConfirmationId).HasColumnName("confirmation_id");
             entity.Property(e => e.UserId).HasColumnName("user_id");
         });
+
+        modelBuilder.Entity<Faculty>().HasData(
+            new Faculty { FacultyId = 1, FacultyName = "Прикладна математика та інформатика" });
+
+        modelBuilder.Entity<Category>().HasData(
+            new Category { CategoryId = 1, CategoryName = "Програмування" });
+
+        modelBuilder.Entity<Role>().HasData(
+           new Role
+           {
+               Id = 2,
+               Name = "authorized",
+               NormalizedName = "AUTHORIZED",
+               ConcurrencyStamp = "STATIC-ROLE-STAMP-0000",
+           });
+
+        // var hasher = new PasswordHasher<User>();
+        var testUser = new User
+        {
+            Id = 1,
+            Email = "student1@lnu.edu.ua",
+            UserName = "student1@lnu.edu.ua",
+            NormalizedEmail = "STUDENT1@LNU.EDU.UA",
+            NormalizedUserName = "STUDENT1@LNU.EDU.UA",
+            FirstName = "Іван",
+            LastName = "Франко",
+            FacultyId = 1,
+            RoleId = 2,
+            IsActive = true,
+            IsEmailConfirmed = true,
+            PasswordHash = "AQAAAAIAAYagAAAAEKA2vL5nQ69q4rQxG+E+mO2e8q1b9wXYZ...",
+
+            SecurityStamp = "STATIC-STAMP-1111-2222-3333",
+            ConcurrencyStamp = "STATIC-USER-STAMP-4444",
+        };
+
+        // testUser.PasswordHash = hasher.HashPassword(testUser, "Password123!");
+        modelBuilder.Entity<User>().HasData(testUser);
+
+        modelBuilder.Entity<Book>().HasData(
+            new Book
+            {
+                BookId = 1,
+                Title = "Чиста Архітектура",
+                Author = "Роберт Мартін",
+                Isbn = "978-0134494166",
+                Year = 2017,
+                CategoryId = 1,
+                OwnerId = testUser.Id,
+                Status = "available",
+                Language = "Українська",
+                Publisher = "Фабула",
+            });
 
         OnModelCreatingPartial(modelBuilder);
     }

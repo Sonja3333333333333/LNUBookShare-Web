@@ -1,4 +1,8 @@
-﻿using LNUBookShare.Application.Interfaces;
+﻿// <copyright file="UserRepository.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
+using LNUBookShare.Application.Interfaces;
 using LNUBookShare.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -45,6 +49,5 @@ namespace LNUBookShare.Infrastructure.Repositories
         {
             await _context.Users.ExecuteDeleteAsync();
         }
-
     }
 }

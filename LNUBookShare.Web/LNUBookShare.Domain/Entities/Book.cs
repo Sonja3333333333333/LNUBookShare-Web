@@ -1,5 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// <copyright file="Book.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
 namespace LNUBookShare.Domain.Entities;
 
