@@ -3,6 +3,7 @@
 // </copyright>
 
 using LNUBookShare.Infrastructure;
+using Microsoft.AspNetCore.Identity; // ДОДАНО: підключення Identity
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 
@@ -28,12 +29,24 @@ try
         options.UseNpgsql(connectionString);
     });
 
+    // ДОДАНО: Реєстрація Identity для роботи з користувачами та ролями
+    builder.Services.AddIdentity<LNUBookShare.Domain.Entities.User, LNUBookShare.Domain.Entities.Role>(options =>
+    {
+        // Базові налаштування пароля
+        options.Password.RequireDigit = false;
+        options.Password.RequiredLength = 6;
+        options.Password.RequireNonAlphanumeric = false;
+        options.Password.RequireUppercase = false;
+    })
+        .AddEntityFrameworkStores<AppDbContext>()
+        .AddDefaultTokenProviders();
+
     // Add services to the container.
     builder.Services.AddControllersWithViews();
 
     var app = builder.Build();
 
-    // ДОДАНО: Додаємо middleware для гарного логування всіх HTTP-запитів
+    // Додаємо middleware для гарного логування всіх HTTP-запитів
     app.UseSerilogRequestLogging();
 
     // Configure the HTTP request pipeline.
@@ -46,8 +59,11 @@ try
     }
 
     app.UseHttpsRedirection();
+
     app.UseRouting();
 
+    // ДОДАНО: Аутентифікація має бути обов'язково ПЕРЕД авторизацією
+    app.UseAuthentication();
     app.UseAuthorization();
 
     app.MapStaticAssets();
@@ -57,7 +73,7 @@ try
         pattern: "{controller=Home}/{action=Index}/{id?}")
         .WithStaticAssets();
 
-    app.Run();
+    await app.RunAsync();
 }
 catch (Exception ex)
 {
@@ -65,5 +81,5 @@ catch (Exception ex)
 }
 finally
 {
-    Log.CloseAndFlush();
+    await Log.CloseAndFlushAsync();
 }
