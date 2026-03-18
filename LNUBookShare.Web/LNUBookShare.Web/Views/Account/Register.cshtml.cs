@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace LNUBookShare.Web.Views.Account
 {
-    public class RegisterModel : PageModel
+    public class Register : PageModel
     {
         public void OnGet()
         {

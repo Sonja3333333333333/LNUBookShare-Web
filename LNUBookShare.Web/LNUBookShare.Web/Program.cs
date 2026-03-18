@@ -1,13 +1,18 @@
-using LNUBookShare.Domain.Entities; // ДОДАНО для доступу до User та Role
+using LNUBookShare.Application.Interfaces;
+using LNUBookShare.Domain.Entities;
 using LNUBookShare.Infrastructure;
-using Microsoft.AspNetCore.Identity; // ДОДАНО
+using LNUBookShare.Infrastructure.Repositories;
+using LNUBookShare.Infrastructure.Services;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
-using LNUBookShare.Application.Interfaces; // Для IFacultyRepository
-using LNUBookShare.Infrastructure.Repositories; // Для FacultyRepository
+
+// 👇 Цей рядок лікує помилку з форматом часу в PostgreSQL
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Налаштування Serilog
+// --- НАЛАШТУВАННЯ SERILOG ---
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
     .Enrich.FromLogContext()
@@ -17,57 +22,63 @@ Log.Logger = new LoggerConfiguration()
 
 builder.Host.UseSerilog();
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-Console.WriteLine($"DEBUG: Connection String is: {connectionString}");
-
-// Підключення до БД
-builder.Services.AddDbContext<AppDbContext>(options =>
+try
 {
-    options.UseNpgsql(connectionString);
-});
+    Log.Information("Запуск веб-додатка LNU Book Share!");
 
-// --- ДОДАНО: Реєстрація Identity для твоїх сутностей ---
-builder.Services.AddIdentity<User, Role>(options =>
-{
-    // Полегшуємо вимоги для тестів (ПМІ вимоги)
-    options.Password.RequireDigit = false;
-    options.Password.RequiredLength = 6;
-    options.Password.RequireNonAlphanumeric = false;
-    options.Password.RequireUppercase = false;
-    options.Password.RequireLowercase = false;
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    Console.WriteLine($"DEBUG: Connection String is: {connectionString}");
 
-    options.User.RequireUniqueEmail = true;
-})
-.AddEntityFrameworkStores<AppDbContext>()
-.AddDefaultTokenProviders();
+    builder.Services.AddDbContext<AppDbContext>(options =>
+    {
+        options.UseNpgsql(connectionString);
+    });
 
-// --- ДОДАНО: Реєстрація твоїх репозиторіїв ---
-builder.Services.AddScoped<IFacultyRepository, FacultyRepository>();
+    // --- IDENTITY (Налаштування ПМІ + Підтвердження пошти) ---
+    builder.Services.AddIdentity<User, Role>(options =>
+    {
+        options.Password.RequireDigit = false;
+        options.Password.RequiredLength = 6;
+        options.Password.RequireNonAlphanumeric = false;
+        options.Password.RequireUppercase = false;
+        options.Password.RequireLowercase = false;
 
-builder.Services.AddControllersWithViews();
+        options.User.RequireUniqueEmail = true;
+
+        // Вимога підтвердження пошти для входу
+        options.SignIn.RequireConfirmedEmail = true;
+    })
+    .AddEntityFrameworkStores<AppDbContext>()
+    .AddDefaultTokenProviders();
+
+    // --- РЕЄСТРАЦІЯ СЕРВІСІВ ТА РЕПОЗИТОРІЇВ ---
+    builder.Services.AddScoped<IFacultyRepository, FacultyRepository>();
+    builder.Services.AddTransient<IEmailService, EmailService>();
+
+    builder.Services.AddControllersWithViews();
 
     var app = builder.Build();
 
-app.UseSerilogRequestLogging();
+    // --- MIDDLEWARE ---
+    app.UseSerilogRequestLogging();
 
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Home/Error");
-    app.UseHsts();
-}
+    if (!app.Environment.IsDevelopment())
+    {
+        app.UseExceptionHandler("/Home/Error");
+        app.UseHsts();
+    }
 
-app.UseHttpsRedirection();
-app.UseStaticFiles(); // Стандартний метод для статики
+    app.UseHttpsRedirection();
+    app.MapStaticAssets();
+    app.UseRouting();
 
-app.UseRouting();
+    app.UseAuthentication();
+    app.UseAuthorization();
 
-// ВАЖЛИВО: Authentication має бути ПЕРЕД Authorization
-app.UseAuthentication();
-app.UseAuthorization();
-
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    app.MapControllerRoute(
+        name: "default",
+        pattern: "{controller=Home}/{action=Index}/{id?}")
+        .WithStaticAssets();
 
     app.Run();
 }
