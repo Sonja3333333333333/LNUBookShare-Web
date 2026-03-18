@@ -1,7 +1,8 @@
 // <copyright file="Program.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
-
+using LNUBookShare.Application.Interfaces;
+using LNUBookShare.Infrastructure.Repositories;
 using LNUBookShare.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
@@ -30,7 +31,8 @@ try
 
     // Add services to the container.
     builder.Services.AddControllersWithViews();
-
+    builder.Services.AddScoped<IBookRepository, BookRepository>();
+    builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
     var app = builder.Build();
 
     // ДОДАНО: Додаємо middleware для гарного логування всіх HTTP-запитів

@@ -1,0 +1,86 @@
+@model LNUBookShare.Web.Models.CatalogViewModel
+@{
+    ViewData["Title"] = "Каталог книг";
+}
+
+<h2>Каталог книг</h2>
+
+<form method="get" asp-action="Index" asp-controller="Catalog" class="row g-3 mb-4">
+    <div class="col-md-3">
+        <label class="form-label">Категорія</label>
+        <select name="CategoryId" class="form-select">
+            @foreach (var item in Model.Categories)
+            {
+            <option value="@item.Value"
+                    @(item.Value == Model.FilterParams.CategoryId?.ToString() ? "selected" : "")>
+                @item.Text
+            </option>
+            }
+        </select>
+    </div>
+
+    <div class="col-md-3">
+        <label class="form-label">Статус</label>
+        <select name="Status" class="form-select">
+            @foreach (var item in Model.Statuses)
+            {
+            <option value="@item.Value"
+                    @(item.Value == (Model.FilterParams.Status ?? "") ? "selected" : "")>
+                @item.Text
+            </option>
+            }
+        </select>
+    </div>
+
+    <div class="col-md-3">
+        <label class="form-label">Сортування</label>
+        <select name="SortBy" class="form-select">
+            @foreach (var item in Model.SortOptions)
+            {
+            <option value="@item.Value"
+                    @(item.Value == (Model.FilterParams.SortBy ?? "title") ? "selected" : "")>
+                @item.Text
+            </option>
+            }
+        </select>
+    </div>
+
+    <div class="col-md-3 d-flex align-items-end">
+        <button type="submit" class="btn btn-primary w-100">Застосувати</button>
+    </div>
+</form>
+
+@if (!Model.Books.Any())
+{
+<p class="text-muted">Книг не знайдено за заданими фільтрами.</p>
+}
+else
+{
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Назва</th>
+            <th>Автор</th>
+            <th>Рік</th>
+            <th>Категорія</th>
+            <th>Статус</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var book in Model.Books)
+            {
+        <tr>
+            <td>@book.Title</td>
+            <td>@book.Author</td>
+            <td>@book.Year</td>
+            <td>@book.Category?.CategoryName</td>
+            <td>
+                <span class="badge @(book.Status == "Available" ? "bg-success" : "bg-warning")">
+                    @(book.Status == "Available" ? "Доступна" : "Позичена")
+                </span>
+            </td>
+        </tr>
+            }
+    </tbody>
+</table>
+}
