@@ -28,5 +28,10 @@ namespace LNUBookShare.Application.Services
             var results = await _repository.SearchBooksAsync(query.Trim(), searchBy);
             return results;
         }
+
+        public async Task<IEnumerable<Book>> GetRecommendationsAsync(int facultyId, int currentUserId)
+        {
+            return await _repository.GetRecommendationsAsync(facultyId, currentUserId);
+        }
     }
 }
