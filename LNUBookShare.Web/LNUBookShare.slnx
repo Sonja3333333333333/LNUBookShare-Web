@@ -1,7 +1,6 @@
 <Solution>
   <Folder Name="/Solution Items/">
-    <File Path=".editorconfig" />
-    <File Path="Directory.Build.props" />
+    <File Path="appsettings.json" />
   </Folder>
   <Folder Name="/Tests/">
     <Project Path="LNUBookShare.UnitTests/LNUBookShare.UnitTests.csproj" Id="7aa99e1f-f8ab-43ed-a6b3-3e41ce568ead" />

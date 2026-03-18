@@ -6,16 +6,23 @@ using LNUBookShare.Application.Interfaces;
 using LNUBookShare.Application.Services;
 using LNUBookShare.Infrastructure;
 using LNUBookShare.Infrastructure.Repositories;
+using LNUBookShare.Domain.Entities;
+using LNUBookShare.Infrastructure.Services;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 
+// 👇 Цей рядок лікує помилку з форматом часу в PostgreSQL
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
 var builder = WebApplication.CreateBuilder(args);
 
+// --- НАЛАШТУВАННЯ SERILOG ---
 Log.Logger = new LoggerConfiguration()
-    .ReadFrom.Configuration(builder.Configuration) // Дозволяє зчитувати додаткові налаштування з appsettings.json
+    .ReadFrom.Configuration(builder.Configuration)
     .Enrich.FromLogContext()
-    .WriteTo.Console() // Логи будуть виводитися в консоль
-    .WriteTo.Seq("http://localhost:5341") // Відправка логів у Seq (стандартна адреса)
+    .WriteTo.Console()
+    .WriteTo.Seq("http://localhost:5341")
     .CreateLogger();
 
 builder.Host.UseSerilog();
@@ -25,6 +32,7 @@ try
     Log.Information("Запуск веб-додатка LNU Book Share!");
 
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    Console.WriteLine($"DEBUG: Connection String is: {connectionString}");
 
     builder.Services.AddDbContext<AppDbContext>(options =>
     {
@@ -32,30 +40,47 @@ try
     });
     builder.Services.AddScoped<IBookRepository, BookRepository>();
 
-    // Add services to the container.
+    // --- IDENTITY (Налаштування ПМІ + Підтвердження пошти) ---
+    builder.Services.AddIdentity<User, Role>(options =>
+    {
+        options.Password.RequireDigit = false;
+        options.Password.RequiredLength = 6;
+        options.Password.RequireNonAlphanumeric = false;
+        options.Password.RequireUppercase = false;
+        options.Password.RequireLowercase = false;
+
+        options.User.RequireUniqueEmail = true;
+
+        // Вимога підтвердження пошти для входу
+        options.SignIn.RequireConfirmedEmail = true;
+    })
+    .AddEntityFrameworkStores<AppDbContext>()
+    .AddDefaultTokenProviders();
+
+    // --- РЕЄСТРАЦІЯ СЕРВІСІВ ТА РЕПОЗИТОРІЇВ ---
+    builder.Services.AddScoped<IFacultyRepository, FacultyRepository>();
+    builder.Services.AddTransient<IEmailService, EmailService>();
+
     builder.Services.AddControllersWithViews();
     builder.Services.AddScoped<BookSearchService>();
 
     var app = builder.Build();
 
-    // ДОДАНО: Додаємо middleware для гарного логування всіх HTTP-запитів
+    // --- MIDDLEWARE ---
     app.UseSerilogRequestLogging();
 
-    // Configure the HTTP request pipeline.
     if (!app.Environment.IsDevelopment())
     {
         app.UseExceptionHandler("/Home/Error");
-
-        // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
         app.UseHsts();
     }
 
     app.UseHttpsRedirection();
+    app.MapStaticAssets();
     app.UseRouting();
 
+    app.UseAuthentication();
     app.UseAuthorization();
-
-    app.MapStaticAssets();
 
     app.MapControllerRoute(
         name: "default",
