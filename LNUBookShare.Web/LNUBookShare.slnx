@@ -2,6 +2,9 @@
   <Folder Name="/Solution Items/">
     <File Path="appsettings.json" />
   </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="LNUBookShare.UnitTests/LNUBookShare.UnitTests.csproj" Id="7aa99e1f-f8ab-43ed-a6b3-3e41ce568ead" />
+  </Folder>
   <Project Path="ConsoleApp/ConsoleApp.csproj" Id="36776339-e212-4849-88f7-6c373ce411f1" />
   <Project Path="LNUBookShare.Application/LNUBookShare.Application.csproj" />
   <Project Path="LNUBookShare.Domain/LNUBookShare.Domain.csproj" />

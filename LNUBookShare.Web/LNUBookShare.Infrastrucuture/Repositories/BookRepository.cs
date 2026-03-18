@@ -50,5 +50,29 @@ namespace LNUBookShare.Infrastructure.Repositories
         {
             await _context.Books.ExecuteDeleteAsync();
         }
+
+        public async Task<IEnumerable<Book>> SearchBooksAsync(string keyword, string searchBy = "title")
+        {
+            if (string.IsNullOrWhiteSpace(keyword))
+            {
+                return new List<Book>();
+            }
+
+            var lowerKeyword = keyword.ToLower();
+            var lower_searchBy = searchBy.ToLower();
+
+            if (lower_searchBy == "author")
+            {
+                return await _context.Books.Where(b => b.Author.ToLower().Contains(lowerKeyword)).ToListAsync();
+            }
+            else if (lower_searchBy == "title")
+            {
+                return await _context.Books.Where(b => b.Title.ToLower().Contains(lowerKeyword)).ToListAsync();
+            }
+            else
+            {
+                return await _context.Books.Where(b => b.Isbn != null && b.Isbn.Contains(lowerKeyword)).ToListAsync();
+            }
+        }
     }
 }

@@ -1,7 +1,12 @@
+// <copyright file="Program.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
 using LNUBookShare.Application.Interfaces;
-using LNUBookShare.Domain.Entities;
+using LNUBookShare.Application.Services;
 using LNUBookShare.Infrastructure;
 using LNUBookShare.Infrastructure.Repositories;
+using LNUBookShare.Domain.Entities;
 using LNUBookShare.Infrastructure.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -33,6 +38,7 @@ try
     {
         options.UseNpgsql(connectionString);
     });
+    builder.Services.AddScoped<IBookRepository, BookRepository>();
 
     // --- IDENTITY (Налаштування ПМІ + Підтвердження пошти) ---
     builder.Services.AddIdentity<User, Role>(options =>
@@ -56,6 +62,7 @@ try
     builder.Services.AddTransient<IEmailService, EmailService>();
 
     builder.Services.AddControllersWithViews();
+    builder.Services.AddScoped<BookSearchService>();
 
     var app = builder.Build();
 

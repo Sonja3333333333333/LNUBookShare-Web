@@ -1,0 +1,62 @@
+﻿@using LNUBookShare.Web.Models
+@model BookSearchViewModel
+
+@{
+    ViewData["Title"] = "Search books";
+}
+
+<div class="container mt-4">
+    <h2>@Model.Title</h2>
+
+    <form asp-action="Search" method="get" class="mb-4">
+        <div class="input-group">
+            <select name="searchBy" class="form-select" style="max-width: 150px;">
+                <option value="title" selected="@(Model.SearchBy == "title")">Назва</option>
+                <option value="author" selected="@(Model.SearchBy == "author")">Автор</option>
+                <option value="isbn" selected="@(Model.SearchBy == "isbn")">ISBN</option>
+            </select>
+
+            <div class="position-relative flex-grow-1">
+                <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                <input type="text" name="query" id="searchInput"
+                       value="@Model.SearchQuery"
+                       class="form-control border-0 ps-5 py-2"
+                       placeholder="Шукати книги..."
+                       autocomplete="off" />
+            </div>
+        </div>
+    </form>
+
+    <hr />
+
+    @if (!string.IsNullOrEmpty(Model.SearchQuery))
+    {
+        <p class="text-muted">Знайдено книг: @Model.TotalCount "</p>
+    }
+
+    <div class="row">
+        @if (Model.Books.Any())
+        {
+            @foreach (var book in Model.Books)
+            {
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">@book.Title</h5>
+                            <h6 class="card-subtitle mb-2 text-muted">@book.Author</h6>
+                            <p class="card-text text-truncate">ISBN: @(book.Isbn ?? "Не вказано")</p>
+                        </div>
+                        <div class="card-footer bg-transparent border-top-0">
+                            <a href="#" class="btn btn-outline-info btn-sm">Детальніше</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else if (!string.IsNullOrEmpty(Model.SearchQuery))
+        {
+            <div class="alert alert-warning">Не знайдено жодної книги.</div>
+        }
+    </div>
+</div>
+
