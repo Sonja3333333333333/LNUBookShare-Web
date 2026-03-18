@@ -3,6 +3,7 @@
 // </copyright>
 
 using LNUBookShare.Application.Interfaces;
+using LNUBookShare.Application.Models;
 using LNUBookShare.Domain.Entities;
 using LNUBookShare.Infrastructure;
 using Microsoft.EntityFrameworkCore;
@@ -20,7 +21,31 @@ namespace LNUBookShare.Infrastructure.Repositories
 
         public async Task<IEnumerable<Book>> GetAllAsync()
         {
-            return await _context.Books.ToListAsync();
+            return await _context.Books.Include(b => b.Category).ToListAsync();
+        }
+
+        public async Task<IEnumerable<Book>> GetFilteredAsync(BookFilterParams filterParams)
+        {
+            IQueryable<Book> query = _context.Books.Include(b => b.Category);
+
+            if (!string.IsNullOrEmpty(filterParams.Status))
+            {
+                query = query.Where(b => b.Status == filterParams.Status);
+            }
+
+            if (filterParams.CategoryId.HasValue)
+            {
+                query = query.Where(b => b.CategoryId == filterParams.CategoryId.Value);
+            }
+
+            query = filterParams.SortBy?.ToLower() switch
+            {
+                "year" => query.OrderByDescending(b => b.Year),
+                "title" => query.OrderBy(b => b.Title),
+                _ => query.OrderBy(b => b.Title), 
+            };
+
+            return await query.ToListAsync();
         }
 
         public async Task<Book?> GetByIdAsync(int id)

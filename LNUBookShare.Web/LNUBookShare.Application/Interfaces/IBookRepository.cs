@@ -2,18 +2,19 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
+using LNUBookShare.Application.Models;
 using LNUBookShare.Domain.Entities;
 
 namespace LNUBookShare.Application.Interfaces
 {
     public interface IBookRepository
     {
-        Task<IEnumerable<Book>> GetAllAsync(); // Read (всі)
-        Task<Book?> GetByIdAsync(int id); // Read (одна)
-        Task AddAsync(Book book); // Create
-        Task UpdateAsync(Book book); // Update
-        Task DeleteAsync(Book book); // Delete
-
+        Task<IEnumerable<Book>> GetAllAsync();
+        Task<IEnumerable<Book>> GetFilteredAsync(BookFilterParams filterParams);
+        Task<Book?> GetByIdAsync(int id);
+        Task AddAsync(Book book);
+        Task UpdateAsync(Book book);
+        Task DeleteAsync(Book book);
         Task ClearAllAsync();
     }
 }
