@@ -20,7 +20,7 @@ namespace LNUBookShare.Infrastructure.Repositories
 
         public async Task<IEnumerable<Book>> GetAllAsync()
         {
-            return await _context.Books.Include(b => b.Owner).ToListAsync();
+            return await _context.Books.Include(b => b.Owner).Include(b => b.Cover).ToListAsync();
         }
 
         public async Task<Book?> GetByIdAsync(int id)
@@ -65,6 +65,7 @@ namespace LNUBookShare.Infrastructure.Repositories
             {
                 return await _context.Books
                     .Include(b => b.Owner)
+                    .Include(b => b.Cover)
                     .Where(b => EF.Functions.ILike(b.Author, $"%{lowerKeyword}%"))
                     .ToListAsync();
             }
@@ -72,6 +73,7 @@ namespace LNUBookShare.Infrastructure.Repositories
             {
                 return await _context.Books
                     .Include(b => b.Owner)
+                    .Include(b => b.Cover)
                     .Where(b => EF.Functions.ILike(b.Title, $"%{lowerKeyword}%"))
                     .ToListAsync();
             }
@@ -79,9 +81,19 @@ namespace LNUBookShare.Infrastructure.Repositories
             {
                 return await _context.Books
                     .Include(b => b.Owner)
+                    .Include(b => b.Cover)
                     .Where(b => b.Isbn != null && b.Isbn.Contains(lowerKeyword))
                     .ToListAsync();
             }
+        }
+
+        public async Task<IEnumerable<Book>> GetRecommendationsAsync(int facultyId, int currentUserId)
+        {
+            return await _context.Books
+                .Include(b => b.Owner)
+                .Include(b => b.Cover)
+                .Where(b => b.Owner.FacultyId == facultyId && b.OwnerId != currentUserId)
+                .ToListAsync();
         }
     }
 }
