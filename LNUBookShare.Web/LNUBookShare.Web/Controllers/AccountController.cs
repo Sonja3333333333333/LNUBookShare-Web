@@ -1,4 +1,8 @@
-﻿using LNUBookShare.Application.Interfaces;
+﻿// <copyright file="AccountController.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
+using LNUBookShare.Application.Interfaces;
 using LNUBookShare.Domain.Entities;
 using LNUBookShare.Web.Models;
 using Microsoft.AspNetCore.Identity;
@@ -112,7 +116,7 @@ public class AccountController : Controller
     {
         if (userId == null || token == null)
         {
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Search", "Catalog");
         }
 
         var user = await _userManager.FindByIdAsync(userId);
@@ -165,7 +169,7 @@ public class AccountController : Controller
                     return Redirect(returnUrl);
                 }
 
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("Search", "Catalog");
             }
 
             ModelState.AddModelError(string.Empty, "Неправильна пошта або пароль.");
@@ -179,7 +183,7 @@ public class AccountController : Controller
     {
         await _signInManager.SignOutAsync();
         _logger.LogInformation("Користувач вийшов із системи.");
-        return RedirectToAction("Index", "Home");
+        return RedirectToAction("Search", "Catalog");
     }
 
     private async Task LoadFacultiesToViewBag()

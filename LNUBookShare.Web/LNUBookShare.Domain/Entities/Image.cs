@@ -19,5 +19,5 @@ public partial class Image
 
     public virtual ICollection<Book> Books { get; set; } = new List<Book>();
 
-    public virtual ICollection<User> Users { get; set; } = new List<User>();
+    // public virtual ICollection<User> Users { get; set; } = new List<User>();
 }

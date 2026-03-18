@@ -20,7 +20,7 @@ namespace LNUBookShare.Infrastructure.Repositories
 
         public async Task<IEnumerable<Book>> GetAllAsync()
         {
-            return await _context.Books.ToListAsync();
+            return await _context.Books.Include(b => b.Owner).ToListAsync();
         }
 
         public async Task<Book?> GetByIdAsync(int id)
@@ -63,15 +63,24 @@ namespace LNUBookShare.Infrastructure.Repositories
 
             if (lower_searchBy == "author")
             {
-                return await _context.Books.Where(b => b.Author.ToLower().Contains(lowerKeyword)).ToListAsync();
+                return await _context.Books
+                    .Include(b => b.Owner)
+                    .Where(b => EF.Functions.ILike(b.Author, $"%{lowerKeyword}%"))
+                    .ToListAsync();
             }
             else if (lower_searchBy == "title")
             {
-                return await _context.Books.Where(b => b.Title.ToLower().Contains(lowerKeyword)).ToListAsync();
+                return await _context.Books
+                    .Include(b => b.Owner)
+                    .Where(b => EF.Functions.ILike(b.Title, $"%{lowerKeyword}%"))
+                    .ToListAsync();
             }
             else
             {
-                return await _context.Books.Where(b => b.Isbn != null && b.Isbn.Contains(lowerKeyword)).ToListAsync();
+                return await _context.Books
+                    .Include(b => b.Owner)
+                    .Where(b => b.Isbn != null && b.Isbn.Contains(lowerKeyword))
+                    .ToListAsync();
             }
         }
     }

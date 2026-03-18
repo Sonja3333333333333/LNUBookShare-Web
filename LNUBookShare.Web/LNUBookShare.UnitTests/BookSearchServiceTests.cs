@@ -1,4 +1,8 @@
-﻿using Moq;
+﻿// <copyright file="BookSearchServiceTests.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
+using Moq;
 using Xunit;
 using LNUBookShare.Application.Services;
 using LNUBookShare.Application.Interfaces;

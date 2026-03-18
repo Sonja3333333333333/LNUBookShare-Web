@@ -1,9 +1,12 @@
-﻿using LNUBookShare.Domain.Entities;
+﻿// <copyright file="BookSearchViewModel.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
+using LNUBookShare.Domain.Entities;
 namespace LNUBookShare.Web.Models
 {
     public class BookSearchViewModel
     {
-        public string Title { get; set; } = "Пошук книг";
         public string? SearchQuery { get; set; }
         public IEnumerable<Book> Books { get; set; } = new List<Book>();
         public int TotalCount

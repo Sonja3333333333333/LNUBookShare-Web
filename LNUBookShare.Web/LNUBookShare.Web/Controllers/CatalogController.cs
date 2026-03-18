@@ -1,10 +1,15 @@
-﻿using LNUBookShare.Application.Services;
+﻿// <copyright file="CatalogController.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
+using LNUBookShare.Application.Services;
 using LNUBookShare.Web.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Serilog.Core;
 
 namespace LNUBookShare.Web.Controllers
 {
+    [Authorize]
     public class CatalogController : Controller
     {
         private readonly BookSearchService _searchService;

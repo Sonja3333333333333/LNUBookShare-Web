@@ -10,11 +10,12 @@
 <body>
     <header>
         <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom mb-3">
-            <div class="container-fluid">                
+            <div class="container-fluid">
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                
                     <ul class="navbar-nav nav-main flex-grow-1 px-4 gap-2">
                         <li class="nav-item">
-                            <a class="nav-link active" asp-area = "" asp-controller ="Catalog" asp-action = "Search">Головна</a>
+                            <a class="nav-link active" asp-area="" asp-controller="Catalog" asp-action="Search">Головна</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="#">Кабінет</a>
@@ -25,6 +26,31 @@
                         <li class="nav-item">
                             <a class="nav-link" href="#">Уподобання</a>
                         </li>
+                    </ul>
+
+                    <ul class="navbar-nav ms-auto px-4 gap-2 align-items-center">
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <li class="nav-item">
+                                <span class="nav-link text-primary fw-bold">
+                                    <i class="bi bi-person-circle me-1"></i> @User.Identity.Name
+                                </span>
+                            </li>
+                            <li class="nav-item">
+                                <form asp-controller="Account" asp-action="Logout" method="post" class="m-0">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm">Вийти</button>
+                                </form>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Account" asp-action="Login">Увійти</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="btn btn-primary btn-sm" asp-controller="Account" asp-action="Register">Реєстрація</a>
+                            </li>
+                        }
                     </ul>
                 </div>
             </div>
