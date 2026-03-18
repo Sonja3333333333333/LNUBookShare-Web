@@ -1,11 +1,10 @@
 ﻿using LNUBookShare.Domain.Entities;
 
-namespace LNUBookShare.Application.Interfaces
-{
-    public interface IFacultyRepository
-    {
-        Task AddAsync(Faculty faculty);
+namespace LNUBookShare.Application.Interfaces;
 
-        Task ClearAllAsync();
-    }
+public interface IFacultyRepository
+{
+    Task<IEnumerable<Faculty>> GetAllAsync(); // ДОДАЙ ЦЕ
+    Task AddAsync(Faculty faculty);
+    Task ClearAllAsync();
 }

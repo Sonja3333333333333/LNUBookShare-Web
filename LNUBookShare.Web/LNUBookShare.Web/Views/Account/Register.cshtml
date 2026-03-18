@@ -1,0 +1,57 @@
+﻿@model LNUBookShare.Web.Models.RegisterViewModel
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6 border p-4 shadow-sm rounded bg-white">
+        <h2 class="text-center mb-4">Створення акаунту</h2>
+
+        <form asp-action="Register" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="FirstName" class="form-label">Ім'я</label>
+                    <input asp-for="FirstName" class="form-control" />
+                    <span asp-validation-for="FirstName" class="text-danger"></span>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="LastName" class="form-label">Прізвище</label>
+                    <input asp-for="LastName" class="form-control" />
+                    <span asp-validation-for="LastName" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Факультет</label>
+                <select asp-for="FacultyId" class="form-select" asp-items="ViewBag.Faculties">
+                    <option value="">-- Оберіть факультет --</option>
+                </select>
+                <span asp-validation-for="FacultyId" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label">Електронна пошта (@@lnu.edu.ua)</label>
+                <input asp-for="Email" class="form-control" placeholder="example@@lnu.edu.ua" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Password" class="form-label">Пароль</label>
+                    <input asp-for="Password" class="form-control" />
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <label asp-for="ConfirmPassword" class="form-label">Підтвердження</label>
+                    <input asp-for="ConfirmPassword" class="form-control" />
+                    <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 btn-lg">Зареєструватися</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

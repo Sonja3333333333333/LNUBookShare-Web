@@ -23,5 +23,9 @@ namespace LNUBookShare.Infrastructure.Repositories
         {
             await _context.Faculties.ExecuteDeleteAsync();
         }
+        public async Task<IEnumerable<Faculty>> GetAllAsync()
+        {
+            return await _context.Faculties.ToListAsync();
+        }
     }
 }
