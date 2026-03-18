@@ -1,4 +1,8 @@
-﻿using System.Net;
+﻿// <copyright file="EmailService.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
+using System.Net;
 using System.Net.Mail;
 using LNUBookShare.Application.Interfaces;
 using Microsoft.Extensions.Configuration;

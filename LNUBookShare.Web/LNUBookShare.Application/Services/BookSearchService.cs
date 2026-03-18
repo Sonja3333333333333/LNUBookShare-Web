@@ -1,4 +1,8 @@
-﻿using System.Collections.Generic;
+﻿// <copyright file="BookSearchService.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using LNUBookShare.Application.Interfaces;
 using LNUBookShare.Domain.Entities;

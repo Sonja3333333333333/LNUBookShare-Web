@@ -4,20 +4,18 @@
 
 using LNUBookShare.Application.Interfaces;
 using LNUBookShare.Application.Services;
+using LNUBookShare.Domain.Entities;
 using LNUBookShare.Infrastructure;
 using LNUBookShare.Infrastructure.Repositories;
-using LNUBookShare.Domain.Entities;
 using LNUBookShare.Infrastructure.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 
-// 👇 Цей рядок лікує помилку з форматом часу в PostgreSQL
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 var builder = WebApplication.CreateBuilder(args);
 
-// --- НАЛАШТУВАННЯ SERILOG ---
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
     .Enrich.FromLogContext()
@@ -57,7 +55,12 @@ try
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 
-    // --- РЕЄСТРАЦІЯ СЕРВІСІВ ТА РЕПОЗИТОРІЇВ ---
+    builder.Services.ConfigureApplicationCookie(options =>
+    {
+        options.LoginPath = "/Account/Login";
+        options.AccessDeniedPath = "/Account/AccessDenied";
+    });
+
     builder.Services.AddScoped<IFacultyRepository, FacultyRepository>();
     builder.Services.AddTransient<IEmailService, EmailService>();
 
@@ -84,7 +87,7 @@ try
 
     app.MapControllerRoute(
         name: "default",
-        pattern: "{controller=Home}/{action=Index}/{id?}")
+        pattern: "{controller=Catalog}/{action=Search}/{id?}")
         .WithStaticAssets();
 
     app.Run();

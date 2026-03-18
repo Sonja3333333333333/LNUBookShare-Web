@@ -1,4 +1,8 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿// <copyright file="User.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
+using Microsoft.AspNetCore.Identity;
 
 namespace LNUBookShare.Domain.Entities;
 
