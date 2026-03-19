@@ -9,7 +9,7 @@ using LNUBookShare.Domain.Entities;
 
 namespace LNUBookShare.Application.Services
 {
-    public class BookSearchService
+    public class BookSearchService : IBookSearchService
     {
         private readonly IBookRepository _repository;
 

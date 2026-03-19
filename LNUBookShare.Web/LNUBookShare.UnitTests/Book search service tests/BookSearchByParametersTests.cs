@@ -48,4 +48,19 @@ public class BookSearchByParametersTests : BookSearchServiceTestBase
         // Використовуємо нашу змінну clean тут:
         _bookRepoMock.Verify(r => r.SearchBooksAsync(clean, "title", "title", "all"), Times.Once);
     }
+
+    [Fact]
+    public async Task Search_WithStatusFilter_PassesFilterToRepo()
+    {
+        // Arrange
+        var query = "Алгебра";
+        var status = "available"; // Користувач вибрав "Доступно"
+
+        // Act
+        await _searchService.SearchAsync(query, "title", "title", status);
+
+        // Assert
+        // Перевіряємо, чи останній параметр (statusFilter) долетів до репозиторія
+        _bookRepoMock.Verify(r => r.SearchBooksAsync(query, "title", "title", "available"), Times.Once);
+    }
 }
