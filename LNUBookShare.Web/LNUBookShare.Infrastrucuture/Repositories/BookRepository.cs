@@ -51,7 +51,7 @@ namespace LNUBookShare.Infrastructure.Repositories
             await _context.Books.ExecuteDeleteAsync();
         }
 
-        public async Task<IEnumerable<Book>> SearchBooksAsync(string keyword, string searchBy = "title")
+        public async Task<IEnumerable<Book>> SearchBooksAsync(string keyword, string searchBy = "title", string sortBy = "title", string statusFilter = "all")
         {
             if (string.IsNullOrWhiteSpace(keyword))
             {
@@ -63,37 +63,58 @@ namespace LNUBookShare.Infrastructure.Repositories
 
             if (lower_searchBy == "author")
             {
-                return await _context.Books
+                var query = _context.Books
                     .Include(b => b.Owner)
                     .Include(b => b.Cover)
-                    .Where(b => EF.Functions.ILike(b.Author, $"%{lowerKeyword}%"))
-                    .ToListAsync();
+                    .Where(b => EF.Functions.ILike(b.Author, $"%{lowerKeyword}%"));
+
+                return await ApplySortingAndFiltering(query, sortBy, statusFilter).ToListAsync();
             }
             else if (lower_searchBy == "title")
             {
-                return await _context.Books
+                var query = _context.Books
                     .Include(b => b.Owner)
                     .Include(b => b.Cover)
-                    .Where(b => EF.Functions.ILike(b.Title, $"%{lowerKeyword}%"))
-                    .ToListAsync();
+                    .Where(b => EF.Functions.ILike(b.Title, $"%{lowerKeyword}%"));
+
+                return await ApplySortingAndFiltering(query, sortBy, statusFilter).ToListAsync();
             }
             else
             {
-                return await _context.Books
+                var query = _context.Books
                     .Include(b => b.Owner)
                     .Include(b => b.Cover)
-                    .Where(b => b.Isbn != null && b.Isbn.Contains(lowerKeyword))
-                    .ToListAsync();
+                    .Where(b => b.Isbn != null && b.Isbn.Contains(lowerKeyword));
+
+                return await ApplySortingAndFiltering(query, sortBy, statusFilter).ToListAsync();
             }
         }
 
-        public async Task<IEnumerable<Book>> GetRecommendationsAsync(int facultyId, int currentUserId)
+        public async Task<IEnumerable<Book>> GetRecommendationsAsync(int facultyId, int currentUserId, string sortBy = "title", string statusFilter = "all")
         {
-            return await _context.Books
+            var query = _context.Books
                 .Include(b => b.Owner)
                 .Include(b => b.Cover)
-                .Where(b => b.Owner.FacultyId == facultyId && b.OwnerId != currentUserId)
-                .ToListAsync();
+                .Where(b => b.Owner.FacultyId == facultyId && b.OwnerId != currentUserId);
+
+            return await ApplySortingAndFiltering(query, sortBy, statusFilter).ToListAsync();
+        }
+
+        private IQueryable<Book> ApplySortingAndFiltering(IQueryable<Book> query, string sortBy, string statusFilter)
+        {
+            if (!string.IsNullOrEmpty(statusFilter) && statusFilter != "all")
+            {
+                query = query.Where(b => b.Status == statusFilter);
+            }
+
+            query = sortBy switch
+            {
+                "author" => query.OrderBy(b => b.Author),
+                "year" => query.OrderByDescending(b => b.Year),
+                _ => query.OrderBy(b => b.Title)
+            };
+
+            return query;
         }
     }
 }
