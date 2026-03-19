@@ -8,7 +8,7 @@ namespace LNUBookShare.Application.Interfaces;
 
 public interface IFacultyRepository
 {
-    Task<IEnumerable<Faculty>> GetAllAsync(); // ДОДАЙ ЦЕ
+    Task<IEnumerable<Faculty>> GetAllAsync();
     Task AddAsync(Faculty faculty);
     Task ClearAllAsync();
 }
