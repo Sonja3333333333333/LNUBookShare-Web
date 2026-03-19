@@ -16,8 +16,7 @@ namespace LNUBookShare.Application.Interfaces
 
         Task ClearAllAsync();
 
-        Task<IEnumerable<Book>> SearchBooksAsync(string keyword, string searchBy = "title"); // search books
-
-        Task<IEnumerable<Book>> GetRecommendationsAsync(int facultyId, int currentUserId); // recs
+        Task<IEnumerable<Book>> SearchBooksAsync(string searchBy, string query, string sortBy = "title", string statusFilter = "all"); // search
+        Task<IEnumerable<Book>> GetRecommendationsAsync(int facultyId, int currentUserId, string sortBy = "title", string statusFilter = "all"); // recs
     }
 }

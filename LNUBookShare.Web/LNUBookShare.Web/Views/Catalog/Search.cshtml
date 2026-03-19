@@ -9,53 +9,82 @@
     <div class="row justify-content-center">
         <div class="col-12">
             
-            <form asp-action="Search" method="get" class="mb-4 d-flex gap-2">
+            <form asp-action="Search" method="get" class="mb-4">
                 
-                <select name="searchBy" class="form-select border border-secondary-subtle shadow-sm" style="width: 140px; border-radius: 8px;">
-                    <option value="title" selected="@(Model.SearchBy == "title")">Назва</option>
-                    <option value="author" selected="@(Model.SearchBy == "author")">Автор</option>
-                    <option value="isbn" selected="@(Model.SearchBy == "isbn")">ISBN</option>
-                </select>
+                <div class="d-flex gap-2 mb-4">
+                    <select name="searchBy" class="form-select border border-secondary-subtle shadow-sm" style="width: 140px; border-radius: 8px;">
+                        <option value="title" selected="@(Model.SearchBy == "title")">Назва</option>
+                        <option value="author" selected="@(Model.SearchBy == "author")">Автор</option>
+                        <option value="isbn" selected="@(Model.SearchBy == "isbn")">ISBN</option>
+                    </select>
 
-                <div class="position-relative flex-grow-1" style="min-width: 0;">
-                    <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted" style="z-index: 5;"></i>
-                    <input type="text" name="query" id="searchInput"
-                           value="@Model.SearchQuery"
-                           class="form-control border border-secondary-subtle ps-5 py-2 shadow-sm"
-                           style="border-radius: 8px; width: 100%;"
-                           placeholder="Шукати книги..."
-                           autocomplete="off" />
+                    <div class="position-relative flex-grow-1" style="min-width: 0;">
+                        <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted" style="z-index: 5;"></i>
+                        <input type="text" name="query" id="searchInput"
+                               value="@Model.SearchQuery"
+                               class="form-control border border-secondary-subtle ps-5 py-2 shadow-sm"
+                               style="border-radius: 8px; width: 100%;"
+                               placeholder="Шукати книги..."
+                               autocomplete="off" />
+                    </div>
+                    <button type="submit" class="d-none"></button>
                 </div>
-                
-                <button type="submit" class="d-none"></button>
+
+                @if (!string.IsNullOrEmpty(Model.SearchQuery))
+                {
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="mb-0 fw-bold">Результати пошуку</h4>
+                        <span class="text-muted">Знайдено книг: @Model.TotalCount</span>
+                    </div>
+                }
+                else if (ViewBag.IsRecommendation == true)
+                {
+                    <div class="mb-4">
+                        <h4 class="mb-0 fw-bold">Рекомендації для вас</h4>
+                        <p class="text-muted mb-0">Книги від студентів вашого факультету</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="mb-4">
+                        <h4 class="mb-0 fw-bold">Усі книги каталогу</h4>
+                        <span class="text-muted">Всього книг: @Model.TotalCount</span>
+                    </div>
+                }
+
+                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary-subtle">
+                    
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="text-muted" style="font-size: 0.9rem;">Сортувати за:</span>
+                        <select name="sortBy" class="form-select form-select-sm border-0 bg-light fw-medium" style="width: 130px; cursor: pointer;" onchange="this.form.submit()">
+                            <option value="title" selected="@(Model.SortBy == "title")">Назва</option>
+                            <option value="author" selected="@(Model.SortBy == "author")">Автор</option>
+                            <option value="year" selected="@(Model.SortBy == "year")">Рік видання</option>
+                        </select>
+                    </div>
+
+                    <div class="d-flex gap-3 align-items-center">
+                        <div class="form-check custom-radio">
+                            <input class="form-check-input" type="radio" name="statusFilter" id="statusAll" value="all" checked="@(Model.StatusFilter == "all" || string.IsNullOrEmpty(Model.StatusFilter))" onchange="this.form.submit()">
+                            <label class="form-check-label text-muted" for="statusAll" style="font-size: 0.9rem;">Всі</label>
+                        </div>
+                        <div class="form-check custom-radio">
+                            <input class="form-check-input" type="radio" name="statusFilter" id="statusAvail" value="available" checked="@(Model.StatusFilter == "available")" onchange="this.form.submit()">
+                            <label class="form-check-label text-muted" for="statusAvail" style="font-size: 0.9rem;">Доступно</label>
+                        </div>
+                        <div class="form-check custom-radio">
+                            <input class="form-check-input" type="radio" name="statusFilter" id="statusBorrowed" value="borrowed" checked="@(Model.StatusFilter == "borrowed")" onchange="this.form.submit()">
+                            <label class="form-check-label text-muted" for="statusBorrowed" style="font-size: 0.9rem;">Видано</label>
+                        </div>
+                        <div class="form-check custom-radio">
+                            <input class="form-check-input" type="radio" name="statusFilter" id="statusReserved" value="reserved" checked="@(Model.StatusFilter == "reserved")" onchange="this.form.submit()">
+                            <label class="form-check-label text-muted" for="statusReserved" style="font-size: 0.9rem;">Заброньовано</label>
+                        </div>
+                    </div>
+
+                </div>
+
             </form>
-
-            <hr class="mb-4" />
-
-            @if (!string.IsNullOrEmpty(Model.SearchQuery))
-            {
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h4 class="mb-0 fw-bold">Результати пошуку</h4>
-                    <span class="text-muted">Знайдено книг: @Model.Books.Count()</span>
-                </div>
-            }
-            else if (ViewBag.IsRecommendation == true)
-            {
-                <div class="mb-4">
-                    <h4 class="mb-0 fw-bold">Рекомендації для вас</h4>
-                    <p class="text-muted mb-0">Книги від студентів вашого факультету</p>
-                </div>
-            }
-            else
-            {
-                <h4 class="mb-3 fw-bold">Усі книги каталогу</h4>
-            }
-
-            @if (!string.IsNullOrEmpty(Model.SearchQuery))
-            {
-                <p class="text-muted">Знайдено книг: @Model.TotalCount</p>
-            }
-
             <div class="book-list">
                 @if (Model.Books.Any())
                 {
@@ -98,29 +127,30 @@
                                             Власник: <span class="text-dark">@(book.Owner?.FirstName ?? "Невідомо") @(book.Owner?.LastName ?? "")</span>
                                         </p>
             
-                                       <p class="card-text mb-1 text-muted" style="font-size: 0.9rem;">
+                                        <p class="card-text mb-1 text-muted" style="font-size: 0.9rem;">
                                             Статус: <span class="text-dark">
-                                                @(book.Status switch {
-                                                    "available" => "Доступно",
-                                                    "reserved" => "Заброньовано",
-                                                    "borrowed" => "Видано",
-                                                    _ => book.Status
-                                                })
-                                            </span>
-                                        </p>
+                                            @(book.Status switch
+                                            {
+                                                "available" => "Доступно",
+                                                "reserved" => "Заброньовано",
+                                                "borrowed" => "Видано",
+                                                _ => book.Status
+                                            })
+                                        </span>
+                                    </p>
 
-                                    </div>
                                 </div>
                             </div>
                         </div>
-                    }
+                    </div>
                 }
+            }
                 else if (!string.IsNullOrEmpty(Model.SearchQuery))
-                {
-                    <div class="alert alert-warning">Не знайдено жодної книги.</div>
-                }
-            </div>
-
+            {
+                <div class="alert alert-warning">Не знайдено жодної книги.</div>
+            }
         </div>
+
     </div>
+</div>
 </div>

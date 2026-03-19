@@ -26,28 +26,32 @@ namespace LNUBookShare.Web.Controllers
             _userManager = userManager;
         }
 
-        public async Task<IActionResult> Search(string query, string searchBy = "title")
+        public async Task<IActionResult> Search(string query, string searchBy = "title", string sortBy = "title", string statusFilter = "all")
         {
             IEnumerable<Book> results;
 
             if (!string.IsNullOrWhiteSpace(query))
             {
-                results = await _searchService.SearchAsync(query, searchBy);
-                _logger.LogInformation("Користувач здійснив пошук за запитом: {Query}, критерій: {SearchBy}", query, searchBy);
-            }
+                results = await _searchService.SearchAsync(query, searchBy, sortBy, statusFilter);
+                _logger.LogInformation(
+                    "Користувач здійснив пошук. Запит: '{Query}', Критерій: {SearchBy}, Сортування: {SortBy}, Фільтр статусу: {StatusFilter}", query, searchBy, sortBy, statusFilter);
+                    }
             else
             {
                 var currentUser = await _userManager.GetUserAsync(User);
 
                 if (currentUser != null)
                 {
-                    results = await _searchService.GetRecommendationsAsync(currentUser.FacultyId, currentUser.Id);
-                    _logger.LogInformation("Згенеровано рекомендації для користувача ID: {UserId} (Факультет ID: {FacultyId}).", currentUser.Id, currentUser.FacultyId);
+                    results = await _searchService.GetRecommendationsAsync(currentUser.FacultyId, currentUser.Id, sortBy, statusFilter);
+                    _logger.LogInformation(
+                "Згенеровано рекомендації для користувача ID: {UserId} (Факультет ID: {FacultyId}). Сортування: {SortBy}, Фільтр статусу: {StatusFilter}", currentUser.Id, currentUser.FacultyId, sortBy, statusFilter);
                     ViewBag.IsRecommendation = true;
                 }
                 else
                 {
-                    results = await _searchService.SearchAsync(string.Empty, "title");
+                    results = await _searchService.SearchAsync(string.Empty, "title", sortBy, statusFilter);
+                    _logger.LogInformation(
+                "Перегляд усіх книг каталогу. Сортування: {SortBy}, Фільтр статусу: {StatusFilter}", sortBy, statusFilter);
                 }
             }
 
@@ -56,6 +60,8 @@ namespace LNUBookShare.Web.Controllers
                 SearchQuery = query,
                 Books = results,
                 SearchBy = searchBy,
+                SortBy = sortBy,
+                StatusFilter = statusFilter,
             };
 
             return View(model);

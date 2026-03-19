@@ -9,6 +9,10 @@ namespace LNUBookShare.Web.Models
     {
         public string? SearchQuery { get; set; }
         public IEnumerable<Book> Books { get; set; } = new List<Book>();
+
+        public string SortBy { get; set; } = "title";
+        public string StatusFilter { get; set; } = "all";
+
         public int TotalCount
         {
             get

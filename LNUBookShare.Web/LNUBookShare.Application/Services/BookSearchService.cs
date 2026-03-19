@@ -18,20 +18,15 @@ namespace LNUBookShare.Application.Services
             _repository = repository;
         }
 
-        public async Task<IEnumerable<Book>> SearchAsync(string query, string searchBy = "title")
+        public async Task<IEnumerable<Book>> SearchAsync(string query, string searchBy = "title", string sortBy = "title", string statusFilter = "all")
         {
-            if (string.IsNullOrWhiteSpace(query))
-            {
-                return await _repository.GetAllAsync();
-            }
-
-            var results = await _repository.SearchBooksAsync(query.Trim(), searchBy);
+            var results = await _repository.SearchBooksAsync(query.Trim(), searchBy, sortBy, statusFilter);
             return results;
         }
 
-        public async Task<IEnumerable<Book>> GetRecommendationsAsync(int facultyId, int currentUserId)
+        public async Task<IEnumerable<Book>> GetRecommendationsAsync(int facultyId, int currentUserId, string sortBy = "title", string statusFilter = "all")
         {
-            return await _repository.GetRecommendationsAsync(facultyId, currentUserId);
+            return await _repository.GetRecommendationsAsync(facultyId, currentUserId, sortBy, statusFilter);
         }
     }
 }
