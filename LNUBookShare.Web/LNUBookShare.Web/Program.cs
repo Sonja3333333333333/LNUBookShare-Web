@@ -62,8 +62,7 @@ try
     builder.Services.AddTransient<IEmailService, EmailService>();
 
     builder.Services.AddControllersWithViews();
-    builder.Services.AddScoped<BookSearchService>();
-
+    builder.Services.AddScoped<IBookSearchService, BookSearchService>();
     var app = builder.Build();
 
     // --- MIDDLEWARE ---

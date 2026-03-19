@@ -3,23 +3,23 @@
 // </copyright>
 
 using System.Security.Claims;
+using LNUBookShare.Application.Interfaces;
 using LNUBookShare.Application.Services;
 using LNUBookShare.Domain.Entities;
 using LNUBookShare.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-
 namespace LNUBookShare.Web.Controllers
 {
     [Authorize]
     public class CatalogController : Controller
     {
-        private readonly BookSearchService _searchService;
+        private readonly IBookSearchService _searchService;
         private readonly ILogger<CatalogController> _logger;
         private readonly UserManager<User> _userManager;
 
-        public CatalogController(BookSearchService searchService, ILogger<CatalogController> logger, UserManager<User> userManager)
+        public CatalogController(IBookSearchService searchService, ILogger<CatalogController> logger, UserManager<User> userManager)
         {
             _searchService = searchService;
             _logger = logger;
