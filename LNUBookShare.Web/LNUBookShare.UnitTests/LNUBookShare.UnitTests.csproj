@@ -18,6 +18,7 @@
   <ItemGroup>
     <ProjectReference Include="..\LNUBookShare.Application\LNUBookShare.Application.csproj" />
     <ProjectReference Include="..\LNUBookShare.Domain\LNUBookShare.Domain.csproj" />
+    <ProjectReference Include="..\LNUBookShare.Web\LNUBookShare.Web.csproj" />
   </ItemGroup>
 
   <ItemGroup>
