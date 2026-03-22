@@ -22,5 +22,7 @@ namespace LNUBookShare.Web.Models
         }
 
         public string SearchBy { get; set; } = "title";
+
+        public HashSet<int> FavoritedBookIds { get; set; } = new HashSet<int>();
     }
 }

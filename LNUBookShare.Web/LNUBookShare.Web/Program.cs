@@ -63,6 +63,9 @@ try
 
     builder.Services.AddControllersWithViews();
     builder.Services.AddScoped<IBookSearchService, BookSearchService>();
+
+    builder.Services.AddScoped<IFavoriteRepository, FavoriteRepository>();
+    builder.Services.AddScoped<IFavoriteService, FavoriteService>();
     var app = builder.Build();
 
     // --- MIDDLEWARE ---

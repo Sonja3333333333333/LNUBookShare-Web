@@ -18,17 +18,19 @@ namespace LNUBookShare.UnitTests
         private readonly Mock<ILogger<CatalogController>> _loggerMock;
         private readonly Mock<UserManager<User>> _userManagerMock;
         private readonly CatalogController _controller;
+        private readonly Mock<IFavoriteService> _favoriteService;
 
         public CatalogControllerTests()
         {
             _searchServiceMock = new Mock<IBookSearchService>();
             _loggerMock = new Mock<ILogger<CatalogController>>();
+            _favoriteService = new Mock<IFavoriteService>();
 
             // Складний мок для UserManager (стандарт для Identity)
             var userStoreMock = new Mock<IUserStore<User>>();
             _userManagerMock = new Mock<UserManager<User>>(userStoreMock.Object, null!, null!, null!, null!, null!, null!, null!, null!);
 
-            _controller = new CatalogController(_searchServiceMock.Object, _loggerMock.Object, _userManagerMock.Object);
+            _controller = new CatalogController(_searchServiceMock.Object, _loggerMock.Object, _userManagerMock.Object, _favoriteService.Object);
 
             // --- Імітація залогіненого користувача ---
             // Це потрібно, щоб контролер міг "побачити" поточного юзера через User (ClaimsPrincipal)
