@@ -18,17 +18,20 @@ namespace LNUBookShare.Web.Controllers
         private readonly IBookSearchService _searchService;
         private readonly ILogger<CatalogController> _logger;
         private readonly UserManager<User> _userManager;
+        private readonly IFavoriteService _favoriteService;
 
-        public CatalogController(IBookSearchService searchService, ILogger<CatalogController> logger, UserManager<User> userManager)
+        public CatalogController(IBookSearchService searchService, ILogger<CatalogController> logger, UserManager<User> userManager, IFavoriteService favoriteService)
         {
             _searchService = searchService;
             _logger = logger;
             _userManager = userManager;
+            _favoriteService = favoriteService;
         }
 
         public async Task<IActionResult> Search(string query, string searchBy = "title", string sortBy = "title", string statusFilter = "all")
         {
             IEnumerable<Book> results;
+            var currentUser = await _userManager.GetUserAsync(User);
 
             if (!string.IsNullOrWhiteSpace(query))
             {
@@ -38,8 +41,6 @@ namespace LNUBookShare.Web.Controllers
                     }
             else
             {
-                var currentUser = await _userManager.GetUserAsync(User);
-
                 if (currentUser != null)
                 {
                     results = await _searchService.GetRecommendationsAsync(currentUser.FacultyId, currentUser.Id, sortBy, statusFilter);
@@ -55,6 +56,16 @@ namespace LNUBookShare.Web.Controllers
                 }
             }
 
+            var favoritedIds = new HashSet<int>();
+            if (currentUser != null)
+            {
+                var favResult = await _favoriteService.GetUserFavoriteBookIdsAsync(currentUser.Id);
+                if (favResult.IsSuccess)
+                {
+                    favoritedIds = favResult.Value.ToHashSet(); // Якщо успіх, беремо Value
+                }
+            }
+
             var model = new BookSearchViewModel
             {
                 SearchQuery = query,
@@ -62,6 +73,7 @@ namespace LNUBookShare.Web.Controllers
                 SearchBy = searchBy,
                 SortBy = sortBy,
                 StatusFilter = statusFilter,
+                FavoritedBookIds = favoritedIds,
             };
 
             return View(model);

@@ -1,0 +1,94 @@
+﻿@using LNUBookShare.Domain.Entities
+@model IEnumerable<Book>
+
+@{
+    ViewData["Title"] = "Уподобані книги";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-12">
+
+            <div class="mb-4">
+            </div>
+
+            <div class="book-list">
+                @if (Model.Any())
+                {
+                    @foreach (var book in Model)
+                    {
+                        <div class="card mb-3 shadow-sm border-0 bg-white" style="border-radius: 12px; border: 1px solid #e0e0e0 !important; overflow: hidden;">
+                            <div class="row g-0 align-items-center">
+
+                                <div class="col-md-3 text-center bg-light d-flex align-items-center justify-content-center p-0" style="height: 160px; border-right: 1px solid #e0e0e0; overflow: hidden;">
+                                    @if (book.Cover != null && !string.IsNullOrEmpty(book.Cover.ImagePath))
+                                    {
+                                        <img src="@book.Cover.ImagePath"
+                                             alt="Обкладинка"
+                                             style="height: 100%; width: 100%; object-fit: cover; object-position: center;" />
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-image text-secondary" style="font-size: 3rem;"></i>
+                                    }
+                                </div>
+
+                                <div class="col-md-9 position-relative">
+                                    <div class="card-body">
+
+                                        <form asp-controller="Favorite" asp-action="Toggle" method="post" class="position-absolute top-0 end-0 mt-2 me-2">
+                                            <input type="hidden" name="bookId" value="@book.BookId" />
+                                            <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
+
+                                            <button type="submit" class="btn btn-link p-0 text-decoration-none" title="Видалити з уподобань">
+                                                <i class="bi bi-heart-fill fs-4 text-danger"></i>
+                                            </button>
+                                        </form>
+
+                                        <h5 class="card-title pe-5 mb-3">
+                                            <a asp-controller="Catalog" asp-action="Details" asp-route-id="@book.BookId" class="text-decoration-none text-dark fw-bold hover-primary">
+                                                @book.Title
+                                            </a>
+                                        </h5>
+
+                                        <p class="card-text mb-1 text-muted" style="font-size: 0.9rem;">
+                                            Автор: <span class="text-dark">@book.Author</span>
+                                        </p>
+
+                                        <p class="card-text mb-1 text-muted" style="font-size: 0.9rem;">
+                                            Власник: <span class="text-dark">@(book.Owner?.FirstName ?? "Невідомо") @(book.Owner?.LastName ?? "")</span>
+                                        </p>
+
+                                        <p class="card-text mb-1 text-muted" style="font-size: 0.9rem;">
+                                            Статус: <span class="text-dark">
+                                            @(book.Status switch
+                                            {
+                                                "available" => "Доступно",
+                                                "reserved" => "Заброньовано",
+                                                "borrowed" => "Видано",
+                                                _ => book.Status
+                                            })
+                                        </span>
+                                    </p>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+                else
+            {
+                <div class="text-center text-muted mt-5">
+                    <h5>Ваш список уподобань порожній.</h5>
+                    <a asp-controller="Catalog" asp-action="Search" class="btn btn-outline-primary mt-3">Перейти до каталогу</a>
+                </div>
+            }
+        </div>
+
+        <div class="mt-4 text-center">
+        </div>
+
+    </div>
+</div>
+</div>
