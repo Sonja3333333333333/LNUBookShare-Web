@@ -49,8 +49,8 @@ namespace LNUBookShare.Infrastructure.Repositories
             // Шукаємо записи вподобань для юзера і за допомогою Include підтягуємо саму книгу та її обкладинку
             return await _context.Favorites
                 .Where(f => f.UserId == userId)
-                .Include(f => f.Book)
-                    .ThenInclude(b => b.Cover) // Щоб вивести картинку
+                .Include(f => f.Book.Cover) // картинка
+                .Include(f => f.Book.Owner) // власник
                 .Select(f => f.Book) // Повертаємо тільки об'єкти Book
                 .ToListAsync();
         }
