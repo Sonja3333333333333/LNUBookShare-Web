@@ -10,6 +10,7 @@ namespace LNUBookShare.Application.Interfaces
     {
         Task<IEnumerable<Book>> GetAllAsync(); // Read (всі)
         Task<Book?> GetByIdAsync(int id); // Read (одна)
+        Task<Book?> GetByIdMoreDetailsAsync(int id); // Read (одна з деталями)
         Task AddAsync(Book book); // Create
         Task UpdateAsync(Book book); // Update
         Task DeleteAsync(Book book); // Delete

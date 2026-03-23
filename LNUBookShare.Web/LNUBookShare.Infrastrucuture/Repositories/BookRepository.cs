@@ -28,6 +28,19 @@ namespace LNUBookShare.Infrastructure.Repositories
             return await _context.Books.FindAsync(id);
         }
 
+        public async Task<Book?> GetByIdMoreDetailsAsync(int id)
+        {
+            var book = await _context.Books
+                .Include(b => b.Owner)
+                .Include(b => b.Cover)
+                .Include(b => b.Category)
+                .Include(b => b.BookReviews)
+                    .ThenInclude(br => br.Reviewer)
+                .FirstOrDefaultAsync(b => b.BookId == id);
+
+            return book;
+        }
+
         public async Task AddAsync(Book book)
         {
             await _context.Books.AddAsync(book);

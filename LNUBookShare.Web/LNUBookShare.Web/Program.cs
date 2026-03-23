@@ -66,6 +66,9 @@ try
 
     builder.Services.AddScoped<IFavoriteRepository, FavoriteRepository>();
     builder.Services.AddScoped<IFavoriteService, FavoriteService>();
+
+    builder.Services.AddScoped<IBookDetailsService, BookDetailsService>();
+
     var app = builder.Build();
 
     // --- MIDDLEWARE ---
