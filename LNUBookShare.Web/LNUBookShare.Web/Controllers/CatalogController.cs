@@ -74,7 +74,7 @@ namespace LNUBookShare.Web.Controllers
             return View(model);
         }
 
-        public async Task<IActionResult> Details(int id)
+        public async Task<IActionResult> Details(int id, string? returnUrl = null)
         {
             var book = await _bookDetailsService.GetBookDetailsAsync(id);
 
@@ -85,6 +85,7 @@ namespace LNUBookShare.Web.Controllers
 
             var results = book.Value;
 
+            ViewBag.ReturnUrl = returnUrl;
             var model = new BookDetailsViewModel
             {
                 BookId = results.BookId,

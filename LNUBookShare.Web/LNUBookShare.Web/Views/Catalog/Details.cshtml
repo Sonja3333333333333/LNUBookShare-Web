@@ -34,7 +34,9 @@
 <div class="container">
     
     <div class="breadcrumb-container d-flex align-items-center gap-2">        
-        <a href="@(ViewBag.ReturnUrl ?? Url.Action("Search", "Catalog"))" class="text-decoration-none text-primary fw-bold">Головна</a>
+        <a href="@(ViewBag.ReturnUrl ?? Url.Action("Search", "Catalog"))" class="text-decoration-none text-primary fw-bold">
+            Головна
+        </a>
         <i class="bi bi-chevron-right text-primary fs-5"></i>
         <span class="text-primary fw-bold">@Model.Title</span>
     </div>
@@ -120,7 +122,8 @@
 
             <div class="col-md-3 d-flex flex-column align-items-end justify-content-between">
                 <div class="favorite-icon">
-                    <partial name="_FavoriteButton" model="(Model.BookId, Model.FavoritedBookIds.Contains(Model.BookId), Context.Request.Path.ToString())" />
+                    @* Передаємо поточний шлях, щоб після лайка залишитися на цій же сторінці деталей *@
+                    <partial name="_FavoriteButton" model="(Model.BookId, Model.FavoritedBookIds.Contains(Model.BookId), Context.Request.Path + Context.Request.QueryString)" />
                 </div>
 
                 <div class="action-buttons d-grid gap-3 w-100 mt-auto" style="max-width: 200px;">

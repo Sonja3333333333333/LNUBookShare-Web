@@ -46,7 +46,11 @@
                                         </form>
 
                                         <h5 class="card-title pe-5 mb-3">
-                                            <a asp-controller="Catalog" asp-action="Details" asp-route-id="@book.BookId" class="fw-bold link-dark-hover">
+                                            <a asp-controller="Catalog"
+                                                   asp-action="Details"
+                                                   asp-route-id="@book.BookId"
+                                                   asp-route-returnUrl="@(Context.Request.Path + Context.Request.QueryString)"
+                                                   class="fw-bold link-dark-hover text-decoration-none text-dark" title="Переглянути деталі">
                                                 @book.Title
                                             </a>
                                         </h5>

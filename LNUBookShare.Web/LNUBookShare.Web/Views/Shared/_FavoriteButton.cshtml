@@ -4,7 +4,7 @@
     <form asp-controller="Favorite" asp-action="Toggle" method="post">
         <input type="hidden" name="bookId" value="@Model.BookId" />
         <input type="hidden" name="returnUrl" value="@Model.ReturnUrl" />
-        <button type="submit" class="btn btn-link p-0 text-decoration-none">
+        <button type="submit" class="btn btn-link p-0 text-decoration-none" title="Додати/Видалити з уподобань">
             <i class="bi @(Model.IsFavorited ? "bi-heart-fill text-danger" : "bi-heart text-dark hover-danger") fs-4"></i>
         </button>
     </form>
