@@ -109,27 +109,15 @@
                                 <div class="col-md-9 position-relative">
                                     <div class="card-body">
             
-                                        @{
-                                            bool isFavorited = Model.FavoritedBookIds.Contains(book.BookId);
-                                        }
-
-                                        <form asp-controller="Favorite" asp-action="Toggle" method="post" class="position-absolute top-0 end-0 mt-2 me-2">
-                                            <input type="hidden" name="bookId" value="@book.BookId" />
-                                            <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
-    
-                                            <button type="submit" class="btn btn-link p-0 text-decoration-none" title="Додати/Видалити з уподобань">
-                                                @if (isFavorited)
-                                                {
-                                                    <i class="bi bi-heart-fill fs-4 text-danger"></i>
-                                                }
-                                                else
-                                                {
-                                                    <i class="bi bi-heart fs-4 text-dark hover-danger"></i>
-                                                }
-                                            </button>
-                                        </form>
+                                        <div class="position-absolute top-0 end-0 mt-2 me-2">
+                                            <partial name="_FavoriteButton" model="(book.BookId, Model.FavoritedBookIds.Contains(book.BookId), Context.Request.Path + Context.Request.QueryString)" />
+                                        </div>
                                         <h5 class="card-title pe-5 mb-3">
-                                            <a asp-controller="Catalog" asp-action="Details" asp-route-id="@book.BookId" class="text-decoration-none text-dark fw-bold hover-primary">
+                                            <a asp-controller="Catalog"
+                                                   asp-action="Details"
+                                                   asp-route-id="@book.BookId"
+                                                   asp-route-returnUrl="@(Context.Request.Path + Context.Request.QueryString)"
+                                                   class="fw-bold link-dark-hover text-decoration-none text-dark" title="Переглянути деталі">
                                                 @book.Title
                                             </a>
                                         </h5>

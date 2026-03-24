@@ -1,15 +1,19 @@
 ﻿// <copyright file="CatalogController.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
-
+using System.Globalization;
 using System.Security.Claims;
+using LNUBookShare.Application.Common;
 using LNUBookShare.Application.Interfaces;
 using LNUBookShare.Application.Services;
 using LNUBookShare.Domain.Entities;
 using LNUBookShare.Web.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 namespace LNUBookShare.Web.Controllers
 {
     [Authorize]
@@ -19,13 +23,14 @@ namespace LNUBookShare.Web.Controllers
         private readonly ILogger<CatalogController> _logger;
         private readonly UserManager<User> _userManager;
         private readonly IFavoriteService _favoriteService;
-
-        public CatalogController(IBookSearchService searchService, ILogger<CatalogController> logger, UserManager<User> userManager, IFavoriteService favoriteService)
+        private readonly IBookDetailsService _bookDetailsService;
+        public CatalogController(IBookSearchService searchService, ILogger<CatalogController> logger, UserManager<User> userManager, IFavoriteService favoriteService, IBookDetailsService bookDetailsService)
         {
             _searchService = searchService;
             _logger = logger;
             _userManager = userManager;
             _favoriteService = favoriteService;
+            _bookDetailsService = bookDetailsService;
         }
 
         public async Task<IActionResult> Search(string query, string searchBy = "title", string sortBy = "title", string statusFilter = "all")
@@ -56,16 +61,6 @@ namespace LNUBookShare.Web.Controllers
                 }
             }
 
-            var favoritedIds = new HashSet<int>();
-            if (currentUser != null)
-            {
-                var favResult = await _favoriteService.GetUserFavoriteBookIdsAsync(currentUser.Id);
-                if (favResult.IsSuccess)
-                {
-                    favoritedIds = favResult.Value.ToHashSet(); // Якщо успіх, беремо Value
-                }
-            }
-
             var model = new BookSearchViewModel
             {
                 SearchQuery = query,
@@ -73,10 +68,55 @@ namespace LNUBookShare.Web.Controllers
                 SearchBy = searchBy,
                 SortBy = sortBy,
                 StatusFilter = statusFilter,
-                FavoritedBookIds = favoritedIds,
+                FavoritedBookIds = await GetUserFavoriteIdsAsync(),
             };
 
             return View(model);
+        }
+
+        public async Task<IActionResult> Details(int id, string? returnUrl = null)
+        {
+            var book = await _bookDetailsService.GetBookDetailsAsync(id);
+
+            if (book.IsFailure)
+            {
+                return NotFound(book.Error);
+            }
+
+            var results = book.Value;
+
+            ViewBag.ReturnUrl = returnUrl;
+            var model = new BookDetailsViewModel
+            {
+                BookId = results.BookId,
+                Title = results.Title,
+                Author = results.Author,
+                Owner = results.Owner,
+                Status = results.Status,
+                BookReviews = results.BookReviews,
+                Category = results.Category,
+                Language = results.Language,
+                Publisher = results.Publisher,
+                Isbn = results.Isbn,
+                Cover = results.Cover,
+                FavoritedBookIds = await GetUserFavoriteIdsAsync(),
+            };
+            return View(model);
+        }
+
+        // логіку отримання улюблених книг користувача
+        // можна винести в окремий метод, щоб не дублювати код у різних діях контролера
+        // також _FavoriteButton який викликаться на різних сторінках(Search та Details), може використовувати цей метод для відображення кнопки вподобати
+        private async Task<HashSet<int>> GetUserFavoriteIdsAsync()
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+            {
+                return new HashSet<int>();
+            }
+
+            var favResult = await _favoriteService.GetUserFavoriteBookIdsAsync(currentUser.Id);
+            return favResult.IsSuccess ? favResult.Value.ToHashSet() : new HashSet<int>();
         }
     }
 }
