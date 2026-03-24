@@ -9,22 +9,19 @@
 }
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-
 <style>
     /* стиль для рамки картки*/
     .book-details-card {
         border: 1px solid #ddd;
-        border-radius: 25px; 
+        border-radius: 20px;
         padding: 30px;
         background-color: #fff;
     }
     
-    /* Стиль для зірочок рейтингу */
     .text-warning {
         color: #ffc107 !important;
     }
     
-   
     .breadcrumb-container {
         margin-bottom: 25px;
         margin-top: 20px;
@@ -33,7 +30,7 @@
 
 <div class="container">
     
-    <div class="breadcrumb-container d-flex align-items-center gap-2">        
+    <div class="breadcrumb-container d-flex align-items-center gap-2">
         <a href="@(ViewBag.ReturnUrl ?? Url.Action("Search", "Catalog"))" class="text-decoration-none text-primary fw-bold">
             Головна
         </a>
@@ -41,53 +38,54 @@
         <span class="text-primary fw-bold">@Model.Title</span>
     </div>
 
-    <div class="book-details-card shadow-sm">
-        <div class="row">
+    <div class="book-details-card shadow-sm mb-5">
+        <div class="row g-4 align-items-start">
             
-            <div class="col-md-4 d-flex align-items-center justify-content-center border-end pe-4">
+            <div class="col-md-3 text-center d-flex align-items-start justify-content-center">
                 @if (Model.Cover != null && !string.IsNullOrEmpty(Model.Cover.ImagePath))
                 {
                     <img src="@Model.Cover.ImagePath"
                          alt="Обкладинка"
-                         style="height: 100%; width: 100%; object-fit: cover; object-position: center;" />
-                }                
+                         class="rounded shadow-sm"
+                         style="max-width: 100%; height: auto; max-height: 400px; object-fit: contain;" />
+                }
                 else
                 {
-                    <div class="bg-light d-flex align-items-center justify-content-center rounded w-100 h-100" style="min-height: 250px; border: 2px dashed #ccc;">
-                        <i class="bi bi-image text-secondary" style="font-size: 5rem;"></i>
+                    <div class="bg-light d-flex align-items-center justify-content-center rounded w-100" style="height: 250px; border: 2px dashed #ccc;">
+                        <i class="bi bi-image text-secondary" style="font-size: 4rem;"></i>
                     </div>
                 }
             </div>
 
-            <div class="col-md-5 ps-4">
-                <table class="table table-borderless table-sm m-0">
-                    <th>
+            <div class="col-md-6 ps-md-4">
+                <table class="table table-borderless table-sm m-0 align-middle">
+                    <tbody>
                         <tr>
-                            <td class="text-secondary fw-bold pe-3" style="width: 30%;">Назва:</td>
+                            <td class="text-dark fw-bold pe-3" style="width: 25%;">Назва</td>
                             <td class="fw-bold fs-5 text-dark">@Model.Title</td>
                         </tr>
                         <tr>
-                            <td class="text-secondary fw-bold pe-3">Автор:</td>
+                            <td class="text-dark fw-bold pe-3">Автор</td>
                             <td>@Model.Author</td>
                         </tr>
                         <tr>
-                            <td class="text-secondary fw-bold pe-3">Власник:</td>
+                            <td class="text-dark fw-bold pe-3">Власник</td>
                             <td>@(Model.Owner?.FirstName ?? "Невідомо") @(Model.Owner?.LastName ?? "")</td>
                         </tr>
                         <tr>
-                            <td class="text-secondary fw-bold pe-3">Статус:</td>
-                            <td>                                
+                            <td class="text-dark fw-bold pe-3">Статус</td>
+                            <td>
                                 @(Model.Status switch
                                 {
                                     "available" => "Доступно",
                                     "reserved" => "Заброньовано",
                                     "borrowed" => "Видано",
                                     _ => Model.Status
-                                })                                    
+                                })
                             </td>
                         </tr>
                         <tr>
-                            <td class="text-secondary fw-bold pe-3">Рейтинг:</td>
+                            <td class="text-dark fw-bold pe-3">Рейтинг</td>
                             <td>
                                 @for (int i = 0; i < fullStars; i++)
                                 {
@@ -101,52 +99,52 @@
                             </td>
                         </tr>
                         <tr>
-                            <td class="text-secondary fw-bold pe-3">Категорія:</td>
+                            <td class="text-dark fw-bold pe-3">Категорія</td>
                             <td>@(Model.Category?.CategoryName ?? "Невідомо")</td>
                         </tr>
                         <tr>
-                            <td class="text-secondary fw-bold pe-3">Мова:</td>
+                            <td class="text-dark fw-bold pe-3">Мова</td>
                             <td>@Model.Language</td>
                         </tr>
                         <tr>
-                            <td class="text-secondary fw-bold pe-3">Видання:</td>
+                            <td class="text-dark fw-bold pe-3">Видання</td>
                             <td>@Model.Publisher</td>
                         </tr>
                         <tr>
-                            <td class="text-secondary fw-bold pe-3">ISBN:</td>
+                            <td class="text-dark fw-bold pe-3">ISBN</td>
                             <td>@Model.Isbn</td>
                         </tr>
-                    </>
+                    </tbody>
                 </table>
             </div>
 
-            <div class="col-md-3 d-flex flex-column align-items-end justify-content-between">
-                <div class="favorite-icon">
-                    @* Передаємо поточний шлях, щоб після лайка залишитися на цій же сторінці деталей *@
+            <div class="col-md-3 d-flex flex-column justify-content-between" style="min-height: 250px;">
+                
+                <div class="text-end">
                     <partial name="_FavoriteButton" model="(Model.BookId, Model.FavoritedBookIds.Contains(Model.BookId), Context.Request.Path + Context.Request.QueryString)" />
                 </div>
 
-                <div class="action-buttons d-grid gap-3 w-100 mt-auto" style="max-width: 200px;">
+                <div class="d-grid gap-2 mt-auto ms-auto" style="width: 100%; max-width: 180px;">
                     @if (Model.Status == "available")
-                    {                        
-                        <button type="button" class="btn btn-secondary btn-lg fw-bold rounded-pill text-white py-2 shadow-sm disabled" aria-disabled="true">
+                    {
+                        <button type="button" class="btn btn-secondary btn-sm fw-medium rounded-pill text-white py-2 shadow-sm disabled" aria-disabled="true">
                             Забронювати
                         </button>
                     }
                     else
-                    {                        
-                        <button type="button" class="btn btn-light btn-lg fw-bold rounded-pill text-muted py-2 border disabled" aria-disabled="true">
+                    {
+                        <button type="button" class="btn btn-light btn-sm fw-medium rounded-pill text-muted py-2 border disabled" aria-disabled="true">
                             Стати в чергу
                         </button>
                     }
                     
-                    <a href="#" class="btn btn-secondary btn-lg fw-bold rounded-pill text-white py-2" style="background-color: #6c757d;">
+                    <a href="#" class="btn btn-secondary btn-sm fw-medium rounded-pill text-white py-2" style="background-color: #6c757d; border-color: #6c757d;">
                         Написати власнику
                     </a>
                 </div>
+
             </div>
 
         </div>
     </div>
-
 </div>
