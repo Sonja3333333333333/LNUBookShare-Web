@@ -62,6 +62,9 @@ namespace LNUBookShare.UnitTests
             _searchServiceMock.Setup(s => s.GetRecommendationsAsync(3, 1, "title", "all"))
                               .ReturnsAsync(recommendedBooks);
 
+            _favoriteService.Setup(f => f.GetUserFavoriteBookIdsAsync(testUser.Id))
+                .ReturnsAsync(Result<IEnumerable<int>>.Success(new List<int>()));
+
             // Act
             // Викликаємо Search з порожнім запитом (імітуємо вхід на головну сторінку каталогу)
             var result = await _controller.Search(null!);
