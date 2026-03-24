@@ -1,7 +1,6 @@
 // <copyright file="Program.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
-
 using LNUBookShare.Application.Interfaces;
 using LNUBookShare.Application.Services;
 using LNUBookShare.Domain.Entities;
@@ -13,7 +12,6 @@ using Microsoft.EntityFrameworkCore;
 using Serilog;
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
-
 var builder = WebApplication.CreateBuilder(args);
 
 Log.Logger = new LoggerConfiguration()
@@ -33,9 +31,10 @@ try
     {
         options.UseNpgsql(connectionString);
     });
+
     builder.Services.AddScoped<IBookRepository, BookRepository>();
 
-    // --- IDENTITY (Налаштування ПМІ + Підтвердження пошти) ---
+    // --- IDENTITY ---
     builder.Services.AddIdentity<User, Role>(options =>
     {
         options.Password.RequireDigit = false;
@@ -43,10 +42,7 @@ try
         options.Password.RequireNonAlphanumeric = false;
         options.Password.RequireUppercase = false;
         options.Password.RequireLowercase = false;
-
         options.User.RequireUniqueEmail = true;
-
-        // Вимога підтвердження пошти для входу
         options.SignIn.RequireConfirmedEmail = true;
     })
     .AddEntityFrameworkStores<AppDbContext>()
@@ -68,6 +64,11 @@ try
     builder.Services.AddScoped<IFavoriteService, FavoriteService>();
 
     builder.Services.AddScoped<IBookDetailsService, BookDetailsService>();
+
+    // --- ТАСКА #57: ВІДГУКИ ТА РЕЙТИНГ ---
+    // Реєструємо репозиторій (робота з БД) та сервіс (логіка)
+    builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
+    builder.Services.AddScoped<IReviewService, ReviewService>();
 
     var app = builder.Build();
 
