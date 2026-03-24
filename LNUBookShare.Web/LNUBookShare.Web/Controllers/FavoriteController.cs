@@ -1,8 +1,12 @@
-﻿using LNUBookShare.Application.Interfaces;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using LNUBookShare.Application.Interfaces;
 using LNUBookShare.Domain.Entities;
+using LNUBookShare.Domain.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace LNUBookShare.Web.Controllers
 {
@@ -21,47 +25,55 @@ namespace LNUBookShare.Web.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index([FromQuery] FavoriteBooksQueryParameters parameters)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
                 return RedirectToAction("Login", "Account");
             }
 
-            // Викликаємо сервіс
-            var result = await _favoriteService.GetUserFavoriteBooksAsync(user.Id);
+            var result = await _favoriteService.GetUserFavoriteBooksAsync(user.Id, parameters);
+
+            ViewBag.QueryParameters = parameters;
 
             if (result.IsFailure)
             {
-                // Якщо сталася логічна помилка, виводимо порожній список і логуємо
                 _logger.LogWarning("Помилка отримання вподобань для User {UserId}: {Error}", user.Id, result.Error);
+                TempData["ErrorMessage"] = result.Error;
+
                 return View(new List<Book>());
             }
 
-            // Передаємо успішний список книг у View
             return View(result.Value);
         }
 
         [HttpPost]
         public async Task<IActionResult> Toggle(int bookId, string returnUrl)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
                 return RedirectToAction("Login", "Account");
             }
 
-            // Викликаємо сервіс (наша бізнес-логіка)
             var result = await _favoriteService.ToggleFavoriteAsync(user.Id, bookId);
 
             if (result.IsFailure)
             {
-                // Якщо помилка, можемо записати її в TempData, щоб показати на екрані
                 TempData["ErrorMessage"] = result.Error;
             }
 
-            // Повертаємо користувача на ту сторінку, де він був (зі збереженням пошуку і фільтрів)
             if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
             {
                 return Redirect(returnUrl);
