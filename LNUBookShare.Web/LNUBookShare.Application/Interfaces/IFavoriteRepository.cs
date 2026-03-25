@@ -1,4 +1,5 @@
 ﻿using LNUBookShare.Domain.Entities;
+using LNUBookShare.Domain.Models;
 
 namespace LNUBookShare.Application.Interfaces
 {
@@ -9,6 +10,7 @@ namespace LNUBookShare.Application.Interfaces
         Task RemoveAsync(int userId, int bookId);
         Task<IEnumerable<int>> GetUserFavoriteBookIdsAsync(int userId);
         Task<IEnumerable<Book>> GetUserFavoriteBooksAsync(int userId);
+        Task<IEnumerable<Book>> GetFavoriteBooksAsync(int userId, FavoriteBooksQueryParameters parameters);
         Task ClearAllForUserAsync(int userId);
     }
 }

@@ -1,6 +1,7 @@
 ﻿using LNUBookShare.Application.Common;
 using LNUBookShare.Application.Interfaces;
 using LNUBookShare.Domain.Entities;
+using LNUBookShare.Domain.Models;
 using Microsoft.Extensions.Logging;
 
 namespace LNUBookShare.Application.Services
@@ -61,7 +62,25 @@ namespace LNUBookShare.Application.Services
             var books = await _favoriteRepository.GetUserFavoriteBooksAsync(userId);
             return Result<IEnumerable<Book>>.Success(books);
         }
-        //1242123
+
+        public async Task<Result<IEnumerable<Book>>> GetUserFavoriteBooksAsync(int userId, FavoriteBooksQueryParameters parameters)
+        {
+            _logger.LogInformation("Користувач {UserId} запросив список вподобань. Параметри - Сортування: {SortBy}, За спаданням: {IsDescending}, Статус: {Status}", userId, parameters.SortBy, parameters.IsDescending, parameters.Status ?? "Не вказано");
+
+            var validSortColumns = new[] { "author", "title", "year", null, string.Empty };
+            var normalizedSortBy = parameters.SortBy?.Trim().ToLower();
+
+            if (!validSortColumns.Contains(normalizedSortBy))
+            {
+                _logger.LogWarning("Користувач {UserId} передав невалідний критерій сортування: {SortBy}", userId, parameters.SortBy);
+                return Result<IEnumerable<Book>>.Failure("Надано невалідний критерій сортування. Допустимі значення: Author, Title, Year.");
+            }
+
+            var books = await _favoriteRepository.GetFavoriteBooksAsync(userId, parameters);
+
+            return Result<IEnumerable<Book>>.Success(books);
+          }
+
         public async Task<Result> ClearUserFavoritesAsync(int userId)
         {
             var favorites = await _favoriteRepository.GetUserFavoriteBookIdsAsync(userId);
