@@ -7,7 +7,7 @@ namespace LNUBookShare.Application.Interfaces
     {
         Task<Result> ToggleFavoriteAsync(int userId, int bookId);
         Task<Result<IEnumerable<int>>> GetUserFavoriteBookIdsAsync(int userId);
-
         Task<Result<IEnumerable<Book>>> GetUserFavoriteBooksAsync(int userId);
+        Task<Result> ClearUserFavoritesAsync(int userId);
     }
 }

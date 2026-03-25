@@ -46,13 +46,19 @@ namespace LNUBookShare.Infrastructure.Repositories
 
         public async Task<IEnumerable<Book>> GetUserFavoriteBooksAsync(int userId)
         {
-            // Шукаємо записи вподобань для юзера і за допомогою Include підтягуємо саму книгу та її обкладинку
             return await _context.Favorites
                 .Where(f => f.UserId == userId)
-                .Include(f => f.Book.Cover) // картинка
-                .Include(f => f.Book.Owner) // власник
-                .Select(f => f.Book) // Повертаємо тільки об'єкти Book
+                .Include(f => f.Book.Cover)
+                .Include(f => f.Book.Owner)
+                .Select(f => f.Book)
                 .ToListAsync();
+        }
+
+        public async Task ClearAllForUserAsync(int userId)
+        {
+            await _context.Favorites
+                .Where(f => f.UserId == userId)
+                .ExecuteDeleteAsync();
         }
     }
 }

@@ -61,5 +61,20 @@ namespace LNUBookShare.Application.Services
             var books = await _favoriteRepository.GetUserFavoriteBooksAsync(userId);
             return Result<IEnumerable<Book>>.Success(books);
         }
+        //1242123
+        public async Task<Result> ClearUserFavoritesAsync(int userId)
+        {
+            var favorites = await _favoriteRepository.GetUserFavoriteBookIdsAsync(userId);
+
+            if (!favorites.Any())
+            {
+                return Result.Failure("Список вподобань вже порожній.");
+            }
+
+            await _favoriteRepository.ClearAllForUserAsync(userId);
+            _logger.LogInformation("Користувач {UserId} очистив список уподобань", userId);
+
+            return Result.Success();
+        }
     }
 }
