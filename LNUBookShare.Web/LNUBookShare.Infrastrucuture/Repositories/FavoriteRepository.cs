@@ -66,6 +66,7 @@ namespace LNUBookShare.Infrastructure.Repositories
                 .Where(f => f.UserId == userId)
                 .Include(f => f.Book)
                     .ThenInclude(b => b.Cover) // Правильний порядок!
+                    .Include(f => f.Book.Owner)
                 .Select(f => f.Book)
                 .AsQueryable();
 
