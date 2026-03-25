@@ -27,21 +27,17 @@ namespace LNUBookShare.Web.Controllers
         [HttpGet]
         public async Task<IActionResult> Index([FromQuery] FavoriteBooksQueryParameters parameters)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
                 return RedirectToAction("Login", "Account");
             }
 
+            // ВИПРАВЛЕНО: Залишили лише ОДИН виклик, який приймає параметри сортування/фільтрації (UC-2)
             var result = await _favoriteService.GetUserFavoriteBooksAsync(user.Id, parameters);
 
+            // Передаємо параметри у ViewBag, щоб UI знав, які радіокнопки зараз вибрані
             ViewBag.QueryParameters = parameters;
-            var result = await _favoriteService.GetUserFavoriteBooksAsync(user.Id);
 
             if (result.IsFailure)
             {
@@ -57,11 +53,6 @@ namespace LNUBookShare.Web.Controllers
         [HttpPost]
         public async Task<IActionResult> Toggle(int bookId, string returnUrl)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {

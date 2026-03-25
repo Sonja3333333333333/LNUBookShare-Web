@@ -85,6 +85,8 @@ namespace LNUBookShare.Infrastructure.Repositories
             };
 
             return await query.ToListAsync();
+        }
+
         public async Task ClearAllForUserAsync(int userId)
         {
             await _context.Favorites
