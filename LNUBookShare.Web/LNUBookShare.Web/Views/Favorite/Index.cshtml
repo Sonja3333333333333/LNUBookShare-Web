@@ -2,17 +2,18 @@
 @using LNUBookShare.Domain.Models
 @model IEnumerable<Book>
 
-@{
+    @{
     ViewData["Title"] = "Уподобані книги";
 
     var queryParams = ViewBag.QueryParameters as FavoriteBooksQueryParameters ?? new FavoriteBooksQueryParameters();
     string currentSort = queryParams.SortBy?.ToLower() ?? "title";
     string currentStatus = queryParams.Status?.ToLower() ?? "";
 }
+    }
 
-<div class="container mt-4">
-    <div class="row justify-content-center">
-        <div class="col-12">
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-12">
 
             @* Виведення помилки для негативного сценарію *@
             @if (TempData["ErrorMessage"] != null)
@@ -59,60 +60,72 @@
 
             <div class="book-list">
                 @if (Model != null && Model.Any())
+                <div class="mb-4">
+                </div>
+
+                <div class="book-list">
+                    @if (Model.Any())
                 {
                     @foreach (var book in Model)
                     {
-                        <div class="card mb-3 shadow-sm border-0 bg-white" style="border-radius: 12px; border: 1px solid #e0e0e0 !important; overflow: hidden;">
-                            <div class="row g-0 align-items-center">
+                    <div class="card mb-3 shadow-sm border-0 bg-white" style="border-radius: 12px; border: 1px solid #e0e0e0 !important; overflow: hidden;">
+                        <div class="row g-0 align-items-center">
 
-                                <div class="col-md-3 text-center bg-light d-flex align-items-center justify-content-center p-0" style="height: 160px; border-right: 1px solid #e0e0e0; overflow: hidden;">
-                                    @if (book.Cover != null && !string.IsNullOrEmpty(book.Cover.ImagePath))
+                            <div class="col-md-3 text-center bg-light d-flex align-items-center justify-content-center p-0" style="height: 160px; border-right: 1px solid #e0e0e0; overflow: hidden;">
+                                @if (book.Cover != null && !string.IsNullOrEmpty(book.Cover.ImagePath))
                                     {
-                                        <img src="@book.Cover.ImagePath"
-                                             alt="Обкладинка"
-                                             style="height: 100%; width: 100%; object-fit: cover; object-position: center;" />
+                                <img src="@book.Cover.ImagePath"
+                                     alt="Обкладинка"
+                                     style="height: 100%; width: 100%; object-fit: cover; object-position: center;" />
                                     }
                                     else
                                     {
-                                        <i class="bi bi-image text-secondary" style="font-size: 3rem;"></i>
+                                <i class="bi bi-image text-secondary" style="font-size: 3rem;"></i>
                                     }
-                                </div>
+                            </div>
 
-                                <div class="col-md-9 position-relative">
-                                    <div class="card-body">
+                            <div class="col-md-9 position-relative">
+                                <div class="card-body">
 
                                         <form asp-controller="Favorite" asp-action="Toggle" method="post" class="position-absolute top-0 end-0 mt-2 me-2">
                                             <input type="hidden" name="bookId" value="@book.BookId" />
                                             <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                                    <form asp-controller="Favorite" asp-action="Toggle" method="post" class="position-absolute top-0 end-0 mt-2 me-2">
+                                        <input type="hidden" name="bookId" value="@book.BookId" />
+                                        <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
 
-                                            <button type="submit" class="btn btn-link p-0 text-decoration-none" title="Видалити з уподобань">
-                                                <i class="bi bi-heart-fill fs-4 text-danger"></i>
-                                            </button>
-                                        </form>
+                                        <button type="submit" class="btn btn-link p-0 text-decoration-none" title="Видалити з уподобань">
+                                            <i class="bi bi-heart-fill fs-4 text-danger"></i>
+                                        </button>
+                                    </form>
 
-                                        <h5 class="card-title pe-5 mb-3">
-                                            <a asp-controller="Catalog" asp-action="Details" asp-route-id="@book.BookId" class="text-decoration-none text-dark fw-bold hover-primary">
-                                                @book.Title
-                                            </a>
-                                        </h5>
+                                    <h5 class="card-title pe-5 mb-3">
+                                        <a asp-controller="Catalog"
+                                           asp-action="Details"
+                                           asp-route-id="@book.BookId"
+                                           asp-route-returnUrl="@(Context.Request.Path + Context.Request.QueryString)"
+                                           class="fw-bold link-dark-hover text-decoration-none text-dark" title="Переглянути деталі">
+                                            @book.Title
+                                        </a>
+                                    </h5>
 
-                                        <p class="card-text mb-1 text-muted" style="font-size: 0.9rem;">
-                                            Автор: <span class="text-dark">@book.Author</span>
-                                        </p>
+                                    <p class="card-text mb-1 text-muted" style="font-size: 0.9rem;">
+                                        Автор: <span class="text-dark">@book.Author</span>
+                                    </p>
 
-                                        <p class="card-text mb-1 text-muted" style="font-size: 0.9rem;">
-                                            Власник: <span class="text-dark">@(book.Owner?.FirstName ?? "Невідомо") @(book.Owner?.LastName ?? "")</span>
-                                        </p>
+                                    <p class="card-text mb-1 text-muted" style="font-size: 0.9rem;">
+                                        Власник: <span class="text-dark">@(book.Owner?.FirstName ?? "Невідомо") @(book.Owner?.LastName ?? "")</span>
+                                    </p>
 
-                                        <p class="card-text mb-1 text-muted" style="font-size: 0.9rem;">
-                                            Статус: <span class="text-dark">
+                                    <p class="card-text mb-1 text-muted" style="font-size: 0.9rem;">
+                                        Статус: <span class="text-dark">
                                             @(book.Status switch
-                                            {
-                                                "available" => "Доступно",
-                                                "reserved" => "Заброньовано",
-                                                "borrowed" => "Видано",
-                                                _ => book.Status
-                                            })
+                                                {
+                                                    "available" => "Доступно",
+                                                    "reserved" => "Заброньовано",
+                                                    "borrowed" => "Видано",
+                                                    _ => book.Status
+                                                })
                                         </span>
                                     </p>
 
@@ -120,8 +133,15 @@
                             </div>
                         </div>
                     </div>
+                    }
+
+                    <div class="mt-4 text-center">
+                        <button type="button" class="btn btn-outline-danger"
+                                data-bs-toggle="modal" data-bs-target="#clearModal">
+                            Очистити вподобане
+                        </button>
+                    </div>
                 }
-            }
                 else
             {
                 <div class="text-center text-muted mt-5">
@@ -129,13 +149,35 @@
                     <h5 class="mt-3">За вашим запитом книг не знайдено.</h5>
                     <p>Спробуйте змінити фільтри або</p>
                     <a asp-controller="Catalog" asp-action="Search" class="btn btn-outline-primary mt-2">Перейти до каталогу</a>
+                {
+                    <div class="text-center text-muted mt-5">
+                        <h5>Ваш список уподобань порожній.</h5>
+                        <a asp-controller="Catalog" asp-action="Search" class="btn btn-outline-primary mt-3">Перейти до каталогу</a>
+                    </div>
+                }
                 </div>
-            }
-        </div>
 
-        <div class="mt-4 text-center">
+            </div>
         </div>
-
     </div>
-</div>
-</div>
+
+    <!-- Модальне вікно підтвердження -->
+    <div class="modal fade" id="clearModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Підтвердження</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    Ви впевнені що хочете видалити всі книги зі списку уподобань?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Скасувати</button>
+                    <form asp-controller="Favorite" asp-action="ClearAll" method="post">
+                        <button type="submit" class="btn btn-danger">Очистити</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>

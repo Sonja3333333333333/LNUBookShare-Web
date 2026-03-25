@@ -54,6 +54,8 @@ namespace LNUBookShare.Infrastructure.Repositories
                 .Where(f => f.UserId == userId)
                 .Include(f => f.Book)
                     .ThenInclude(b => b.Cover) // Правильний порядок!
+                .Include(f => f.Book.Cover)
+                .Include(f => f.Book.Owner)
                 .Select(f => f.Book)
                 .ToListAsync();
         }
@@ -83,6 +85,11 @@ namespace LNUBookShare.Infrastructure.Repositories
             };
 
             return await query.ToListAsync();
+        public async Task ClearAllForUserAsync(int userId)
+        {
+            await _context.Favorites
+                .Where(f => f.UserId == userId)
+                .ExecuteDeleteAsync();
         }
     }
 }

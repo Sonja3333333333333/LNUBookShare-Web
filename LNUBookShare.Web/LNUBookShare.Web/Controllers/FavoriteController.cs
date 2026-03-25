@@ -41,6 +41,7 @@ namespace LNUBookShare.Web.Controllers
             var result = await _favoriteService.GetUserFavoriteBooksAsync(user.Id, parameters);
 
             ViewBag.QueryParameters = parameters;
+            var result = await _favoriteService.GetUserFavoriteBooksAsync(user.Id);
 
             if (result.IsFailure)
             {
@@ -80,6 +81,25 @@ namespace LNUBookShare.Web.Controllers
             }
 
             return RedirectToAction("Search", "Catalog");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ClearAll()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var result = await _favoriteService.ClearUserFavoritesAsync(user.Id);
+
+            if (result.IsFailure)
+            {
+                TempData["ErrorMessage"] = result.Error;
+            }
+
+            return RedirectToAction("Index");
         }
     }
 }

@@ -29,3 +29,14 @@ body {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
 }
+
+a.link-dark-hover {
+    color: mediumblue !important; 
+    text-decoration: none !important;
+    transition: color 0.2s ease;
+}
+
+a.link-dark-hover:hover {
+    color: blue !important;
+    text-decoration: underline !important;
+}

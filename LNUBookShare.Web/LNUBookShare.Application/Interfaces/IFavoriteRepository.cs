@@ -11,5 +11,6 @@ namespace LNUBookShare.Application.Interfaces
         Task<IEnumerable<int>> GetUserFavoriteBookIdsAsync(int userId);
         Task<IEnumerable<Book>> GetUserFavoriteBooksAsync(int userId);
         Task<IEnumerable<Book>> GetFavoriteBooksAsync(int userId, FavoriteBooksQueryParameters parameters);
+        Task ClearAllForUserAsync(int userId);
     }
 }
