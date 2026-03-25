@@ -1,6 +1,7 @@
 ﻿// <copyright file="CatalogController.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
+
 using System.Globalization;
 using System.Security.Claims;
 using LNUBookShare.Application.Common;
@@ -9,11 +10,9 @@ using LNUBookShare.Application.Services;
 using LNUBookShare.Domain.Entities;
 using LNUBookShare.Web.Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 namespace LNUBookShare.Web.Controllers
 {
     [Authorize]
@@ -24,13 +23,22 @@ namespace LNUBookShare.Web.Controllers
         private readonly UserManager<User> _userManager;
         private readonly IFavoriteService _favoriteService;
         private readonly IBookDetailsService _bookDetailsService;
-        public CatalogController(IBookSearchService searchService, ILogger<CatalogController> logger, UserManager<User> userManager, IFavoriteService favoriteService, IBookDetailsService bookDetailsService)
+        private readonly IReviewService _reviewService; // Додаємо наш сервіс відгуків
+
+        public CatalogController(
+            IBookSearchService searchService,
+            ILogger<CatalogController> logger,
+            UserManager<User> userManager,
+            IFavoriteService favoriteService,
+            IBookDetailsService bookDetailsService,
+            IReviewService reviewService) // Ін'єктуємо сюди
         {
             _searchService = searchService;
             _logger = logger;
             _userManager = userManager;
             _favoriteService = favoriteService;
             _bookDetailsService = bookDetailsService;
+            _reviewService = reviewService;
         }
 
         public async Task<IActionResult> Search(string query, string searchBy = "title", string sortBy = "title", string statusFilter = "all")
@@ -41,23 +49,18 @@ namespace LNUBookShare.Web.Controllers
             if (!string.IsNullOrWhiteSpace(query))
             {
                 results = await _searchService.SearchAsync(query, searchBy, sortBy, statusFilter);
-                _logger.LogInformation(
-                    "Користувач здійснив пошук. Запит: '{Query}', Критерій: {SearchBy}, Сортування: {SortBy}, Фільтр статусу: {StatusFilter}", query, searchBy, sortBy, statusFilter);
-                    }
+                _logger.LogInformation("Пошук: {Query}", query);
+            }
             else
             {
                 if (currentUser != null)
                 {
                     results = await _searchService.GetRecommendationsAsync(currentUser.FacultyId, currentUser.Id, sortBy, statusFilter);
-                    _logger.LogInformation(
-                "Згенеровано рекомендації для користувача ID: {UserId} (Факультет ID: {FacultyId}). Сортування: {SortBy}, Фільтр статусу: {StatusFilter}", currentUser.Id, currentUser.FacultyId, sortBy, statusFilter);
                     ViewBag.IsRecommendation = true;
                 }
                 else
                 {
                     results = await _searchService.SearchAsync(string.Empty, "title", sortBy, statusFilter);
-                    _logger.LogInformation(
-                "Перегляд усіх книг каталогу. Сортування: {SortBy}, Фільтр статусу: {StatusFilter}", sortBy, statusFilter);
                 }
             }
 
@@ -76,16 +79,21 @@ namespace LNUBookShare.Web.Controllers
 
         public async Task<IActionResult> Details(int id, string? returnUrl = null)
         {
-            var book = await _bookDetailsService.GetBookDetailsAsync(id);
+            var bookResult = await _bookDetailsService.GetBookDetailsAsync(id);
 
-            if (book.IsFailure)
+            if (bookResult.IsFailure)
             {
-                return NotFound(book.Error);
+                return NotFound(bookResult.Error);
             }
 
-            var results = book.Value;
+            var results = bookResult.Value;
+
+            // Отримуємо актуальний середній рейтинг через наш новий сервіс
+            var avgRating = await _reviewService.CalculateAverageRatingAsync(id);
+            var reviews = await _reviewService.GetBookReviewsAsync(id);
 
             ViewBag.ReturnUrl = returnUrl;
+
             var model = new BookDetailsViewModel
             {
                 BookId = results.BookId,
@@ -93,7 +101,8 @@ namespace LNUBookShare.Web.Controllers
                 Author = results.Author,
                 Owner = results.Owner,
                 Status = results.Status,
-                BookReviews = results.BookReviews,
+                BookReviews = reviews, // Використовуємо список із сервісу
+                AverageRating = avgRating, // Використовуємо рейтинг із сервісу
                 Category = results.Category,
                 Language = results.Language,
                 Publisher = results.Publisher,
@@ -101,12 +110,37 @@ namespace LNUBookShare.Web.Controllers
                 Cover = results.Cover,
                 FavoritedBookIds = await GetUserFavoriteIdsAsync(),
             };
+
             return View(model);
         }
 
-        // логіку отримання улюблених книг користувача
-        // можна винести в окремий метод, щоб не дублювати код у різних діях контролера
-        // також _FavoriteButton який викликаться на різних сторінках(Search та Details), може використовувати цей метод для відображення кнопки вподобати
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddReview(int bookId, int rating, string comment)
+        {
+            var userIdString = _userManager.GetUserId(User);
+            if (string.IsNullOrEmpty(userIdString))
+            {
+                return Unauthorized();
+            }
+
+            int userId = int.Parse(userIdString);
+
+            // Викликаємо логіку сервісу (валідація 1-5 та логування там уже є)
+            var result = await _reviewService.AddReviewAsync(bookId, userId, rating, comment);
+
+            if (!result.IsSuccess)
+            {
+                TempData["ErrorMessage"] = result.Error;
+            }
+            else
+            {
+                TempData["SuccessMessage"] = "Ваш відгук успішно додано!";
+            }
+
+            return RedirectToAction(nameof(Details), new { id = bookId });
+        }
+
         private async Task<HashSet<int>> GetUserFavoriteIdsAsync()
         {
             var currentUser = await _userManager.GetUserAsync(User);

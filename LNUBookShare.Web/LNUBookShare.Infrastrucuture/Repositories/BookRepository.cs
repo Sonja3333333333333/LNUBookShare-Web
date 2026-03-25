@@ -34,8 +34,6 @@ namespace LNUBookShare.Infrastructure.Repositories
                 .Include(b => b.Owner)
                 .Include(b => b.Cover)
                 .Include(b => b.Category)
-                .Include(b => b.BookReviews)
-                    .ThenInclude(br => br.Reviewer)
                 .FirstOrDefaultAsync(b => b.BookId == id);
 
             return book;
