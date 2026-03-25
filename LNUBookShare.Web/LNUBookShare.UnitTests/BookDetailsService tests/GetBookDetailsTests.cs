@@ -19,7 +19,6 @@ namespace LNUBookShare.UnitTests.BookDetailsService_tests
                 Title = "Кобзар",
                 Owner = new User { FirstName = "Тарас" },
                 Cover = new Image { ImagePath = "cover.jpg" },
-                BookReviews = new List<BookReview>()
             };
 
             // Налаштовуємо репозиторій
