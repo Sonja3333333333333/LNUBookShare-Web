@@ -12,14 +12,17 @@ namespace LNUBookShare.Web.Controllers
     [Authorize]
     public class ProfileController : Controller
     {
-        private readonly IProfileService _profileService;
         private readonly UserManager<User> _userManager;
+        private readonly IProfileService _profileService;
         private readonly ILogger<ProfileController> _logger;
 
-        public ProfileController(IProfileService profileService, UserManager<User> userManager, ILogger<ProfileController> logger)
+        public ProfileController(
+            UserManager<User> userManager,
+            IProfileService profileService,
+            ILogger<ProfileController> logger)
         {
-            _profileService = profileService;
             _userManager = userManager;
+            _profileService = profileService;
             _logger = logger;
         }
 
@@ -27,7 +30,27 @@ namespace LNUBookShare.Web.Controllers
         public async Task<IActionResult> Index()
         {
             _logger.LogInformation("Користувач зайшов у свій кабінет.");
-            return View();
+
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            // Логіка завантаження даних для відображення профілю з гілки main
+            var result = await _profileService.GetUserProfileAsync(user.Id);
+
+            var model = new UserProfileViewModel
+            {
+                UserId = user.Id,
+                FirstName = user.FirstName ?? "Не вказано",
+                LastName = user.LastName ?? "Не вказано",
+                Email = user.Email ?? "Не вказано",
+                FacultyName = "Тут буде назва факультету",
+                AvatarPath = user.Avatar?.ImagePath
+            };
+
+            return View(model);
         }
 
         [HttpPost]
@@ -49,12 +72,11 @@ namespace LNUBookShare.Web.Controllers
             {
                 Title = model.Title,
                 Author = model.Author,
-                Isbn = model.Isbn,
                 Year = model.Year,
                 Publisher = model.Publisher,
                 Language = model.Language,
                 CategoryId = model.CategoryId,
-                OwnerId = user.Id,
+                OwnerId = user.Id
             };
 
             var result = await _profileService.AddBookToProfileAsync(book);

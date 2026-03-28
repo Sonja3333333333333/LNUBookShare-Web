@@ -72,16 +72,16 @@ try
     builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
     builder.Services.AddScoped<IReviewService, ReviewService>();
 
+    builder.Services.AddScoped<IProfileRepository, ProfileRepository>();
+    builder.Services.AddScoped<IProfileService, ProfileService>();
+
     var app = builder.Build();
 
     // --- MIDDLEWARE ---
     app.UseSerilogRequestLogging();
 
-    if (!app.Environment.IsDevelopment())
-    {
-        app.UseExceptionHandler("/Home/Error");
-        app.UseHsts();
-    }
+    app.UseExceptionHandler("/Home/Error");
+    app.UseHsts();
 
     app.UseHttpsRedirection();
     app.MapStaticAssets();

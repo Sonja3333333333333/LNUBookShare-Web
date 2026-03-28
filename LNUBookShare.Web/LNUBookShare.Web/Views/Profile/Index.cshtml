@@ -1,14 +1,70 @@
-﻿@model LNUBookShare.Web.Models.AddBookViewModel
-
+﻿@using LNUBookShare.Web.Models
+@model UserProfileViewModel
 @{
     ViewData["Title"] = "Кабінет";
 }
 
-<h2>Мій Кабінет</h2>
+<div class="container mt-4">
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success mt-3">@TempData["SuccessMessage"]</div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger mt-3">@TempData["ErrorMessage"]</div>
+    }
 
-<button type="button" class="btn btn-primary rounded-circle" data-bs-toggle="modal" data-bs-target="#addBookModal" style="width: 50px; height: 50px; font-size: 24px;">
-    +
-</button>
+    <div class="d-flex justify-content-end mb-3">
+        <button type="button" class="btn btn-primary rounded-circle" data-bs-toggle="modal" data-bs-target="#addBookModal" style="width: 50px; height: 50px; font-size: 24px;" title="Додати книгу">
+            +
+        </button>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-12">
+            <div class="card shadow-sm border-secondary-subtle" style="border-radius: 10px;">
+                <div class="card-body p-4 position-relative">
+                    <div class="row align-items-center">
+                        <div class="col-md-3 text-center mb-4 mb-md-0">
+                            @if (!string.IsNullOrEmpty(Model.AvatarPath))
+                            {
+                                <img src="@Model.AvatarPath" alt="Аватар користувача" class="rounded-circle img-fluid border shadow-sm" style="width: 150px; height: 150px; object-fit: cover;" />
+                            }
+                            else
+                            {
+                                <div class="bg-light rounded-circle d-flex align-items-center justify-content-center mx-auto border shadow-sm" style="width: 150px; height: 150px;">
+                                    <i class="bi bi-person text-secondary" style="font-size: 5rem;"></i>
+                                </div>
+                            }
+                        </div>
+                        <div class="col-md-9 border-start">
+                            <div class="row mb-3">
+                                <div class="col-sm-4">
+                                    <label class="form-label text-muted small fw-bold mb-0">Прізвище, Ім'я</label>
+                                    <div class="form-control bg-light border-secondary-subtle">
+                                        @Model.LastName @Model.FirstName
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <label class="form-label text-muted small fw-bold mb-0">Email</label>
+                                    <div class="form-control bg-light border-secondary-subtle">
+                                        @Model.Email
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <label class="form-label text-muted small fw-bold mb-0">Факультет</label>
+                                    <div class="form-control bg-light border-secondary-subtle">
+                                        @Model.FacultyName
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <div class="modal fade" id="addBookModal" tabindex="-1" aria-labelledby="addBookModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -17,52 +73,36 @@
                 <h5 class="modal-title" id="addBookModalLabel">Додати книгу</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            
             <form asp-controller="Profile" asp-action="AddBook" method="post">
                 <div class="modal-body">
-        
                     <div class="mb-3">
-                        <label asp-for="Title" class="form-label">Назва книги</label>
-                        <input asp-for="Title" class="form-control" placeholder="Назва книги" required />
-                        <span asp-validation-for="Title" class="text-danger"></span>
+                        <label for="Title" class="form-label">Назва книги</label>
+                        <input type="text" id="Title" name="Title" class="form-control" placeholder="Назва книги" required />
                     </div>
-
                     <div class="mb-3">
-                        <label asp-for="Author" class="form-label">Автор</label>
-                        <input asp-for="Author" class="form-control" placeholder="Автор" required />
-                        <span asp-validation-for="Author" class="text-danger"></span>
+                        <label for="Author" class="form-label">Автор</label>
+                        <input type="text" id="Author" name="Author" class="form-control" placeholder="Автор" required />
                     </div>
-
                     <div class="mb-3">
-                        <label asp-for="Isbn" class="form-label">ISBN</label>
-                        <input asp-for="Isbn" class="form-control" placeholder="ISBN (необов'язково)" />
+                        <label for="Year" class="form-label">Рік видання</label>
+                        <input type="number" id="Year" name="Year" class="form-control" placeholder="Рік видання" required />
                     </div>
-
                     <div class="mb-3">
-                        <label asp-for="Year" class="form-label">Рік випуску</label>
-                        <input asp-for="Year" type="number" class="form-control" placeholder="Рік випуску" required />
-                        <span asp-validation-for="Year" class="text-danger"></span>
+                        <label for="Publisher" class="form-label">Видавництво</label>
+                        <input type="text" id="Publisher" name="Publisher" class="form-control" placeholder="Видавництво" />
                     </div>
-
                     <div class="mb-3">
-                        <label asp-for="Publisher" class="form-label">Видавництво</label>
-                        <input asp-for="Publisher" class="form-control" placeholder="Видавництво" />
+                        <label for="Language" class="form-label">Мова</label>
+                        <input type="text" id="Language" name="Language" class="form-control" placeholder="Мова" />
                     </div>
-
                     <div class="mb-3">
-                        <label asp-for="Language" class="form-label">Мова</label>
-                        <input asp-for="Language" class="form-control" placeholder="Мова" />
-                    </div>
-
-                    <div class="mb-3">
-                        <label asp-for="CategoryId" class="form-label">Категорія</label>
-                        <select asp-for="CategoryId" class="form-select">
+                        <label for="CategoryId" class="form-label">Категорія</label>
+                        <select id="CategoryId" name="CategoryId" class="form-select">
                             <option value="1">Художня література</option>
                             <option value="2">Наукова література</option>
                             <option value="3">Навчальні матеріали</option>
                         </select>
                     </div>
-
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-primary w-100">Зберегти</button>
@@ -71,12 +111,3 @@
         </div>
     </div>
 </div>
-
-@if (TempData["SuccessMessage"] != null)
-{
-    <div class="alert alert-success mt-3">@TempData["SuccessMessage"]</div>
-}
-@if (TempData["ErrorMessage"] != null)
-{
-    <div class="alert alert-danger mt-3">@TempData["ErrorMessage"]</div>
-}
