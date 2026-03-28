@@ -1,0 +1,82 @@
+﻿@model LNUBookShare.Web.Models.AddBookViewModel
+
+@{
+    ViewData["Title"] = "Кабінет";
+}
+
+<h2>Мій Кабінет</h2>
+
+<button type="button" class="btn btn-primary rounded-circle" data-bs-toggle="modal" data-bs-target="#addBookModal" style="width: 50px; height: 50px; font-size: 24px;">
+    +
+</button>
+
+<div class="modal fade" id="addBookModal" tabindex="-1" aria-labelledby="addBookModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addBookModalLabel">Додати книгу</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            
+            <form asp-controller="Profile" asp-action="AddBook" method="post">
+                <div class="modal-body">
+        
+                    <div class="mb-3">
+                        <label asp-for="Title" class="form-label">Назва книги</label>
+                        <input asp-for="Title" class="form-control" placeholder="Назва книги" required />
+                        <span asp-validation-for="Title" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Author" class="form-label">Автор</label>
+                        <input asp-for="Author" class="form-control" placeholder="Автор" required />
+                        <span asp-validation-for="Author" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Isbn" class="form-label">ISBN</label>
+                        <input asp-for="Isbn" class="form-control" placeholder="ISBN (необов'язково)" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Year" class="form-label">Рік випуску</label>
+                        <input asp-for="Year" type="number" class="form-control" placeholder="Рік випуску" required />
+                        <span asp-validation-for="Year" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Publisher" class="form-label">Видавництво</label>
+                        <input asp-for="Publisher" class="form-control" placeholder="Видавництво" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Language" class="form-label">Мова</label>
+                        <input asp-for="Language" class="form-control" placeholder="Мова" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="CategoryId" class="form-label">Категорія</label>
+                        <select asp-for="CategoryId" class="form-select">
+                            <option value="1">Художня література</option>
+                            <option value="2">Наукова література</option>
+                            <option value="3">Навчальні матеріали</option>
+                        </select>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary w-100">Зберегти</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success mt-3">@TempData["SuccessMessage"]</div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger mt-3">@TempData["ErrorMessage"]</div>
+}
