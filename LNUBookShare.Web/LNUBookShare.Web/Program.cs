@@ -65,6 +65,10 @@ try
 
     builder.Services.AddScoped<IBookDetailsService, BookDetailsService>();
 
+    builder.Services.AddScoped<IProfileService, ProfileService>();
+
+    // --- ТАСКА #57: ВІДГУКИ ТА РЕЙТИНГ ---
+    // Реєструємо репозиторій (робота з БД) та сервіс (логіка)
     builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
     builder.Services.AddScoped<IReviewService, ReviewService>();
 
@@ -91,7 +95,7 @@ try
         pattern: "{controller=Catalog}/{action=Search}/{id?}")
         .WithStaticAssets();
 
-    app.Run();
+    await app.RunAsync();
 }
 catch (Exception ex)
 {
@@ -99,5 +103,5 @@ catch (Exception ex)
 }
 finally
 {
-    Log.CloseAndFlush();
+    await Log.CloseAndFlushAsync();
 }

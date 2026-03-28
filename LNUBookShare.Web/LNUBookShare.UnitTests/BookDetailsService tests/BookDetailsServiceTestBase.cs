@@ -17,8 +17,6 @@ namespace LNUBookShare.UnitTests.BookDetailsService_tests
             _bookRepoMock = new Mock<IBookRepository>();
             _loggerMock = new Mock<ILogger<BookDetailsService>>();
             _bookDetailsService = new BookDetailsService(_bookRepoMock.Object, _loggerMock.Object);
-        } 
-
-        
+        }
     }
 }

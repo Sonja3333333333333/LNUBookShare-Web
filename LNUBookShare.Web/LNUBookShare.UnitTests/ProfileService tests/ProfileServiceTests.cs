@@ -1,23 +1,31 @@
-﻿using LNUBookShare.Application.Interfaces;
+﻿using System;
+using System.Threading.Tasks;
+using LNUBookShare.Application.Interfaces;
 using LNUBookShare.Application.Services;
 using LNUBookShare.Domain.Entities;
 using Microsoft.Extensions.Logging;
 using Moq;
+using Xunit;
 
 namespace LNUBookShare.UnitTests.ProfileService_tests
 {
     public class ProfileServiceTests
     {
         private readonly Mock<IProfileRepository> _profileRepositoryMock;
+        private readonly Mock<IBookRepository> _bookRepositoryMock; 
         private readonly Mock<ILogger<ProfileService>> _loggerMock;
         private readonly ProfileService _profileService;
 
         public ProfileServiceTests()
         {
             _profileRepositoryMock = new Mock<IProfileRepository>();
+            _bookRepositoryMock = new Mock<IBookRepository>();
             _loggerMock = new Mock<ILogger<ProfileService>>();
 
-            _profileService = new ProfileService(_profileRepositoryMock.Object, _loggerMock.Object);
+            _profileService = new ProfileService(
+                _profileRepositoryMock.Object,
+                _bookRepositoryMock.Object,
+                _loggerMock.Object);
         }
 
         [Fact]
@@ -81,7 +89,5 @@ namespace LNUBookShare.UnitTests.ProfileService_tests
                     It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
                 Times.Once);
         }
-
     }
-
 }
