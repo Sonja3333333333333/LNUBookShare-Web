@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using LNUBookShare.Application.Common;
 using LNUBookShare.Application.Interfaces;
-using LNUBookShare.Domain.Models;
 using LNUBookShare.Domain.Entities;
+using LNUBookShare.Domain.Models;
 using Microsoft.Extensions.Logging;
 
 namespace LNUBookShare.Application.Services
@@ -44,29 +46,59 @@ namespace LNUBookShare.Application.Services
                 AvatarPath = user.Avatar?.ImagePath,
             };
 
-            _logger.LogInformation("Успішно сформовано профіль для користувача з ID: {UserId}", userId);
-
             return Result<UserProfileDto>.Success(dto);
         }
 
         public async Task<Result> AddBookToProfileAsync(Book book)
         {
-            // Перевіряємо на валідність
             if (book == null)
             {
-                _logger.LogWarning("Спроба додати порожню книгу.");
                 return Result.Failure("Дані про книгу відсутні.");
             }
 
-            // Задаємо системні поля (статус за замовчуванням і час створення)
-            book.Status = "Доступно"; // Або "Available", залежно від того, як у вас в БД
+            book.Status = "available";
             book.CreatedAt = DateTime.UtcNow;
 
-            // Зберігаємо через репозиторій
             await _bookRepository.AddAsync(book);
 
             _logger.LogInformation("Користувач {UserId} успішно додав книгу {Title}", book.OwnerId, book.Title);
+            return Result.Success();
+        }
 
+        public async Task<List<Book>> GetUserBooksAsync(int userId)
+        {
+            var allBooks = await _bookRepository.GetAllAsync();
+
+            return allBooks
+                .Where(b => b.OwnerId == userId)
+                .OrderByDescending(b => b.CreatedAt)
+                .ToList();
+        }
+
+        public async Task<Result> UpdateBookAsync(Book book)
+        {
+            if (book == null)
+            {
+                return Result.Failure("Дані для оновлення відсутні.");
+            }
+
+            await _bookRepository.UpdateAsync(book);
+
+            _logger.LogInformation("Книгу з ID {BookId} оновлено", book.BookId);
+            return Result.Success();
+        }
+
+        public async Task<Result> DeleteBookAsync(int bookId)
+        {
+            var book = await _bookRepository.GetByIdAsync(bookId);
+            if (book == null)
+            {
+                return Result.Failure("Книгу не знайдено.");
+            }
+
+            await _bookRepository.DeleteAsync(book);
+
+            _logger.LogInformation("Книгу з ID {BookId} видалено", bookId);
             return Result.Success();
         }
     }
