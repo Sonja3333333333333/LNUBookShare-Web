@@ -88,7 +88,18 @@
                         </tr>
                         <tr>
                             <td class="text-dark fw-bold pe-3">Власник</td>
-                            <td>@(Model.Owner?.FirstName ?? "Невідомо") @(Model.Owner?.LastName ?? "")</td>
+                            <td>
+                                <p class="card-text mb-1 text-muted" style="font-size: 0.9rem;">
+                                    <a asp-controller="OtherProfile"
+                                           asp-action="Index"
+                                           asp-route-userId="@Model.Owner?.Id"
+                                           class="text-primary link-dark-hover text-decoration-none fw-medium"
+                                           style="font-size: 0.9rem;"
+                                           title="Переглянути профіль">
+                                        @(Model.Owner?.FirstName ?? "Невідомо") @(Model.Owner?.LastName ?? "")
+                                    </a>
+                                </p>
+                            </td>
                         </tr>
                         <tr>
                             <td class="text-dark fw-bold pe-3">Статус</td>
