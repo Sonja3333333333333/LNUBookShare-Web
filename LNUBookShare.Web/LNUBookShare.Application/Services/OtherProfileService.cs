@@ -34,16 +34,9 @@ namespace LNUBookShare.Application.Services
 
         public async Task<Result<IEnumerable<Book>>> GetOtherUserBooks(int userId, string sortBy = "title", string statusFilter = "all")
         {
-            var user = await _otherProfileRepository.GetUserById(userId);
-            if (user is null)
-            {
-                _logger.LogWarning("Спроба отримати книги неіснуючого користувача з ID: {UserId}", userId);
-                return Result<IEnumerable<Book>>.Failure("Користувача не знайдено.");
-            }
-
+            var books = await _otherProfileRepository.GetUserBooks(userId, sortBy, statusFilter);
             _logger.LogInformation("Книги користувача {UserId} успішно отримані", userId);
 
-            var books = await _otherProfileRepository.GetUserBooks(userId, sortBy, statusFilter);
             return Result<IEnumerable<Book>>.Success(books);
         }
     }
