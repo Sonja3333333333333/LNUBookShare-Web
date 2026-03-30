@@ -71,6 +71,9 @@ try
     builder.Services.AddScoped<IProfileRepository, ProfileRepository>();
     builder.Services.AddScoped<IProfileService, ProfileService>();
 
+    builder.Services.AddScoped<IOtherProfileRepository, OtherProfileRepository>();
+    builder.Services.AddScoped<IOtherProfileService, OtherProfileService>();
+
     var app = builder.Build();
 
     // --- MIDDLEWARE ---
