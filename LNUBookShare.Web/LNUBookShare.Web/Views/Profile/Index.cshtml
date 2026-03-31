@@ -1,0 +1,65 @@
+﻿@using LNUBookShare.Web.Models
+@model UserProfileViewModel
+
+@{
+    ViewData["Title"] = "Кабінет";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-12">
+            
+            <div class="card shadow-sm border-secondary-subtle" style="border-radius: 15px;">
+                <div class="card-body p-4 position-relative">
+                    
+                    <a asp-controller="Profile" asp-action="Edit" class="position-absolute top-0 end-0 mt-3 me-4 text-secondary hover-primary" title="Редагувати профіль">
+                        <i class="bi bi-pencil-square fs-3"></i>
+                    </a>
+
+                    <div class="row align-items-center">
+                        
+                        <div class="col-md-3 text-center border-end">
+                            @if (!string.IsNullOrEmpty(Model.AvatarPath))
+                            {
+                                <img src="@Model.AvatarPath" alt="Аватар користувача" class="rounded-circle img-fluid border shadow-sm" style="width: 150px; height: 150px; object-fit: cover;" />
+                            }
+                            else
+                            {
+                                <div class="bg-light rounded-circle d-flex align-items-center justify-content-center mx-auto border shadow-sm" style="width: 150px; height: 150px;">
+                                    <i class="bi bi-person text-secondary" style="font-size: 5rem;"></i>
+                                </div>
+                            }
+                        </div>
+
+                        <div class="col-md-6 ps-md-4 mt-4 mt-md-0">
+                            
+                            <div class="mb-3">
+                                <label class="form-label text-muted small fw-bold mb-1">Прізвище, Ім'я</label>
+                                <div class="form-control bg-light border-secondary-subtle">
+                                    @Model.LastName @Model.FirstName
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label text-muted small fw-bold mb-1">Email</label>
+                                <div class="form-control bg-light border-secondary-subtle">
+                                    @Model.Email
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label text-muted small fw-bold mb-1">Факультет</label>
+                                <div class="form-control bg-light border-secondary-subtle">
+                                    @Model.FacultyName
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
