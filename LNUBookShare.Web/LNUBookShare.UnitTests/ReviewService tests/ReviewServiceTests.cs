@@ -1,7 +1,7 @@
 ﻿using LNUBookShare.Application.Interfaces;
 using LNUBookShare.Application.Services;
 using LNUBookShare.Domain.Entities;
-using Microsoft.Extensions.Logging; // Додай це для логгера
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -10,15 +10,14 @@ namespace LNUBookShare.UnitTests.ReviewService_tests
     public class ReviewServiceTests
     {
         private readonly Mock<IReviewRepository> _reviewRepoMock;
-        private readonly Mock<ILogger<ReviewService>> _loggerMock; // Створюємо мок логгера
+        private readonly Mock<ILogger<ReviewService>> _loggerMock; 
         private readonly ReviewService _reviewService;
 
         public ReviewServiceTests()
         {
             _reviewRepoMock = new Mock<IReviewRepository>();
-            _loggerMock = new Mock<ILogger<ReviewService>>(); // Ініціалізуємо
+            _loggerMock = new Mock<ILogger<ReviewService>>(); 
 
-            // Тепер передаємо ДВА аргументи: репозиторій та логгер
             _reviewService = new ReviewService(_reviewRepoMock.Object, _loggerMock.Object);
         }
 
@@ -34,7 +33,6 @@ namespace LNUBookShare.UnitTests.ReviewService_tests
 
             // Assert
             Assert.True(result.IsSuccess);
-            // ПЕРЕВІР: якщо в репозиторії метод називається AddAsync, то пиши тут AddAsync
             _reviewRepoMock.Verify(r => r.AddAsync(It.IsAny<BookReview>()), Times.Once);
         }
 
@@ -72,6 +70,20 @@ namespace LNUBookShare.UnitTests.ReviewService_tests
 
             // Assert
             Assert.Equal(4.5, average);
+        }
+        [Fact]
+        public async Task CalculateAverageRatingAsync_WhenNoReviews_ShouldReturnZero()
+        {
+            // Arrange
+            _reviewRepoMock
+                .Setup(r => r.GetByBookIdAsync(It.IsAny<int>()))
+                .ReturnsAsync(new List<BookReview>()); // Пустий список
+
+            // Act
+            var average = await _reviewService.CalculateAverageRatingAsync(1);
+
+            // Assert
+            Assert.Equal(0, average); // Має бути 0.0, а не помилка
         }
     }
 }
