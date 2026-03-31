@@ -33,7 +33,7 @@ public class AccountControllerRegisterTests : AccountControllerTestBase
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.Once);
     }
-
+        
     [Fact]
     public async Task Register_SuccessfulRegistration_LogsInformationAndRedirects()
     {
