@@ -3,72 +3,47 @@
 
 @{
     ViewData["Title"] = Model.Title;
-
     int fullStars = (int)Math.Round(Model.AverageRating);
     int emptyStars = 5 - fullStars;
 }
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
 <style>
-    .book-details-card {
-        border: 1px solid #ddd;
-        border-radius: 20px;
-        padding: 30px;
-        background-color: #fff;
-    }
-    
-    .text-warning {
-        color: #ffc107 !important;
-    }
-    
-    .breadcrumb-container {
-        margin-bottom: 25px;
-        margin-top: 20px;
-    }
-
-    .alert-pill {
-        border-radius: 50px;
-        border: none;
-    }
+    .book-details-card { border: 1px solid #ddd; border-radius: 20px; padding: 30px; background-color: #fff; }
+    .text-warning { color: #ffc107 !important; }
+    .breadcrumb-container { margin-bottom: 25px; margin-top: 20px; }
+    .alert-pill { border-radius: 50px; border: none; }
 </style>
 
 <div class="container">
-    @* --- БЛОК СПОВІЩЕНЬ (TempData) --- *@
+    @* --- ПОВІДОМЛЕННЯ --- *@
     <div class="mt-4">
-        @if (TempData["SuccessMessage"] != null)
-        {
+        @if (TempData["SuccessMessage"] != null) {
             <div class="alert alert-success alert-dismissible fade show alert-pill px-4 shadow-sm" role="alert">
                 <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         }
-
-        @if (TempData["ErrorMessage"] != null)
-        {
+        @if (TempData["ErrorMessage"] != null) {
             <div class="alert alert-danger alert-dismissible fade show alert-pill px-4 shadow-sm" role="alert">
                 <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["ErrorMessage"]
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         }
     </div>
 
     <div class="breadcrumb-container d-flex align-items-center gap-2">
-        <a href="@(ViewBag.ReturnUrl ?? Url.Action("Search", "Catalog"))" class="text-decoration-none text-primary fw-bold">
-            Головна
-        </a>
+        <a href="@(ViewBag.ReturnUrl ?? Url.Action("Search", "Catalog"))" class="text-decoration-none text-primary fw-bold">Головна</a>
         <i class="bi bi-chevron-right text-primary fs-5"></i>
         <span class="text-primary fw-bold">@Model.Title</span>
     </div>
 
     <div class="book-details-card shadow-sm mb-5">
         <div class="row g-4 align-items-start">
-            <div class="col-md-3 text-center d-flex align-items-start justify-content-center">
-                @if (Model.Cover != null && !string.IsNullOrEmpty(Model.Cover.ImagePath))
-                {
+            <div class="col-md-3 text-center">
+                @if (Model.Cover != null && !string.IsNullOrEmpty(Model.Cover.ImagePath)) {
                     <img src="@Model.Cover.ImagePath" alt="Обкладинка" class="rounded shadow-sm" style="max-width: 100%; height: auto; max-height: 400px; object-fit: contain;" />
-                }
-                else
-                {
+                } else {
                     <div class="bg-light d-flex align-items-center justify-content-center rounded w-100" style="height: 250px; border: 2px dashed #ccc;">
                         <i class="bi bi-image text-secondary" style="font-size: 4rem;"></i>
                     </div>
@@ -78,170 +53,110 @@
             <div class="col-md-6 ps-md-4">
                 <table class="table table-borderless table-sm m-0 align-middle">
                     <tbody>
-                        <tr>
-                            <td class="text-dark fw-bold pe-3" style="width: 25%;">Назва</td>
-                            <td class="fw-bold fs-5 text-dark">@Model.Title</td>
-                        </tr>
-                        <tr>
-                            <td class="text-dark fw-bold pe-3">Автор</td>
-                            <td>@Model.Author</td>
-                        </tr>
-                        <tr>
-                            <td class="text-dark fw-bold pe-3">Власник</td>
-                            <td>@(Model.Owner?.FirstName ?? "Невідомо") @(Model.Owner?.LastName ?? "")</td>
-                        </tr>
-                        <tr>
-                            <td class="text-dark fw-bold pe-3">Статус</td>
-                            <td>
-                                @(Model.Status switch
-                                {
-                                    "available" => "Доступно",
-                                    "reserved" => "Заброньовано",
-                                    "borrowed" => "Видано",
-                                    _ => Model.Status
-                                })
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="text-dark fw-bold pe-3">Рейтинг</td>
-                            <td>
-                                @for (int i = 0; i < fullStars; i++)
-                                {
-                                    <i class="bi bi-star-fill text-warning"></i>
-                                }
-                                @for (int i = 0; i < emptyStars; i++)
-                                {
-                                    <i class="bi bi-star text-warning"></i>
-                                }
-                                <span class="ms-1 text-secondary">(@Model.AverageRating.ToString("0.0"))</span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="text-dark fw-bold pe-3">Категорія</td>
-                            <td>@(Model.Category?.CategoryName ?? "Невідомо")</td>
-                        </tr>
-                        <tr>
-                            <td class="text-dark fw-bold pe-3">Мова</td>
-                            <td>@Model.Language</td>
-                        </tr>
-                        <tr>
-                            <td class="text-dark fw-bold pe-3">Видання</td>
-                            <td>@Model.Publisher</td>
-                        </tr>
-                        <tr>
-                            <td class="text-dark fw-bold pe-3">ISBN</td>
-                            <td>@Model.Isbn</td>
-                        </tr>
+                        <tr><td class="text-dark fw-bold" style="width: 25%;">Назва</td><td class="fw-bold fs-5">@Model.Title</td></tr>
+                        <tr><td class="text-dark fw-bold">Автор</td><td>@Model.Author</td></tr>
+                        <tr><td class="text-dark fw-bold">Власник</td><td>@(Model.Owner?.FirstName ?? "Невідомо") @(Model.Owner?.LastName ?? "")</td></tr>
+                        <tr><td class="text-dark fw-bold">Статус</td><td>
+                            @(Model.Status switch { "available" => "Доступно", "reserved" => "Заброньовано", "borrowed" => "Видано", _ => Model.Status })
+                        </td></tr>
+                        <tr><td class="text-dark fw-bold">Рейтинг</td><td>
+                            @for (int i = 0; i < fullStars; i++) { <i class="bi bi-star-fill text-warning"></i> }
+                            @for (int i = 0; i < emptyStars; i++) { <i class="bi bi-star text-warning"></i> }
+                            <span class="ms-1 text-secondary">(@Model.AverageRating.ToString("0.0"))</span>
+                        </td></tr>
+                        <tr><td class="text-dark fw-bold">Категорія</td><td>@(Model.Category?.CategoryName ?? "Невідомо")</td></tr>
+                        <tr><td class="text-dark fw-bold">Мова</td><td>@Model.Language</td></tr>
+                        <tr><td class="text-dark fw-bold">Видання</td><td>@Model.Publisher</td></tr>
+                        <tr><td class="text-dark fw-bold">ISBN</td><td>@Model.Isbn</td></tr>
                     </tbody>
                 </table>
             </div>
 
             <div class="col-md-3 d-flex flex-column justify-content-between" style="min-height: 250px;">
                 <div class="text-end">
-                    <partial name="_FavoriteButton" model="(Model.BookId, Model.FavoritedBookIds.Contains(Model.BookId), Context.Request.Path + Context.Request.QueryString)" />
+                    <partial name="_FavoriteButton" model="@((int)Model.BookId, (bool)Model.FavoritedBookIds.Contains(Model.BookId), Context.Request.Path.ToString() + Context.Request.QueryString.ToString())" />
                 </div>
-                <div class="d-grid gap-2 mt-auto ms-auto" style="width: 100%; max-width: 180px;">
-                    @if (Model.Status == "available")
-                    {
-                        <button type="button" class="btn btn-secondary btn-sm fw-medium rounded-pill text-white py-2 shadow-sm disabled" aria-disabled="true">Забронювати</button>
+                
+                <div class="d-grid gap-2 mt-auto ms-auto" style="width: 100%; max-width: 220px;">
+                    @if (Model.Status == "available") {
+                        <form asp-action="Reserve" asp-controller="Catalog" method="post" class="d-grid">
+                            <input type="hidden" name="bookId" value="@Model.BookId" />
+                            <button type="submit" class="btn btn-primary btn-sm fw-medium rounded-pill text-white py-2 shadow-sm">
+                                <i class="bi bi-bookmark-check me-1"></i> Забронювати
+                            </button>
+                        </form>
+                    } else {
+                        if (Model.IsInQueue) {
+                            <div class="alert alert-info py-2 px-3 rounded-pill text-center mb-0 shadow-sm" style="font-size: 0.85rem; border: none;">
+                                <i class="bi bi-clock-history me-1"></i> Ви у черзі (№@Model.QueuePosition)
+                            </div>
+                        } else {
+                            <form asp-action="JoinQueue" asp-controller="Catalog" method="post" class="d-grid">
+                                <input type="hidden" name="bookId" value="@Model.BookId" />
+                                <button type="submit" class="btn btn-outline-primary btn-sm fw-medium rounded-pill py-2 shadow-sm">
+                                    <i class="bi bi-people me-1"></i> Стати в чергу
+                                </button>
+                            </form>
+                        }
                     }
-                    else
-                    {
-                        <button type="button" class="btn btn-light btn-sm fw-medium rounded-pill text-muted py-2 border disabled" aria-disabled="true">Стати в чергу</button>
-                    }
-                    <a href="#" class="btn btn-secondary btn-sm fw-medium rounded-pill text-white py-2" style="background-color: #6c757d; border-color: #6c757d;">Написати власнику</a>
+                    <a href="#" class="btn btn-secondary btn-sm fw-medium rounded-pill text-white py-2" style="background-color: #6c757d;">
+                        <i class="bi bi-chat-dots me-1"></i> Написати власнику
+                    </a>
                 </div>
             </div>
         </div>
     </div>
 
-    <hr class="my-5" style="border-top: 2px solid #eee;" />
-
+    @* --- ВІДГУКИ --- *@
     <div class="text-center mb-5">
         <h3 class="fw-bold text-dark">Відгуки про @Model.Title</h3>
-        @if (User.Identity != null && User.Identity.IsAuthenticated)
-        {
-            <button type="button" class="btn btn-secondary rounded-pill px-5 py-2 mt-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#addReviewModal">
-                Залишити відгук
-            </button>
-        }
-        else
-        {
+        @if (User.Identity?.IsAuthenticated == true) {
+            <button type="button" class="btn btn-secondary rounded-pill px-5 py-2 mt-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#addReviewModal">Залишити відгук</button>
+        } else {
             <p class="text-muted mt-3">Увійдіть, щоб залишити відгук.</p>
         }
     </div>
 
     <div class="reviews-container mx-auto" style="max-width: 800px;">
-        @if (Model.BookReviews != null && Model.BookReviews.Any())
-        {
-            @foreach (var review in Model.BookReviews)
-            {
+        @if (Model.BookReviews?.Any() == true) {
+            @foreach (var review in Model.BookReviews) {
                 <div class="review-item mb-4">
-                    <div class="d-flex justify-content-between align-items-start">
+                    <div class="d-flex justify-content-between">
                         <div class="d-flex align-items-center gap-3">
                             <div class="user-avatar bg-light rounded-circle d-flex align-items-center justify-content-center" style="width: 45px; height: 45px; border: 1px solid #ddd;">
                                 <i class="bi bi-person text-secondary fs-4"></i>
                             </div>
                             <div>
-                                <h6 class="mb-0 fw-bold text-dark">@(review.Reviewer?.FirstName ?? "Користувач")</h6>
+                                <h6 class="mb-0 fw-bold">@(review.Reviewer?.FirstName ?? "Користувач")</h6>
                                 <div class="text-warning small">
-                                    @for (int i = 1; i <= 5; i++)
-                                    {
-                                        <i class="bi bi-star@(i <= review.Rating ? "-fill" : "")"></i>
-                                    }
+                                    @for (int i = 1; i <= 5; i++) { <i class="bi bi-star@(i <= review.Rating ? "-fill" : "")"></i> }
                                 </div>
                             </div>
                         </div>
-                        <div class="text-muted small">
-                            @review.CreatedAt.ToString("dd.MM.yyyy")
-                        </div>
+                        <div class="text-muted small">@review.CreatedAt.ToString("dd.MM.yyyy")</div>
                     </div>
-                    <div class="ps-5 mt-2">
-                        <p class="text-dark mb-0" style="line-height: 1.6;">@review.Comment</p>
-                    </div>
+                    <div class="ps-5 mt-2"><p class="text-dark mb-0">@review.Comment</p></div>
                     <hr class="mt-4 opacity-25" />
                 </div>
             }
-        }
-        else
-        {
-            <div class="text-center py-5">
-                <i class="bi bi-chat-left-dots text-light" style="font-size: 3rem;"></i>
-                <p class="text-muted mt-2">Ще немає жодного відгуку. Будьте першим!</p>
-            </div>
+        } else {
+            <div class="text-center py-5"><i class="bi bi-chat-left-dots text-light" style="font-size: 3rem;"></i><p class="text-muted mt-2">Ще немає відгуків.</p></div>
         }
     </div>
 </div>
 
-<div class="modal fade" id="addReviewModal" tabindex="-1" aria-hidden="true">
+@* --- МОДАЛКА ВІДГУКУ --- *@
+<div class="modal fade" id="addReviewModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content" style="border-radius: 15px;">
-            <div class="modal-header border-0">
-                <h5 class="modal-title fw-bold">Ваш відгук</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
+            <div class="modal-header border-0"><h5 class="modal-title fw-bold">Ваш відгук</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
             <form asp-action="AddReview" asp-controller="Catalog" method="post">
                 <input type="hidden" name="BookId" value="@Model.BookId" />
                 <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Оцінка</label>
-                        <select name="rating" class="form-select rounded-pill">
-                            <option value="5">5 - Відмінно</option>
-                            <option value="4">4 - Добре</option>
-                            <option value="3">3 - Задовільно</option>
-                            <option value="2">2 - Погано</option>
-                            <option value="1">1 - Жахливо</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Коментар</label>
-                        <textarea name="comment" class="form-control" rows="4" placeholder="Напишіть враження..." required></textarea>
-                    </div>
+                    <div class="mb-3"><label class="form-label fw-bold">Оцінка</label><select name="rating" class="form-select rounded-pill"><option value="5">5 - Відмінно</option><option value="4">4 - Добре</option><option value="3">3 - Задовільно</option><option value="2">2 - Погано</option><option value="1">1 - Жахливо</option></select></div>
+                    <div class="mb-3"><label class="form-label fw-bold">Коментар</label><textarea name="comment" class="form-control" rows="4" placeholder="Ваші враження..." required></textarea></div>
                 </div>
-                <div class="modal-footer border-0">
-                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Скасувати</button>
-                    <button type="submit" class="btn btn-secondary rounded-pill px-4">Надіслати</button>
-                </div>
+                <div class="modal-footer border-0"><button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Скасувати</button><button type="submit" class="btn btn-secondary rounded-pill px-4">Надіслати</button></div>
             </form>
         </div>
     </div>
