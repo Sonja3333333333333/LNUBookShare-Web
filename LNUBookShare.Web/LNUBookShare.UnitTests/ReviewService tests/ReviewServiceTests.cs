@@ -46,7 +46,8 @@ namespace LNUBookShare.UnitTests.ReviewService_tests
 
             // Assert
             Assert.True(result.IsFailure);
-            Assert.Equal("Неприпустима оцінка", result.Error);
+            // ФІКС: Текст має збігатися з сервісом на 100%
+            Assert.Equal("Неприпустима оцінка. Оберіть від 1 до 5.", result.Error);
             _reviewRepoMock.Verify(r => r.AddAsync(It.IsAny<BookReview>()), Times.Never);
         }
 

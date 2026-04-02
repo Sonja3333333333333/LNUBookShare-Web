@@ -13,4 +13,6 @@ public interface IReviewService
 
     // Повертає список відгуків для виводу на сторінці
     Task<IEnumerable<BookReview>> GetBookReviewsAsync(int bookId);
+
+    Task<bool> HasUserReviewedAsync(int bookId, int userId);
 }

@@ -91,6 +91,7 @@ namespace LNUBookShare.Web.Controllers
 
             bool isInQueue = false;
             int queuePosition = 0;
+            bool hasReviewed = false; // Додаємо прапорець
             var currentUser = await _userManager.GetUserAsync(User);
 
             if (currentUser != null)
@@ -100,6 +101,9 @@ namespace LNUBookShare.Web.Controllers
                 {
                     queuePosition = await _reservationService.GetQueuePositionAsync(id, currentUser.Id);
                 }
+
+                // ПЕРЕВІРКА: чи є вже відгук від цього юзера
+                hasReviewed = await _reviewService.HasUserReviewedAsync(id, currentUser.Id);
             }
 
             ViewBag.ReturnUrl = returnUrl;
@@ -120,6 +124,7 @@ namespace LNUBookShare.Web.Controllers
                 AverageRating = avgRating,
                 IsInQueue = isInQueue,
                 QueuePosition = queuePosition,
+                HasUserReviewed = hasReviewed, // Передаємо у модель
                 FavoritedBookIds = await GetUserFavoriteIdsAsync(),
             };
 
