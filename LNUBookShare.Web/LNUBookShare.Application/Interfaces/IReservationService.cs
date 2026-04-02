@@ -1,4 +1,5 @@
 ﻿using LNUBookShare.Application.Common;
+using LNUBookShare.Domain.Entities;
 
 namespace LNUBookShare.Application.Interfaces
 {
@@ -8,5 +9,6 @@ namespace LNUBookShare.Application.Interfaces
         Task<Result> JoinQueueAsync(int bookId, int userId);
         Task<int> GetQueuePositionAsync(int bookId, int userId);
         Task<bool> IsUserInQueueAsync(int bookId, int userId);
+        Task<List<User>> GetQueueUsersAsync(int bookId);
     }
 }

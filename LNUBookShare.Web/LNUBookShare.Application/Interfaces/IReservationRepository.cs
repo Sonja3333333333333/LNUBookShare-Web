@@ -7,5 +7,7 @@ namespace LNUBookShare.Application.Interfaces
         Task AddAsync(ReservationQueue entry);
         Task<bool> ExistsAsync(int bookId, int userId);
         Task<int> GetPositionAsync(int bookId, int userId);
+
+        Task<List<User>> GetQueueUsersAsync(int bookId);
     }
 }

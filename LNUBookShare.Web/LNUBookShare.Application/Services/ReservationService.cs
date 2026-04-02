@@ -95,5 +95,23 @@ namespace LNUBookShare.Application.Services
         {
             return await _reservationRepo.ExistsAsync(bookId, userId);
         }
+
+        public async Task<List<User>> GetQueueUsersAsync(int bookId)
+        {
+            _logger.LogInformation("Отримання списку користувачів у черзі для книги з ID {BookId}", bookId);
+
+            var usersInQueue = await _reservationRepo.GetQueueUsersAsync(bookId);
+
+            if (!usersInQueue.Any())
+            {
+                _logger.LogInformation("Черга для книги з ID {BookId} порожня", bookId);
+            }
+            else
+            {
+                _logger.LogInformation("Знайдено {Count} користувачів у черзі для книги з ID {BookId}", usersInQueue.Count, bookId);
+            }
+
+            return usersInQueue;
+        }
     }
 }
