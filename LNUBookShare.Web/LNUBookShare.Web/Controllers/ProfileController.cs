@@ -2,6 +2,7 @@
 using LNUBookShare.Domain.Entities;
 using LNUBookShare.Web.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -82,6 +83,15 @@ namespace LNUBookShare.Web.Controllers
                 LastName = dto.LastName,
                 FacultyId = user.FacultyId,
                 AvatarPath = dto.AvatarPath,
+            var model = new UserProfileViewModel
+            {
+                UserId = user.Id,
+                FirstName = user.FirstName ?? "Не вказано",
+                LastName = user.LastName ?? "Не вказано",
+                Email = user.Email ?? "Не вказано",
+                FacultyName = "Прикладної математики та інформатики",
+                AvatarPath = user.Avatar?.ImagePath,
+                MyBooks = await _profileService.GetUserBooksAsync(user.Id),
             };
 
             return View(model);
@@ -95,6 +105,12 @@ namespace LNUBookShare.Web.Controllers
             {
                 await LoadFacultiesToViewBag();
                 return View(model);
+        public async Task<IActionResult> AddBook(AddBookViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                TempData["ErrorMessage"] = "Будь ласка, заповніть усі обов'язкові поля.";
+                return RedirectToAction("Index");
             }
 
             var user = await _userManager.GetUserAsync(User);
@@ -143,6 +159,162 @@ namespace LNUBookShare.Web.Controllers
         {
             var faculties = await _facultyRepository.GetAllAsync();
             ViewBag.Faculties = new SelectList(faculties, "FacultyId", "FacultyName");
+            var book = new Book
+            {
+                Title = model.Title,
+                Author = model.Author,
+                Year = model.Year,
+                Isbn = model.Isbn,
+                Publisher = model.Publisher,
+                Language = model.Language,
+                CategoryId = model.CategoryId,
+                OwnerId = user.Id,
+                Status = "available",
+                CreatedAt = DateTime.UtcNow,
+            };
+
+            if (model.CoverPhoto != null && model.CoverPhoto.Length > 0)
+            {
+                book.Cover = await SaveImageAsync(model.CoverPhoto);
+            }
+
+            var result = await _profileService.AddBookToProfileAsync(book);
+
+            if (result.IsSuccess)
+            {
+                TempData["SuccessMessage"] = "Книгу успішно додано!";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = result.Error;
+            }
+
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> EditBook(int id, AddBookViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                TempData["ErrorMessage"] = "Перевірте правильність введених даних.";
+                return RedirectToAction("Index");
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var books = await _profileService.GetUserBooksAsync(user.Id);
+            var book = books.Find(b => b.BookId == id);
+
+            if (book == null)
+            {
+                return NotFound();
+            }
+
+            book.Title = model.Title;
+            book.Author = model.Author;
+            book.Publisher = model.Publisher;
+            book.Year = model.Year;
+            book.Isbn = model.Isbn;
+            book.Language = model.Language;
+            book.CategoryId = model.CategoryId;
+
+            if (model.CoverPhoto != null && model.CoverPhoto.Length > 0)
+            {
+                book.Cover = await SaveImageAsync(model.CoverPhoto);
+            }
+
+            var result = await _profileService.UpdateBookAsync(book);
+
+            if (result.IsSuccess)
+            {
+                TempData["SuccessMessage"] = "Книгу успішно оновлено!";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = result.Error;
+            }
+
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteBook(int id)
+        {
+            if (!ModelState.IsValid)
+            {
+                return RedirectToAction("Index");
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var result = await _profileService.DeleteBookAsync(id);
+
+            if (result.IsSuccess)
+            {
+                TempData["SuccessMessage"] = "Книгу видалено.";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = result.Error;
+            }
+
+            return RedirectToAction("Index");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Queue(int bookId, [FromServices] IReservationService reservationService)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var myBooks = await _profileService.GetUserBooksAsync(user.Id);
+            var book = myBooks.FirstOrDefault(b => b.BookId == bookId);
+
+            if (book == null)
+            {
+                TempData["ErrorMessage"] = "Книгу не знайдено, або ви не є її власником.";
+                return RedirectToAction("Index");
+            }
+
+            var queueUsers = await reservationService.GetQueueUsersAsync(bookId);
+
+            ViewBag.BookTitle = book.Title;
+            return View(queueUsers);
+        }
+
+        private async Task<LNUBookShare.Domain.Entities.Image> SaveImageAsync(Microsoft.AspNetCore.Http.IFormFile file)
+        {
+            string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images", "books");
+            if (!Directory.Exists(uploadsFolder))
+            {
+                Directory.CreateDirectory(uploadsFolder);
+            }
+
+            string uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(file.FileName);
+            string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+            using (var fileStream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(fileStream);
+            }
+
+            return new LNUBookShare.Domain.Entities.Image
+            {
+                ImagePath = "/images/books/" + uniqueFileName,
+                ImageType = "Book",
+            };
         }
     }
 }

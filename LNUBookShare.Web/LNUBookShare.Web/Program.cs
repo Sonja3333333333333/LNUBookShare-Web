@@ -70,6 +70,12 @@ try
     builder.Services.AddScoped<IFavoriteRepository, FavoriteRepository>();
     builder.Services.AddScoped<IFavoriteService, FavoriteService>();
 
+    builder.Services.AddScoped<IBookDetailsService, BookDetailsService>();
+
+    builder.Services.AddScoped<IProfileService, ProfileService>();
+
+    // --- ТАСКА #57: ВІДГУКИ ТА РЕЙТИНГ ---
+    // Реєструємо репозиторій (робота з БД) та сервіс (логіка)
     // Reviews
     builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
     builder.Services.AddScoped<IReviewService, ReviewService>();
@@ -82,6 +88,8 @@ try
     builder.Services.AddScoped<IProfileRepository, ProfileRepository>();
     builder.Services.AddScoped<IProfileService, ProfileService>();
 
+    builder.Services.AddScoped<IOtherProfileRepository, OtherProfileRepository>();
+    builder.Services.AddScoped<IOtherProfileService, OtherProfileService>();
     builder.Services.AddControllersWithViews();
 
     var app = builder.Build();
@@ -89,11 +97,8 @@ try
     // --- MIDDLEWARE ---
     app.UseSerilogRequestLogging();
 
-    if (!app.Environment.IsDevelopment())
-    {
-        app.UseExceptionHandler("/Home/Error");
-        app.UseHsts();
-    }
+    app.UseExceptionHandler("/Home/Error");
+    app.UseHsts();
 
     app.UseHttpsRedirection();
     app.MapStaticAssets();
@@ -107,7 +112,7 @@ try
         pattern: "{controller=Catalog}/{action=Search}/{id?}")
         .WithStaticAssets();
 
-    app.Run();
+    await app.RunAsync();
 }
 catch (Exception ex)
 {
@@ -115,5 +120,5 @@ catch (Exception ex)
 }
 finally
 {
-    Log.CloseAndFlush();
+    await Log.CloseAndFlushAsync();
 }

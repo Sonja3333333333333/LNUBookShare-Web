@@ -1,0 +1,166 @@
+﻿@using LNUBookShare.Web.Models
+@model OtherProfileViewModel
+
+@{
+    ViewData["Title"] = "Кабінет";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-12">
+            <div class="card shadow-sm border-secondary-subtle" style="border-radius: 15px;">
+                <div class="card-body p-4 position-relative">
+                    <div class="row align-items-center">
+                        <div class="col-md-3 text-center border-end">
+                            @if (Model.Avatar != null && !string.IsNullOrEmpty(Model.Avatar.ImagePath))
+                            {
+                                <img src="@Model.Avatar.ImagePath" alt="Аватар користувача" class="rounded-circle img-fluid border shadow-sm" style="width: 150px; height: 150px; object-fit: cover;" />
+                            }
+                            else
+                            {
+                                <div class="bg-light rounded-circle d-flex align-items-center justify-content-center mx-auto border shadow-sm" style="width: 150px; height: 150px;">
+                                    <i class="bi bi-person text-secondary" style="font-size: 5rem;"></i>
+                                </div>
+                            }
+                        </div>
+
+                        <div class="col-md-6 ps-md-4 mt-4 mt-md-0">
+                            <div class="mb-3">
+                                <label class="form-label text-muted small fw-bold mb-1">Прізвище, Ім'я</label>
+                                <div class="form-control bg-light border-secondary-subtle">
+                                    @Model.LastName @Model.FirstName
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label text-muted small fw-bold mb-1">Email</label>
+                                <div class="form-control bg-light border-secondary-subtle">
+                                    @Model.Email
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label text-muted small fw-bold mb-1">Факультет</label>
+                                <div class="form-control bg-light border-secondary-subtle">
+                                    @Model.Faculty
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 mt-5 mb-4 text-center">
+                <h2 class="fw-bold text-dark">Книги користувача</h2>
+            </div>
+
+            <form asp-controller="OtherProfile" asp-action="Index" method="get" class="mb-4">
+                <input type="hidden" name="userId" value="@Model.UserId" />
+                
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 pb-3 border-bottom border-secondary-subtle">
+                    
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="text-muted small">Сортувати за:</span>
+                        <select name="sortBy" class="form-select form-select-sm border-secondary-subtle bg-light" style="width: 140px;" onchange="this.form.submit()">
+                            <option value="title" selected="@(Model.SortBy == "title")">Назва</option>
+                            <option value="author" selected="@(Model.SortBy == "author")">Автор</option>
+                            <option value="year" selected="@(Model.SortBy == "year")">Рік видання</option>
+                        </select>
+                    </div>
+
+                    <div class="d-flex gap-3 align-items-center">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="statusFilter" id="statusAll" value="all"
+                                   checked="@(Model.StatusFilter == "all" || string.IsNullOrEmpty(Model.StatusFilter))" onchange="this.form.submit()">
+                            <label class="form-check-label text-muted small" for="statusAll">Всі</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="statusFilter" id="statusAvail" value="available"
+                                   checked="@(Model.StatusFilter == "available")" onchange="this.form.submit()">
+                            <label class="form-check-label text-muted small" for="statusAvail">Доступно</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="statusFilter" id="statusBorrowed" value="borrowed"
+                                   checked="@(Model.StatusFilter == "borrowed")" onchange="this.form.submit()">
+                            <label class="form-check-label text-muted small" for="statusBorrowed">Видано</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="statusFilter" id="statusReserved" value="reserved"
+                                   checked="@(Model.StatusFilter == "reserved")" onchange="this.form.submit()">
+                            <label class="form-check-label text-muted small" for="statusReserved">Заброньовано</label>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <div class="book-list">
+                @if (Model.Books != null && Model.Books.Any())
+                {
+                    @foreach (var book in Model.Books)
+                    {
+                        <div class="card mb-3 shadow-sm border-0 bg-white" style="border-radius: 12px; border: 1px solid #e0e0e0 !important; overflow: hidden;">
+                            <div class="row g-0 align-items-center">
+                                <div class="col-md-3 text-center bg-light d-flex align-items-center justify-content-center p-0" style="height: 160px; border-right: 1px solid #e0e0e0; overflow: hidden;">
+                                    @if (book.Cover != null && !string.IsNullOrEmpty(book.Cover.ImagePath))
+                                    {
+                                        <img src="@book.Cover.ImagePath" alt="Обкладинка" style="height: 100%; width: 100%; object-fit: cover;" />
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-image text-secondary" style="font-size: 3rem;"></i>
+                                    }
+                                </div>
+                    
+                                <div class="col-md-9 position-relative">
+                                    <div class="card-body">
+                                        <div class="position-absolute top-0 end-0 mt-2 me-2">
+                                            <partial name="_FavoriteButton" model="(book.BookId, Model.FavoritedBookIds.Contains(book.BookId), Context.Request.Path + Context.Request.QueryString)" />
+                                        </div>
+                                        <h5 class="card-title pe-5 mb-3">
+                                            <a asp-controller="Catalog"
+                                                   asp-action="Details"
+                                                   asp-route-id="@book.BookId"
+                                                   asp-route-returnUrl="@(Context.Request.Path + Context.Request.QueryString)"
+                                                   class="fw-bold link-dark-hover text-decoration-none text-dark" title="Переглянути деталі">
+                                                @book.Title
+                                            </a>
+                                        </h5>
+                                        <p class="card-text mb-1 text-muted" style="font-size: 0.9rem;">
+                                            Автор: <span class="text-dark">@book.Author</span>
+                                        </p>
+                                        <p class="card-text mb-1 text-muted" style="font-size: 0.9rem;">
+                                            Статус: <span class="text-dark">
+                                            @(book.Status switch
+                                            {
+                                                "available" => "Доступно",
+                                                "reserved" => "Заброньовано",
+                                                "borrowed" => "Видано",
+                                                _ => book.Status
+                                            })
+                                        </span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+                else if (Model.StatusFilter != "all" && !string.IsNullOrEmpty(Model.StatusFilter))
+            {
+                <div class="text-center py-4 text-muted">
+                    <i class="bi bi-search mb-2" style="font-size: 2rem;"></i>
+                    <p>За обраним фільтром книг не знайдено</p>
+                </div>
+            }
+            else 
+            {
+                <div class="text-center py-5 bg-light rounded-4 border border-secondary-subtle shadow-sm mt-3">
+                    <div class="mb-3">
+                        <i class="bi bi-journal-x text-secondary-subtle" style="font-size: 5rem;"></i>
+                    </div>
+                    <h4 class="text-secondary fw-bold">У цього користувача ще немає книг</h4>
+                    <p class="text-muted">Як тільки користувач додасть книги до своєї колекції, вони з'являться тут.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+</div>

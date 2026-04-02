@@ -35,5 +35,18 @@ namespace LNUBookShare.Infrastructure.Repositories
 
             return queue.IndexOf(userId) + 1;
         }
+
+        public async Task<List<User>> GetQueueUsersAsync(int bookId)
+        {
+            return await _context.ReservationQueues
+                .Where(q => q.BookId == bookId)
+                .OrderBy(q => q.CreatedAt)
+                .Join(
+                    _context.Users.Include(u => u.Avatar),
+                    rq => rq.UserId,
+                    u => u.Id,
+                    (rq, u) => u)
+                .ToListAsync();
+        }
     }
 }
