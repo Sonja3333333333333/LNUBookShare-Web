@@ -1,4 +1,6 @@
-﻿namespace LNUBookShare.Web.Models
+﻿using LNUBookShare.Domain.Entities;
+
+namespace LNUBookShare.Web.Models
 {
     public class UserProfileViewModel
     {
@@ -8,5 +10,6 @@
         public string Email { get; set; } = string.Empty;
         public string FacultyName { get; set; } = string.Empty;
         public string? AvatarPath { get; set; }
+        public List<Book> MyBooks { get; set; } = new List<Book>();
     }
 }
