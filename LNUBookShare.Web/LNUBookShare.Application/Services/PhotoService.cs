@@ -42,7 +42,7 @@ namespace LNUBookShare.Application.Services
                 return Result<string>.Failure(uploadResult.Error.Message);
             }
 
-            return Result<string>.Success(uploadResult.SecureUrl.ToString());
+            return uploadResult.SecureUrl.ToString();
         }
     }
 }

@@ -52,7 +52,7 @@ namespace LNUBookShare.Web.Controllers
                 Email = dto.Email,
                 FacultyName = dto.FacultyName,
                 AvatarPath = dto.AvatarPath,
-                MyBooks = await _profileService.GetUserBooksAsync(user.Id),
+                MyBooks = (await _profileService.GetUserBooksAsync(user.Id)).Value,
             };
 
             return View(model);
@@ -200,7 +200,8 @@ namespace LNUBookShare.Web.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
-            var books = await _profileService.GetUserBooksAsync(user.Id);
+            var booksResult = await _profileService.GetUserBooksAsync(user.Id);
+            var books = booksResult.IsSuccess ? booksResult.Value : new List<Book>();
             var book = books.Find(b => b.BookId == id);
 
             if (book == null)
@@ -272,7 +273,9 @@ namespace LNUBookShare.Web.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
-            var myBooks = await _profileService.GetUserBooksAsync(user.Id);
+            var myBooksResult = await _profileService.GetUserBooksAsync(user.Id);
+            var myBooks = myBooksResult.IsSuccess ? myBooksResult.Value : new List<Book>();
+
             var book = myBooks.FirstOrDefault(b => b.BookId == bookId);
 
             if (book == null)

@@ -10,7 +10,7 @@ namespace LNUBookShare.Application.Interfaces
 
         Task<Result> AddBookToProfileAsync(Book book);
 
-        Task<List<Book>> GetUserBooksAsync(int userId);
+        Task<Result<List<Book>>> GetUserBooksAsync(int userId);
 
         Task<Result> UpdateBookAsync(Book book);
 

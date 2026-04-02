@@ -36,21 +36,25 @@ public class ReviewService : IReviewService
             ReviewerId = userId,
             Rating = rating,
             Comment = comment,
-            CreatedAt = DateTime.UtcNow, // Додав кому тут (SA1413)
+            CreatedAt = DateTime.UtcNow,
         };
 
         await _reviewRepo.AddAsync(review);
         return Result.Success();
     }
 
-    public async Task<double> CalculateAverageRatingAsync(int bookId)
+    public async Task<Result<double>> CalculateAverageRatingAsync(int bookId)
     {
         var reviews = await _reviewRepo.GetByBookIdAsync(bookId);
-        return reviews.Any() ? Math.Round(reviews.Average(r => r.Rating), 1) : 0.0;
+        var average = reviews.Any() ? Math.Round(reviews.Average(r => r.Rating), 1) : 0.0;
+
+        return average;
     }
 
-    public async Task<IEnumerable<BookReview>> GetBookReviewsAsync(int bookId)
+    public async Task<Result<IEnumerable<BookReview>>> GetBookReviewsAsync(int bookId)
     {
-        return await _reviewRepo.GetByBookIdAsync(bookId);
+        var reviews = await _reviewRepo.GetByBookIdAsync(bookId);
+
+        return Result<IEnumerable<BookReview>>.Success(reviews);
     }
 }
