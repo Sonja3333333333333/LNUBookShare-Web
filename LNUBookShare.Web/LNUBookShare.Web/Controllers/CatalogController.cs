@@ -2,11 +2,7 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-using System.Globalization;
-using System.Security.Claims;
-using LNUBookShare.Application.Common;
 using LNUBookShare.Application.Interfaces;
-using LNUBookShare.Application.Services;
 using LNUBookShare.Domain.Entities;
 using LNUBookShare.Web.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -23,7 +19,8 @@ namespace LNUBookShare.Web.Controllers
         private readonly UserManager<User> _userManager;
         private readonly IFavoriteService _favoriteService;
         private readonly IBookDetailsService _bookDetailsService;
-        private readonly IReviewService _reviewService; // Додаємо наш сервіс відгуків
+        private readonly IReviewService _reviewService;
+        private readonly IReservationService _reservationService;
 
         public CatalogController(
             IBookSearchService searchService,
@@ -31,7 +28,8 @@ namespace LNUBookShare.Web.Controllers
             UserManager<User> userManager,
             IFavoriteService favoriteService,
             IBookDetailsService bookDetailsService,
-            IReviewService reviewService) // Ін'єктуємо сюди
+            IReviewService reviewService,
+            IReservationService reservationService)
         {
             _searchService = searchService;
             _logger = logger;
@@ -39,8 +37,10 @@ namespace LNUBookShare.Web.Controllers
             _favoriteService = favoriteService;
             _bookDetailsService = bookDetailsService;
             _reviewService = reviewService;
+            _reservationService = reservationService;
         }
 
+        [HttpGet]
         public async Task<IActionResult> Search(string query, string searchBy = "title", string sortBy = "title", string statusFilter = "all")
         {
             IEnumerable<Book> results;
@@ -49,7 +49,6 @@ namespace LNUBookShare.Web.Controllers
             if (!string.IsNullOrWhiteSpace(query))
             {
                 results = await _searchService.SearchAsync(query, searchBy, sortBy, statusFilter);
-                _logger.LogInformation("Пошук: {Query}", query);
             }
             else
             {
@@ -77,41 +76,102 @@ namespace LNUBookShare.Web.Controllers
             return View(model);
         }
 
+        [HttpGet]
         public async Task<IActionResult> Details(int id, string? returnUrl = null)
         {
             var bookResult = await _bookDetailsService.GetBookDetailsAsync(id);
-
             if (bookResult.IsFailure)
             {
                 return NotFound(bookResult.Error);
             }
 
-            var results = bookResult.Value;
-
-            // Отримуємо актуальний середній рейтинг через наш новий сервіс
+            var book = bookResult.Value;
             var avgRating = await _reviewService.CalculateAverageRatingAsync(id);
             var reviews = await _reviewService.GetBookReviewsAsync(id);
+
+            bool isInQueue = false;
+            int queuePosition = 0;
+            var currentUser = await _userManager.GetUserAsync(User);
+
+            if (currentUser != null)
+            {
+                isInQueue = await _reservationService.IsUserInQueueAsync(id, currentUser.Id);
+                if (isInQueue)
+                {
+                    queuePosition = await _reservationService.GetQueuePositionAsync(id, currentUser.Id);
+                }
+            }
 
             ViewBag.ReturnUrl = returnUrl;
 
             var model = new BookDetailsViewModel
             {
-                BookId = results.BookId,
-                Title = results.Title,
-                Author = results.Author,
-                Owner = results.Owner,
-                Status = results.Status,
-                BookReviews = reviews, // Використовуємо список із сервісу
-                AverageRating = avgRating, // Використовуємо рейтинг із сервісу
-                Category = results.Category,
-                Language = results.Language,
-                Publisher = results.Publisher,
-                Isbn = results.Isbn,
-                Cover = results.Cover,
+                BookId = book.BookId,
+                Title = book.Title,
+                Author = book.Author,
+                Owner = book.Owner,
+                Status = book.Status,
+                Category = book.Category,
+                Language = book.Language,
+                Publisher = book.Publisher,
+                Isbn = book.Isbn,
+                Cover = book.Cover,
+                BookReviews = reviews,
+                AverageRating = avgRating,
+                IsInQueue = isInQueue,
+                QueuePosition = queuePosition,
                 FavoritedBookIds = await GetUserFavoriteIdsAsync(),
             };
 
             return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Reserve(int bookId)
+        {
+            var userIdString = _userManager.GetUserId(User);
+            if (string.IsNullOrEmpty(userIdString))
+            {
+                return Unauthorized();
+            }
+
+            var result = await _reservationService.ReserveBookAsync(bookId, int.Parse(userIdString));
+
+            if (result.IsSuccess)
+            {
+                TempData["SuccessMessage"] = "Ви успішно забронювали книгу!";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = result.Error;
+            }
+
+            return RedirectToAction(nameof(Details), new { id = bookId });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> JoinQueue(int bookId)
+        {
+            var userIdString = _userManager.GetUserId(User);
+            if (string.IsNullOrEmpty(userIdString))
+            {
+                return Unauthorized();
+            }
+
+            var result = await _reservationService.JoinQueueAsync(bookId, int.Parse(userIdString));
+
+            if (result.IsSuccess)
+            {
+                TempData["SuccessMessage"] = "Ви успішно стали в чергу!";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = result.Error;
+            }
+
+            return RedirectToAction(nameof(Details), new { id = bookId });
         }
 
         [HttpPost]
@@ -124,18 +184,15 @@ namespace LNUBookShare.Web.Controllers
                 return Unauthorized();
             }
 
-            int userId = int.Parse(userIdString);
+            var result = await _reviewService.AddReviewAsync(bookId, int.Parse(userIdString), rating, comment);
 
-            // Викликаємо логіку сервісу (валідація 1-5 та логування там уже є)
-            var result = await _reviewService.AddReviewAsync(bookId, userId, rating, comment);
-
-            if (!result.IsSuccess)
+            if (result.IsSuccess)
             {
-                TempData["ErrorMessage"] = result.Error;
+                TempData["SuccessMessage"] = "Ваш відгук додано!";
             }
             else
             {
-                TempData["SuccessMessage"] = "Ваш відгук успішно додано!";
+                TempData["ErrorMessage"] = result.Error;
             }
 
             return RedirectToAction(nameof(Details), new { id = bookId });
