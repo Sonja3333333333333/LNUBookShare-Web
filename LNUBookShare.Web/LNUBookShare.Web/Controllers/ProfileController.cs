@@ -177,6 +177,30 @@ namespace LNUBookShare.Web.Controllers
             return RedirectToAction("Index");
         }
 
+        [HttpGet]
+        public async Task<IActionResult> Queue(int bookId, [FromServices] IReservationService reservationService)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var myBooks = await _profileService.GetUserBooksAsync(user.Id);
+            var book = myBooks.FirstOrDefault(b => b.BookId == bookId);
+
+            if (book == null)
+            {
+                TempData["ErrorMessage"] = "Книгу не знайдено, або ви не є її власником.";
+                return RedirectToAction("Index");
+            }
+
+            var queueUsers = await reservationService.GetQueueUsersAsync(bookId);
+
+            ViewBag.BookTitle = book.Title;
+            return View(queueUsers);
+        }
+
         private async Task<LNUBookShare.Domain.Entities.Image> SaveImageAsync(Microsoft.AspNetCore.Http.IFormFile file)
         {
             string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images", "books");

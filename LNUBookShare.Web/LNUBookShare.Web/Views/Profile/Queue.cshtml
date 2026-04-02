@@ -1,0 +1,48 @@
+﻿@model List<LNUBookShare.Domain.Entities.User>
+@{
+    ViewData["Title"] = "Черга на книгу";
+}
+<div class="container mt-4">
+
+    <div class="mb-4 mt-3">
+        <a href="javascript:history.back()" class="btn btn-outline-secondary px-4 py-2" style="border-radius: 10px;">
+            <i class="bi bi-arrow-left me-2"></i> Повернутися назад
+        </a>
+    </div>
+
+    <div class="container mt-4" style="max-width: 600px;">
+        <div class="card shadow-sm border-0" style="border-radius: 12px; overflow: hidden;">
+            <ul class="list-group list-group-flush">
+                @if (Model != null && Model.Any())
+                {
+                    @foreach (var user in Model)
+                    {
+                        <li class="list-group-item d-flex align-items-center gap-3 py-3 px-4">
+                            @if (user.Avatar != null && !string.IsNullOrEmpty(user.Avatar.ImagePath))
+                            {
+                                <img src="@user.Avatar.ImagePath" class="rounded-circle border shadow-sm" style="width: 45px; height: 45px; object-fit: cover;" />
+                            }
+                            else
+                            {
+                                <div class="bg-light rounded-circle d-flex align-items-center justify-content-center border shadow-sm" style="width: 45px; height: 45px;">
+                                    <i class="bi bi-person text-secondary fs-5"></i>
+                                </div>
+                            }
+                        
+                            <span class="fw-bold text-dark">
+                                @(string.IsNullOrWhiteSpace(user.FirstName) ? "Користувач" : $"{user.FirstName} {user.LastName}")
+                            </span>
+                        </li>
+                    }
+                }
+                else
+                {
+                    <li class="list-group-item text-center text-muted py-5">
+                        <i class="bi bi-emoji-frown fs-1 d-block mb-2 text-light"></i>
+                        Черга на цю книгу наразі порожня.
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+</div>

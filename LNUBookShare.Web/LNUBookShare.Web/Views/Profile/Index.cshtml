@@ -149,7 +149,10 @@
                             </p>
 
                                 <div class="mt-3">
-                                    <button class="btn btn-sm btn-outline-secondary px-4" style="border-radius: 8px;">Переглянути чергу</button>
+            
+                                    <a asp-controller="Profile" asp-action="Queue" asp-route-bookId="@book.BookId" class="btn btn-sm btn-outline-secondary px-4" style="border-radius: 8px;">
+    Переглянути чергу
+</a>
                                 </div>
                             </div>
                         </div>
