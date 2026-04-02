@@ -122,12 +122,21 @@
                                             </a>
                                         </h5>
 
+                                        
                                         <p class="card-text mb-1 text-muted" style="font-size: 0.9rem;">
                                             Автор: <span class="text-dark">@book.Author</span>
                                         </p>
             
                                         <p class="card-text mb-1 text-muted" style="font-size: 0.9rem;">
-                                            Власник: <span class="text-dark">@(book.Owner?.FirstName ?? "Невідомо") @(book.Owner?.LastName ?? "")</span>
+                                            Власник:
+                                            <a asp-controller="OtherProfile"
+                                                   asp-action="Index"
+                                                   asp-route-userId="@book.Owner?.Id"
+                                                   class="text-primary link-dark-hover text-decoration-none fw-medium"
+                                                   style="font-size: 0.9rem;"
+                                                   title="Переглянути профіль">
+                                                @(book.Owner?.FirstName ?? "Невідомо") @(book.Owner?.LastName ?? "")
+                                            </a>
                                         </p>
             
                                         <p class="card-text mb-1 text-muted" style="font-size: 0.9rem;">

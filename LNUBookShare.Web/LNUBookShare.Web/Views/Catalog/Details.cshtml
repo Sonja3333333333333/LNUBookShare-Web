@@ -56,6 +56,71 @@
             <div class="col-md-6 ps-md-4">
                 <table class="table table-borderless table-sm m-0 align-middle">
                     <tbody>
+                        <tr>
+                            <td class="text-dark fw-bold pe-3" style="width: 25%;">Назва</td>
+                            <td class="fw-bold fs-5 text-dark">@Model.Title</td>
+                        </tr>
+                        <tr>
+                            <td class="text-dark fw-bold pe-3">Автор</td>
+                            <td>@Model.Author</td>
+                        </tr>
+                        <tr>
+                            <td class="text-dark fw-bold pe-3">Власник</td>
+                            <td>
+                                <p class="card-text mb-1 text-muted" style="font-size: 0.9rem;">
+                                    <a asp-controller="OtherProfile"
+                                           asp-action="Index"
+                                           asp-route-userId="@Model.Owner?.Id"
+                                           class="text-primary link-dark-hover text-decoration-none fw-medium"
+                                           style="font-size: 0.9rem;"
+                                           title="Переглянути профіль">
+                                        @(Model.Owner?.FirstName ?? "Невідомо") @(Model.Owner?.LastName ?? "")
+                                    </a>
+                                </p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-dark fw-bold pe-3">Статус</td>
+                            <td>
+                                @(Model.Status switch
+                                {
+                                    "available" => "Доступно",
+                                    "reserved" => "Заброньовано",
+                                    "borrowed" => "Видано",
+                                    _ => Model.Status
+                                })
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-dark fw-bold pe-3">Рейтинг</td>
+                            <td>
+                                @for (int i = 0; i < fullStars; i++)
+                                {
+                                    <i class="bi bi-star-fill text-warning"></i>
+                                }
+                                @for (int i = 0; i < emptyStars; i++)
+                                {
+                                    <i class="bi bi-star text-warning"></i>
+                                }
+                                <span class="ms-1 text-secondary">(@Model.AverageRating.ToString("0.0"))</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-dark fw-bold pe-3">Категорія</td>
+                            <td>@(Model.Category?.CategoryName ?? "Невідомо")</td>
+                        </tr>
+                        <tr>
+                            <td class="text-dark fw-bold pe-3">Мова</td>
+                            <td>@Model.Language</td>
+                        </tr>
+                        <tr>
+                            <td class="text-dark fw-bold pe-3">Видання</td>
+                            <td>@Model.Publisher</td>
+                        </tr>
+                        <tr>
+                            <td class="text-dark fw-bold pe-3">ISBN</td>
+                            <td>@Model.Isbn</td>
+                        </tr>
                         <tr><td class="text-dark fw-bold" style="width: 25%;">Назва</td><td class="fw-bold fs-5">@Model.Title</td></tr>
                         <tr><td class="text-dark fw-bold">Автор</td><td>@Model.Author</td></tr>
                         <tr><td class="text-dark fw-bold">Власник</td><td>@(Model.Owner?.FirstName ?? "Невідомо") @(Model.Owner?.LastName ?? "")</td></tr>

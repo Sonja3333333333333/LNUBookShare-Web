@@ -88,6 +88,8 @@ try
     builder.Services.AddScoped<IProfileRepository, ProfileRepository>();
     builder.Services.AddScoped<IProfileService, ProfileService>();
 
+    builder.Services.AddScoped<IOtherProfileRepository, OtherProfileRepository>();
+    builder.Services.AddScoped<IOtherProfileService, OtherProfileService>();
     builder.Services.AddControllersWithViews();
 
     var app = builder.Build();
