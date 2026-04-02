@@ -2,7 +2,6 @@
 using LNUBookShare.Domain.Entities;
 using LNUBookShare.Web.Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -15,18 +14,18 @@ namespace LNUBookShare.Web.Controllers
         private readonly UserManager<User> _userManager;
         private readonly IProfileService _profileService;
         private readonly IFacultyRepository _facultyRepository;
-        private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly IPhotoService _photoService; // Додаємо наш новий сервіс
 
         public ProfileController(
             UserManager<User> userManager,
             IProfileService profileService,
             IFacultyRepository facultyRepository,
-            IWebHostEnvironment webHostEnvironment)
+            IPhotoService photoService) // IWebHostEnvironment більше не потрібен!
         {
             _userManager = userManager;
             _profileService = profileService;
             _facultyRepository = facultyRepository;
-            _webHostEnvironment = webHostEnvironment;
+            _photoService = photoService;
         }
 
         [HttpGet]
@@ -109,18 +108,15 @@ namespace LNUBookShare.Web.Controllers
 
             if (model.AvatarFile != null && model.AvatarFile.Length > 0)
             {
-                var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images", "avatars");
-                Directory.CreateDirectory(uploadsFolder);
-
-                var uniqueFileName = $"{user.Id}_{Guid.NewGuid()}{Path.GetExtension(model.AvatarFile.FileName)}";
-                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                using (var stream = new FileStream(filePath, FileMode.Create))
+                var photoResult = await _photoService.AddPhotoAsync(model.AvatarFile, "avatars");
+                if (photoResult.IsSuccess)
                 {
-                    await model.AvatarFile.CopyToAsync(stream);
+                    newAvatarPath = photoResult.Value;
                 }
-
-                newAvatarPath = $"/images/avatars/{uniqueFileName}";
+                else
+                {
+                    TempData["ErrorMessage"] = "Помилка завантаження фото: " + photoResult.Error;
+                }
             }
 
             var result = await _profileService.UpdateProfileAsync(
@@ -299,23 +295,11 @@ namespace LNUBookShare.Web.Controllers
 
         private async Task<LNUBookShare.Domain.Entities.Image> SaveImageAsync(Microsoft.AspNetCore.Http.IFormFile file)
         {
-            string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images", "books");
-            if (!Directory.Exists(uploadsFolder))
-            {
-                Directory.CreateDirectory(uploadsFolder);
-            }
-
-            string uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(file.FileName);
-            string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-            using (var fileStream = new FileStream(filePath, FileMode.Create))
-            {
-                await file.CopyToAsync(fileStream);
-            }
+            var photoResult = await _photoService.AddPhotoAsync(file, "books");
 
             return new LNUBookShare.Domain.Entities.Image
             {
-                ImagePath = "/images/books/" + uniqueFileName,
+                ImagePath = photoResult.Value,
                 ImageType = "Book",
             };
         }
