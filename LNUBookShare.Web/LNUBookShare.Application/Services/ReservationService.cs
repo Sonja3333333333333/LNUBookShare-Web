@@ -39,11 +39,9 @@ namespace LNUBookShare.Application.Services
                 return Result.Failure("Ви не можете бронювати власну книгу.");
             }
 
-            // 1. Змінюємо статус книги
             book.Status = "reserved";
             await _bookRepo.UpdateAsync(book);
 
-            // 2. Додаємо першого юзера в чергу
             var entry = new ReservationQueue
             {
                 BookId = bookId,
@@ -86,17 +84,17 @@ namespace LNUBookShare.Application.Services
             return Result.Success();
         }
 
-        public async Task<int> GetQueuePositionAsync(int bookId, int userId)
+        public async Task<Result<int>> GetQueuePositionAsync(int bookId, int userId)
         {
             return await _reservationRepo.GetPositionAsync(bookId, userId);
         }
 
-        public async Task<bool> IsUserInQueueAsync(int bookId, int userId)
+        public async Task<Result<bool>> IsUserInQueueAsync(int bookId, int userId)
         {
             return await _reservationRepo.ExistsAsync(bookId, userId);
         }
 
-        public async Task<List<User>> GetQueueUsersAsync(int bookId)
+        public async Task<Result<List<User>>> GetQueueUsersAsync(int bookId)
         {
             _logger.LogInformation("Отримання списку користувачів у черзі для книги з ID {BookId}", bookId);
 

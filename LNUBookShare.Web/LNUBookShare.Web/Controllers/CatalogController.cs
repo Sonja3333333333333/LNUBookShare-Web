@@ -48,18 +48,21 @@ namespace LNUBookShare.Web.Controllers
 
             if (!string.IsNullOrWhiteSpace(query))
             {
-                results = await _searchService.SearchAsync(query, searchBy, sortBy, statusFilter);
+                var searchResult = await _searchService.SearchAsync(query, searchBy, sortBy, statusFilter);
+                results = searchResult.IsSuccess ? searchResult.Value : Enumerable.Empty<Book>();
             }
             else
             {
                 if (currentUser != null)
                 {
-                    results = await _searchService.GetRecommendationsAsync(currentUser.FacultyId, currentUser.Id, sortBy, statusFilter);
+                    var recResult = await _searchService.GetRecommendationsAsync(currentUser.FacultyId, currentUser.Id, sortBy, statusFilter);
+                    results = recResult.IsSuccess ? recResult.Value : Enumerable.Empty<Book>();
                     ViewBag.IsRecommendation = true;
                 }
                 else
                 {
-                    results = await _searchService.SearchAsync(string.Empty, "title", sortBy, statusFilter);
+                    var searchResult = await _searchService.SearchAsync(string.Empty, "title", sortBy, statusFilter);
+                    results = searchResult.IsSuccess ? searchResult.Value : Enumerable.Empty<Book>();
                 }
             }
 
@@ -86,8 +89,12 @@ namespace LNUBookShare.Web.Controllers
             }
 
             var book = bookResult.Value;
-            var avgRating = await _reviewService.CalculateAverageRatingAsync(id);
-            var reviews = await _reviewService.GetBookReviewsAsync(id);
+
+            var avgRatingResult = await _reviewService.CalculateAverageRatingAsync(id);
+            var avgRating = avgRatingResult.IsSuccess ? avgRatingResult.Value : 0.0;
+
+            var reviewsResult = await _reviewService.GetBookReviewsAsync(id);
+            var reviews = reviewsResult.IsSuccess ? reviewsResult.Value : Enumerable.Empty<BookReview>();
 
             bool isInQueue = false;
             int queuePosition = 0;
@@ -95,10 +102,12 @@ namespace LNUBookShare.Web.Controllers
 
             if (currentUser != null)
             {
-                isInQueue = await _reservationService.IsUserInQueueAsync(id, currentUser.Id);
+                var queueStatusResult = await _reservationService.IsUserInQueueAsync(id, currentUser.Id);
+                isInQueue = queueStatusResult.IsSuccess && queueStatusResult.Value;
                 if (isInQueue)
                 {
-                    queuePosition = await _reservationService.GetQueuePositionAsync(id, currentUser.Id);
+                    var positionResult = await _reservationService.GetQueuePositionAsync(id, currentUser.Id);
+                    queuePosition = positionResult.IsSuccess ? positionResult.Value : 0;
                 }
             }
 

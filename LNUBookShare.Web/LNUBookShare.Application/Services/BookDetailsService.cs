@@ -27,7 +27,7 @@ namespace LNUBookShare.Application.Services
             }
 
             _logger.LogInformation("Успішно отримано деталі для книги з ID: {BookId}", book_id);
-            return Result<Book>.Success(book);
+            return book;
         }
     }
 }
