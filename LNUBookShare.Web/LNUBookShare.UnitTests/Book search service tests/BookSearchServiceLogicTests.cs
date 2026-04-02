@@ -1,6 +1,9 @@
 ﻿using Moq;
 using Xunit;
 using LNUBookShare.Domain.Entities;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace LNUBookShare.UnitTests.BookSearchTests;
 
@@ -13,12 +16,15 @@ public class BookSearchServiceLogicTests : BookSearchServiceTestBase
     public async Task SearchAsync_WhenQueryIsEmpty_ShouldReturnEmptyList_WithoutCallingRepo(string? emptyQuery)
     {
         // Act
-        // Навіть якщо query криве, сервіс має зреагувати
         var result = await _searchService.SearchAsync(emptyQuery!);
 
+        // Дістаємо сам список із результату
+        var books = result.Value;
+
         // Assert
-        Assert.NotNull(result);
-        Assert.Empty(result);
+        Assert.True(result.IsSuccess); // Перевіряємо, що статус успішний
+        Assert.NotNull(books);
+        Assert.Empty(books); // Тепер Assert.Empty працює зі списком!
 
         // Перевіряємо, що репозиторій навіть не смикали (економія ресурсів!)
         _bookRepoMock.Verify(r => r.SearchBooksAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
@@ -35,10 +41,12 @@ public class BookSearchServiceLogicTests : BookSearchServiceTestBase
 
         // Act
         var result = await _searchService.SearchAsync(query);
+        var books = result.Value; // Дістаємо список
 
         // Assert
-        Assert.NotNull(result);
-        Assert.Empty(result);
+        Assert.True(result.IsSuccess);
+        Assert.NotNull(books);
+        Assert.Empty(books);
     }
 
     [Fact]
@@ -58,10 +66,12 @@ public class BookSearchServiceLogicTests : BookSearchServiceTestBase
 
         // Act
         var result = await _searchService.SearchAsync(query);
+        var books = result.Value; // Дістаємо список
 
         // Assert
-        Assert.Equal(2, result.Count());
-        Assert.Contains(result, b => b.Title == "C# in Depth");
+        Assert.True(result.IsSuccess);
+        Assert.Equal(2, books.Count());
+        Assert.Contains(books, b => b.Title == "C# in Depth");
     }
 
     [Fact]
@@ -78,9 +88,11 @@ public class BookSearchServiceLogicTests : BookSearchServiceTestBase
 
         // Act
         var result = await _searchService.SearchAsync(query, "title", "title", status);
+        var books = result.Value; // Дістаємо список
 
         // Assert
-        Assert.Single(result); // Має бути рівно 1 книга
-        Assert.All(result, b => Assert.Equal("available", b.Status));
+        Assert.True(result.IsSuccess);
+        Assert.Single(books); // Має бути рівно 1 книга
+        Assert.All(books, b => Assert.Equal("available", b.Status));
     }
 }
