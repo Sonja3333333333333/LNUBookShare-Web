@@ -25,7 +25,17 @@
             </a>
             <div class="row align-items-center">
                 <div class="col-md-3 text-center border-end border-secondary-subtle">
-                    <img src="@(Model.AvatarPath ?? "/images/default-avatar.png")" class="rounded-circle border shadow-sm" style="width: 140px; height: 140px; object-fit: cover;" />
+                    @if (!string.IsNullOrEmpty(Model.AvatarPath))
+                    {
+                        <img src="@Model.AvatarPath" alt="Аватар користувача" class="rounded-circle border shadow-sm" style="width: 140px; height: 140px; object-fit: cover;" />
+                    }
+                    else
+                    {
+                        <div class="bg-light rounded-circle d-flex align-items-center justify-content-center mx-auto border shadow-sm"
+                             style="width: 140px; height: 140px;">
+                            <i class="bi bi-person text-secondary" style="font-size: 5rem;"></i>
+                        </div>
+                    }
                 </div>
                 <div class="col-md-9 ps-md-4">
                     <div class="mb-2">
@@ -101,6 +111,7 @@
                                             data-year="@book.Year"
                                             data-isbn="@book.Isbn"
                                             data-category="@book.CategoryId"
+                                            data-language="@book.Language"
                                             data-bs-toggle="modal" data-bs-target="#editBookModal">
                                         <i class="bi bi-pencil fs-5"></i>
                                     </button>
@@ -113,19 +124,29 @@
                                     </button>
                                 </div>
 
-                                <h5 class="card-title pe-5 mb-3 fw-bold text-dark">@book.Title</h5>
+                                <h5 class="card-title pe-5 mb-3">
+                                    <a asp-controller="Catalog"
+                                           asp-action="Details"
+                                           asp-route-id="@book.BookId"
+                                           asp-route-returnUrl="@(Context.Request.Path + Context.Request.QueryString)"
+                                           class="fw-bold link-dark-hover text-decoration-none text-dark" title="Переглянути деталі">
+                                        @book.Title
+                                    </a>
+                                </h5>
                                 <p class="card-text mb-1 text-muted" style="font-size: 0.9rem;">
                                     Автор: <span class="text-dark">@book.Author</span>
                                 </p>
-                                @if (!string.IsNullOrEmpty(book.Publisher))
-                                {
-                                    <p class="card-text mb-1 text-muted" style="font-size: 0.9rem;">
-                                        Видавництво: <span class="text-dark">@book.Publisher</span>
-                                    </p>
-                                }
                                 <p class="card-text mb-0 text-muted" style="font-size: 0.9rem;">
-                                    Статус: <span class="text-dark">@book.Status</span>
-                                </p>
+                                    Статус: <span class="text-dark">
+                                    @(book.Status?.ToLower() switch
+                                    {
+                                        "available" => "Доступно",
+                                        "reserved" => "Заброньовано",
+                                        "borrowed" => "Видано",
+                                        _ => book.Status 
+                                    })
+                                </span>
+                            </p>
 
                                 <div class="mt-3">
                                     <button class="btn btn-sm btn-outline-secondary px-4" style="border-radius: 8px;">Переглянути чергу</button>
@@ -179,6 +200,10 @@
                         <div class="form-label small fw-bold text-muted">ISBN</div>
                         <input name="Isbn" class="form-control border-secondary-subtle" />
                     </div>
+                    <div class="mb-3">
+                        <div class="form-label small fw-bold text-muted">Мова</div>
+                        <input name="Language" class="form-control border-secondary-subtle" />
+                    </div>
                     <div class="row">
                         <div class="col-6 mb-3">
                             <div class="form-label small fw-bold text-muted">Рік</div>
@@ -231,6 +256,10 @@
                     <div class="mb-3">
                         <div class="form-label small fw-bold text-muted">ISBN</div>
                         <input name="Isbn" id="edit-isbn" class="form-control border-secondary-subtle" />
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-label small fw-bold text-muted">Мова</div>
+                        <input name="Language" id="edit-language" class="form-control border-secondary-subtle" />
                     </div>
                     <div class="row">
                         <div class="col-6 mb-3">
@@ -289,7 +318,8 @@
                 const publisher = this.dataset.publisher;
                 const year = this.dataset.year;
                 const category = this.dataset.category;
-
+                const isbn = this.dataset.isbn; 
+                const language = this.dataset.language; 
                 document.getElementById('edit-id').value = id;
                 document.getElementById('edit-title').value = title;
                 document.getElementById('edit-author').value = author;
@@ -297,6 +327,7 @@
                 document.getElementById('edit-isbn').value = isbn;
                 document.getElementById('edit-year').value = year;
                 document.getElementById('edit-category').value = category;
+                document.getElementById('edit-language').value = language; 
                 
                 document.getElementById('editBookForm').action = '/Profile/EditBook/' + id;
             });
@@ -309,4 +340,5 @@
             });
         });
     </script>
+}
 }
