@@ -92,6 +92,12 @@ try
     builder.Services.AddScoped<IOtherProfileService, OtherProfileService>();
     builder.Services.AddControllersWithViews();
 
+    // Реєструємо налаштування Cloudinary
+    builder.Services.Configure<LNUBookShare.Application.Common.CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
+
+    // Реєструємо сервіс
+    builder.Services.AddScoped<IPhotoService, PhotoService>();
+
     var app = builder.Build();
 
     // --- MIDDLEWARE ---
