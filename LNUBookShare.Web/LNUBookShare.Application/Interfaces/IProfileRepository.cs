@@ -6,5 +6,7 @@ namespace LNUBookShare.Application.Interfaces
     public interface IProfileRepository
     {
         Task<User?> GetUserDetailsAsync(int userId);
+        Task<User?> GetUserByIdAsync(int userId);
+        Task UpdateUserAsync(User user);
     }
 }

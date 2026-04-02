@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using LNUBookShare.Application.Common;
+﻿using LNUBookShare.Application.Common;
 using LNUBookShare.Application.Interfaces;
 using LNUBookShare.Domain.Entities;
 using LNUBookShare.Domain.Models;
@@ -99,6 +95,36 @@ namespace LNUBookShare.Application.Services
             await _bookRepository.DeleteAsync(book);
 
             _logger.LogInformation("Книгу з ID {BookId} видалено", bookId);
+            return Result.Success();
+        }
+
+        public async Task<Result> UpdateProfileAsync(int userId, string firstName, string lastName, int facultyId, string? avatarPath)
+        {
+            // Отримуємо користувача з бази
+            var user = await _profileRepository.GetUserByIdAsync(userId);
+
+            if (user == null)
+            {
+                return Result.Failure("Користувача не знайдено.");
+            }
+
+            // Оновлюємо базові дані
+            user.FirstName = firstName;
+            user.LastName = lastName;
+            user.FacultyId = facultyId;
+
+            // Якщо користувач завантажив нове фото
+            if (!string.IsNullOrEmpty(avatarPath))
+            {
+                user.Avatar = new Image
+                {
+                    ImagePath = avatarPath,
+                    ImageType = "Avatar",
+                };
+            }
+
+            await _profileRepository.UpdateUserAsync(user);
+
             return Result.Success();
         }
     }
