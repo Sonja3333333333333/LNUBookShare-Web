@@ -1,7 +1,6 @@
-﻿// <copyright file="BookRepository.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using LNUBookShare.Application.Interfaces;
 using LNUBookShare.Domain.Entities;
 using LNUBookShare.Infrastructure;
@@ -30,13 +29,11 @@ namespace LNUBookShare.Infrastructure.Repositories
 
         public async Task<Book?> GetByIdMoreDetailsAsync(int id)
         {
-            var book = await _context.Books
+            return await _context.Books
                 .Include(b => b.Owner)
                 .Include(b => b.Cover)
                 .Include(b => b.Category)
                 .FirstOrDefaultAsync(b => b.BookId == id);
-
-            return book;
         }
 
         public async Task AddAsync(Book book)
@@ -62,53 +59,45 @@ namespace LNUBookShare.Infrastructure.Repositories
             await _context.Books.ExecuteDeleteAsync();
         }
 
-        public async Task<IEnumerable<Book>> SearchBooksAsync(string keyword, string searchBy = "title", string sortBy = "title", string statusFilter = "all")
+        public async Task<IEnumerable<Book>> SearchBooksAsync(string searchBy, string query, string sortBy = "title", string statusFilter = "all")
         {
-            if (string.IsNullOrWhiteSpace(keyword))
+            if (string.IsNullOrWhiteSpace(query))
             {
                 return new List<Book>();
             }
 
-            var lowerKeyword = keyword.ToLower();
-            var lower_searchBy = searchBy.ToLower();
+            var lowerQuery = query.ToLower();
+            var lowerSearchBy = searchBy.ToLower();
 
-            if (lower_searchBy == "author")
+            var dbQuery = _context.Books
+                .Include(b => b.Owner)
+                .Include(b => b.Cover)
+                .AsQueryable();
+
+            if (lowerSearchBy == "author")
             {
-                var query = _context.Books
-                    .Include(b => b.Owner)
-                    .Include(b => b.Cover)
-                    .Where(b => EF.Functions.ILike(b.Author, $"%{lowerKeyword}%"));
-
-                return await ApplySortingAndFiltering(query, sortBy, statusFilter).ToListAsync();
+                dbQuery = dbQuery.Where(b => EF.Functions.ILike(b.Author, $"%{lowerQuery}%"));
             }
-            else if (lower_searchBy == "title")
+            else if (lowerSearchBy == "title")
             {
-                var query = _context.Books
-                    .Include(b => b.Owner)
-                    .Include(b => b.Cover)
-                    .Where(b => EF.Functions.ILike(b.Title, $"%{lowerKeyword}%"));
-
-                return await ApplySortingAndFiltering(query, sortBy, statusFilter).ToListAsync();
+                dbQuery = dbQuery.Where(b => EF.Functions.ILike(b.Title, $"%{lowerQuery}%"));
             }
             else
             {
-                var query = _context.Books
-                    .Include(b => b.Owner)
-                    .Include(b => b.Cover)
-                    .Where(b => b.Isbn != null && b.Isbn.Contains(lowerKeyword));
-
-                return await ApplySortingAndFiltering(query, sortBy, statusFilter).ToListAsync();
+                dbQuery = dbQuery.Where(b => b.Isbn != null && b.Isbn.Contains(lowerQuery));
             }
+
+            return await ApplySortingAndFiltering(dbQuery, sortBy, statusFilter).ToListAsync();
         }
 
         public async Task<IEnumerable<Book>> GetRecommendationsAsync(int facultyId, int currentUserId, string sortBy = "title", string statusFilter = "all")
         {
-            var query = _context.Books
+            var dbQuery = _context.Books
                 .Include(b => b.Owner)
                 .Include(b => b.Cover)
                 .Where(b => b.Owner.FacultyId == facultyId && b.OwnerId != currentUserId);
 
-            return await ApplySortingAndFiltering(query, sortBy, statusFilter).ToListAsync();
+            return await ApplySortingAndFiltering(dbQuery, sortBy, statusFilter).ToListAsync();
         }
 
         private IQueryable<Book> ApplySortingAndFiltering(IQueryable<Book> query, string sortBy, string statusFilter)

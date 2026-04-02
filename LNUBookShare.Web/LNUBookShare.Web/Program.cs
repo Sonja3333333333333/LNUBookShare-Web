@@ -1,6 +1,7 @@
 // <copyright file="Program.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
+
 using LNUBookShare.Application.Interfaces;
 using LNUBookShare.Application.Services;
 using LNUBookShare.Domain.Entities;
@@ -14,6 +15,7 @@ using Serilog;
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 var builder = WebApplication.CreateBuilder(args);
 
+// --- SERILOG CONFIGURATION ---
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
     .CreateLogger();
@@ -27,12 +29,11 @@ try
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
     Console.WriteLine($"DEBUG: Connection String is: {connectionString}");
 
+    // --- DATABASE ---
     builder.Services.AddDbContext<AppDbContext>(options =>
     {
         options.UseNpgsql(connectionString);
     });
-
-    builder.Services.AddScoped<IBookRepository, BookRepository>();
 
     // --- IDENTITY ---
     builder.Services.AddIdentity<User, Role>(options =>
@@ -54,25 +55,42 @@ try
         options.AccessDeniedPath = "/Account/AccessDenied";
     });
 
+    // --- REPOSITORIES & SERVICES REGISTRATION ---
+
+    // Core infrastructure
+    builder.Services.AddScoped<IBookRepository, BookRepository>();
     builder.Services.AddScoped<IFacultyRepository, FacultyRepository>();
     builder.Services.AddTransient<IEmailService, EmailService>();
 
-    builder.Services.AddControllersWithViews();
+    // Book Search & Details
     builder.Services.AddScoped<IBookSearchService, BookSearchService>();
+    builder.Services.AddScoped<IBookDetailsService, BookDetailsService>();
 
+    // Favorites
     builder.Services.AddScoped<IFavoriteRepository, FavoriteRepository>();
     builder.Services.AddScoped<IFavoriteService, FavoriteService>();
 
     builder.Services.AddScoped<IBookDetailsService, BookDetailsService>();
 
+    builder.Services.AddScoped<IProfileService, ProfileService>();
+
+    // --- ТАСКА #57: ВІДГУКИ ТА РЕЙТИНГ ---
+    // Реєструємо репозиторій (робота з БД) та сервіс (логіка)
+    // Reviews
     builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
     builder.Services.AddScoped<IReviewService, ReviewService>();
 
+    // --- RESERVATION QUEUE (NEW) ---
+    builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
+    builder.Services.AddScoped<IReservationService, ReservationService>();
+
+    // Profile
     builder.Services.AddScoped<IProfileRepository, ProfileRepository>();
     builder.Services.AddScoped<IProfileService, ProfileService>();
 
     builder.Services.AddScoped<IOtherProfileRepository, OtherProfileRepository>();
     builder.Services.AddScoped<IOtherProfileService, OtherProfileService>();
+    builder.Services.AddControllersWithViews();
 
     var app = builder.Build();
 
@@ -94,7 +112,7 @@ try
         pattern: "{controller=Catalog}/{action=Search}/{id?}")
         .WithStaticAssets();
 
-    app.Run();
+    await app.RunAsync();
 }
 catch (Exception ex)
 {
@@ -102,5 +120,5 @@ catch (Exception ex)
 }
 finally
 {
-    Log.CloseAndFlush();
+    await Log.CloseAndFlushAsync();
 }
