@@ -21,5 +21,18 @@ namespace LNUBookShare.Infrastructure.Repositories
                 .Include(u => u.Avatar)
                 .FirstOrDefaultAsync(u => u.Id == userId);
         }
+
+        public async Task<User?> GetUserByIdAsync(int userId)
+        {
+            return await _context.Users
+                .Include(u => u.Avatar)
+                .FirstOrDefaultAsync(u => u.Id == userId);
+        }
+
+        public async Task UpdateUserAsync(User user)
+        {
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
+        }
     }
 }

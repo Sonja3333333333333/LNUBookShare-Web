@@ -53,6 +53,7 @@ namespace LNUBookShare.Web.Controllers
                 Email = dto.Email,
                 FacultyName = dto.FacultyName,
                 AvatarPath = dto.AvatarPath,
+                MyBooks = await _profileService.GetUserBooksAsync(user.Id),
             };
 
             return View(model);
@@ -83,15 +84,6 @@ namespace LNUBookShare.Web.Controllers
                 LastName = dto.LastName,
                 FacultyId = user.FacultyId,
                 AvatarPath = dto.AvatarPath,
-            var model = new UserProfileViewModel
-            {
-                UserId = user.Id,
-                FirstName = user.FirstName ?? "Не вказано",
-                LastName = user.LastName ?? "Не вказано",
-                Email = user.Email ?? "Не вказано",
-                FacultyName = "Прикладної математики та інформатики",
-                AvatarPath = user.Avatar?.ImagePath,
-                MyBooks = await _profileService.GetUserBooksAsync(user.Id),
             };
 
             return View(model);
@@ -105,12 +97,6 @@ namespace LNUBookShare.Web.Controllers
             {
                 await LoadFacultiesToViewBag();
                 return View(model);
-        public async Task<IActionResult> AddBook(AddBookViewModel model)
-        {
-            if (!ModelState.IsValid)
-            {
-                TempData["ErrorMessage"] = "Будь ласка, заповніть усі обов'язкові поля.";
-                return RedirectToAction("Index");
             }
 
             var user = await _userManager.GetUserAsync(User);
@@ -155,10 +141,21 @@ namespace LNUBookShare.Web.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        private async Task LoadFacultiesToViewBag()
+        [HttpPost]
+        public async Task<IActionResult> AddBook(AddBookViewModel model)
         {
-            var faculties = await _facultyRepository.GetAllAsync();
-            ViewBag.Faculties = new SelectList(faculties, "FacultyId", "FacultyName");
+            if (!ModelState.IsValid)
+            {
+                TempData["ErrorMessage"] = "Будь ласка, заповніть усі обов'язкові поля.";
+                return RedirectToAction("Index");
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
             var book = new Book
             {
                 Title = model.Title,
@@ -292,6 +289,12 @@ namespace LNUBookShare.Web.Controllers
 
             ViewBag.BookTitle = book.Title;
             return View(queueUsers);
+        }
+
+        private async Task LoadFacultiesToViewBag()
+        {
+            var faculties = await _facultyRepository.GetAllAsync();
+            ViewBag.Faculties = new SelectList(faculties, "FacultyId", "FacultyName");
         }
 
         private async Task<LNUBookShare.Domain.Entities.Image> SaveImageAsync(Microsoft.AspNetCore.Http.IFormFile file)

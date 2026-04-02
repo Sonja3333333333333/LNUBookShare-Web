@@ -15,5 +15,7 @@ namespace LNUBookShare.Application.Interfaces
         Task<Result> UpdateBookAsync(Book book);
 
         Task<Result> DeleteBookAsync(int bookId);
+
+        Task<Result> UpdateProfileAsync(int userId, string firstName, string lastName, int facultyId, string? avatarPath);
     }
 }
