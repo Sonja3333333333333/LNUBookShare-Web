@@ -1,0 +1,120 @@
+@model LNUBookShare.Web.Models.EditProfileViewModel
+
+@{
+    ViewData["Title"] = "Редагування профілю";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-secondary-subtle" style="border-radius: 15px;">
+                <div class="card-body p-4">
+
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+                    }
+
+                    <form asp-action="Edit" method="post" enctype="multipart/form-data">
+                        <input type="hidden" asp-for="UserId" />
+
+                        <div class="text-center mb-4">
+                            <div class="position-relative d-inline-block">
+                                @if (!string.IsNullOrEmpty(Model.AvatarPath))
+                                {
+                                <img id="avatarPreview"
+                                     src="@Model.AvatarPath"
+                                     alt="Аватар"
+                                     class="rounded-circle border shadow-sm"
+                                     style="width: 120px; height: 120px; object-fit: cover;" />
+                                }
+                                else
+                                {
+                                <div id="avatarPlaceholder"
+                                     class="bg-light rounded-circle d-flex align-items-center justify-content-center border shadow-sm mx-auto"
+                                     style="width: 120px; height: 120px;">
+                                    <i class="bi bi-person text-secondary" style="font-size: 3.5rem;"></i>
+                                </div>
+                                }
+                            </div>
+
+                            <div class="mt-3">
+                                <label for="AvatarFile" class="btn btn-outline-secondary btn-sm rounded-pill px-4">
+                                    <i class="bi bi-camera me-1"></i> Додати (Змінити) фото
+                                </label>
+                                <input type="file"
+                                       id="AvatarFile"
+                                       name="AvatarFile"
+                                       accept="image/*"
+                                       class="d-none"
+                                       onchange="previewAvatar(event)" />
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <input asp-for="LastName"
+                                   class="form-control"
+                                   placeholder="Прізвище" />
+                            <span asp-validation-for="LastName" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <input asp-for="FirstName"
+                                   class="form-control"
+                                   placeholder="Ім'я" />
+                            <span asp-validation-for="FirstName" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <select asp-for="FacultyId"
+                                    class="form-select"
+                                    asp-items="ViewBag.Faculties">
+                                <option value="">-- Оберіть факультет --</option>
+                            </select>
+                            <span asp-validation-for="FacultyId" class="text-danger small"></span>
+                        </div>
+
+                        <div class="d-flex justify-content-center gap-3">
+                            <a asp-action="Index"
+                               class="btn btn-outline-secondary rounded-pill px-4">
+                                Скасувати
+                            </a>
+                            <button type="submit"
+                                    class="btn btn-primary rounded-pill px-4">
+                                Зберегти
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function previewAvatar(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                let preview = document.getElementById('avatarPreview');
+                const placeholder = document.getElementById('avatarPlaceholder');
+
+                if (!preview) {
+                    preview = document.createElement('img');
+                    preview.id = 'avatarPreview';
+                    preview.className = 'rounded-circle border shadow-sm';
+                    preview.style = 'width: 120px; height: 120px; object-fit: cover;';
+                    if (placeholder) placeholder.replaceWith(preview);
+                }
+
+                preview.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    </script>
+}
