@@ -127,6 +127,7 @@ namespace LNUBookShare.Web.Controllers
             book.Publisher = model.Publisher;
             book.Year = model.Year;
             book.Isbn = model.Isbn;
+            book.Language = model.Language;
             book.CategoryId = model.CategoryId;
 
             if (model.CoverPhoto != null && model.CoverPhoto.Length > 0)

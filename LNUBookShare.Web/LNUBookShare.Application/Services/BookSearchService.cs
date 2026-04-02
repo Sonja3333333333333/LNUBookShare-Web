@@ -25,9 +25,8 @@ namespace LNUBookShare.Application.Services
             }
 
             var trimmedQuery = query.Trim();
-            _logger.LogInformation("Пошук книги: {Query} за полем {Field}", trimmedQuery, searchBy);
 
-            return await _bookRepository.SearchBooksAsync(trimmedQuery, searchBy, sortBy, statusFilter);
+            return await _bookRepository.SearchBooksAsync(searchBy, trimmedQuery, sortBy, statusFilter);
         }
 
         public async Task<IEnumerable<Book>> GetRecommendationsAsync(int facultyId, int currentUserId, string sortBy = "title", string statusFilter = "all")

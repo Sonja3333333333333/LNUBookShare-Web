@@ -1,17 +1,21 @@
 ﻿@using LNUBookShare.Web.Models
-@model BookDetailsViewModel
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<LNUBookShare.Domain.Entities.User> UserManager
 
+@model BookDetailsViewModel
 @{
     ViewData["Title"] = Model.Title;
     int fullStars = (int)Math.Round(Model.AverageRating);
     int emptyStars = 5 - fullStars;
+
+    int currentUserId = 0;
+    int.TryParse(UserManager.GetUserId(User), out currentUserId);
 }
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
 <style>
     .book-details-card { border: 1px solid #ddd; border-radius: 20px; padding: 30px; background-color: #fff; }
     .text-warning { color: #ffc107 !important; }
-    .breadcrumb-container { margin-bottom: 25px; margin-top: 20px; }
     .alert-pill { border-radius: 50px; border: none; }
 </style>
 
@@ -31,12 +35,11 @@
             </div>
         }
     </div>
-
-    <div class="breadcrumb-container d-flex align-items-center gap-2">
-        <a href="@(ViewBag.ReturnUrl ?? Url.Action("Search", "Catalog"))" class="text-decoration-none text-primary fw-bold">Головна</a>
-        <i class="bi bi-chevron-right text-primary fs-5"></i>
-        <span class="text-primary fw-bold">@Model.Title</span>
-    </div>
+<div class="mb-4 mt-3">
+    <a href="javascript:history.back()" class="btn btn-outline-secondary px-4 py-2" style="border-radius: 10px;">
+                            <i class="bi bi-arrow-left me-2"></i> Повернутися назад
+                        </a>
+</div>
 
     <div class="book-details-card shadow-sm mb-5">
         <div class="row g-4 align-items-start">
@@ -76,32 +79,38 @@
                 <div class="text-end">
                     <partial name="_FavoriteButton" model="@((int)Model.BookId, (bool)Model.FavoritedBookIds.Contains(Model.BookId), Context.Request.Path.ToString() + Context.Request.QueryString.ToString())" />
                 </div>
-                
                 <div class="d-grid gap-2 mt-auto ms-auto" style="width: 100%; max-width: 220px;">
-                    @if (Model.Status == "available") {
-                        <form asp-action="Reserve" asp-controller="Catalog" method="post" class="d-grid">
-                            <input type="hidden" name="bookId" value="@Model.BookId" />
-                            <button type="submit" class="btn btn-primary btn-sm fw-medium rounded-pill text-white py-2 shadow-sm">
-                                <i class="bi bi-bookmark-check me-1"></i> Забронювати
-                            </button>
-                        </form>
-                    } else {
-                        if (Model.IsInQueue) {
-                            <div class="alert alert-info py-2 px-3 rounded-pill text-center mb-0 shadow-sm" style="font-size: 0.85rem; border: none;">
-                                <i class="bi bi-clock-history me-1"></i> Ви у черзі (№@Model.QueuePosition)
-                            </div>
-                        } else {
-                            <form asp-action="JoinQueue" asp-controller="Catalog" method="post" class="d-grid">
+                    @if (Model.Owner != null && Model.Owner.Id == currentUserId)
+                    {
+
+                    }
+                    else
+                    {
+                        @if (Model.Status == "available") {
+                            <form asp-action="Reserve" asp-controller="Catalog" method="post" class="d-grid">
                                 <input type="hidden" name="bookId" value="@Model.BookId" />
-                                <button type="submit" class="btn btn-outline-primary btn-sm fw-medium rounded-pill py-2 shadow-sm">
-                                    <i class="bi bi-people me-1"></i> Стати в чергу
+                                <button type="submit" class="btn btn-primary btn-sm fw-medium rounded-pill text-white py-2 shadow-sm">
+                                    <i class="bi bi-bookmark-check me-1"></i> Забронювати
                                 </button>
                             </form>
+                        } else {
+                            if (Model.IsInQueue) {
+                                <div class="alert alert-info py-2 px-3 rounded-pill text-center mb-0 shadow-sm" style="font-size: 0.85rem; border: none;">
+                                    <i class="bi bi-clock-history me-1"></i> Ви у черзі (№@Model.QueuePosition)
+                                </div>
+                            } else {
+                                <form asp-action="JoinQueue" asp-controller="Catalog" method="post" class="d-grid">
+                                    <input type="hidden" name="bookId" value="@Model.BookId" />
+                                    <button type="submit" class="btn btn-outline-primary btn-sm fw-medium rounded-pill py-2 shadow-sm">
+                                        <i class="bi bi-people me-1"></i> Стати в чергу
+                                    </button>
+                                </form>
+                            }
                         }
+                        <a href="#" class="btn btn-secondary btn-sm fw-medium rounded-pill text-white py-2" style="background-color: #6c757d;">
+                            <i class="bi bi-chat-dots me-1"></i> Написати власнику
+                        </a>
                     }
-                    <a href="#" class="btn btn-secondary btn-sm fw-medium rounded-pill text-white py-2" style="background-color: #6c757d;">
-                        <i class="bi bi-chat-dots me-1"></i> Написати власнику
-                    </a>
                 </div>
             </div>
         </div>
