@@ -1,7 +1,6 @@
 ﻿// <copyright file="CatalogController.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
-
 using LNUBookShare.Application.Interfaces;
 using LNUBookShare.Domain.Entities;
 using LNUBookShare.Web.Models;
@@ -12,11 +11,10 @@ using Microsoft.AspNetCore.Mvc;
 namespace LNUBookShare.Web.Controllers
 {
     [Authorize]
-    public class CatalogController : Controller
+    public class CatalogController : BaseController
     {
         private readonly IBookSearchService _searchService;
         private readonly ILogger<CatalogController> _logger;
-        private readonly UserManager<User> _userManager;
         private readonly IFavoriteService _favoriteService;
         private readonly IBookDetailsService _bookDetailsService;
         private readonly IReviewService _reviewService;
@@ -30,10 +28,10 @@ namespace LNUBookShare.Web.Controllers
             IBookDetailsService bookDetailsService,
             IReviewService reviewService,
             IReservationService reservationService)
+            : base(userManager)
         {
             _searchService = searchService;
             _logger = logger;
-            _userManager = userManager;
             _favoriteService = favoriteService;
             _bookDetailsService = bookDetailsService;
             _reviewService = reviewService;
@@ -44,7 +42,7 @@ namespace LNUBookShare.Web.Controllers
         public async Task<IActionResult> Search(string query, string searchBy = "title", string sortBy = "title", string statusFilter = "all")
         {
             IEnumerable<Book> results;
-            var currentUser = await _userManager.GetUserAsync(User);
+            var currentUser = await GetCurrentUserAsync();
 
             if (!string.IsNullOrWhiteSpace(query))
             {
@@ -98,7 +96,8 @@ namespace LNUBookShare.Web.Controllers
 
             bool isInQueue = false;
             int queuePosition = 0;
-            var currentUser = await _userManager.GetUserAsync(User);
+            bool hasReviewed = false;
+            var currentUser = await GetCurrentUserAsync();
 
             if (currentUser != null)
             {
@@ -109,6 +108,9 @@ namespace LNUBookShare.Web.Controllers
                     var positionResult = await _reservationService.GetQueuePositionAsync(id, currentUser.Id);
                     queuePosition = positionResult.IsSuccess ? positionResult.Value : 0;
                 }
+
+                var hasReviewedResult = await _reviewService.HasUserReviewedAsync(id, currentUser.Id);
+                hasReviewed = hasReviewedResult.IsSuccess && hasReviewedResult.Value;
             }
 
             ViewBag.ReturnUrl = returnUrl;
@@ -129,6 +131,7 @@ namespace LNUBookShare.Web.Controllers
                 AverageRating = avgRating,
                 IsInQueue = isInQueue,
                 QueuePosition = queuePosition,
+                HasUserReviewed = hasReviewed, // Передаємо у модель
                 FavoritedBookIds = await GetUserFavoriteIdsAsync(),
             };
 
@@ -139,13 +142,13 @@ namespace LNUBookShare.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Reserve(int bookId)
         {
-            var userIdString = _userManager.GetUserId(User);
-            if (string.IsNullOrEmpty(userIdString))
+            var currentUserId = GetCurrentUserId();
+            if (currentUserId == null)
             {
                 return Unauthorized();
             }
 
-            var result = await _reservationService.ReserveBookAsync(bookId, int.Parse(userIdString));
+            var result = await _reservationService.ReserveBookAsync(bookId, currentUserId.Value);
 
             if (result.IsSuccess)
             {
@@ -163,13 +166,13 @@ namespace LNUBookShare.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> JoinQueue(int bookId)
         {
-            var userIdString = _userManager.GetUserId(User);
-            if (string.IsNullOrEmpty(userIdString))
+            var currentUserId = GetCurrentUserId();
+            if (currentUserId == null)
             {
                 return Unauthorized();
             }
 
-            var result = await _reservationService.JoinQueueAsync(bookId, int.Parse(userIdString));
+            var result = await _reservationService.JoinQueueAsync(bookId, currentUserId.Value);
 
             if (result.IsSuccess)
             {
@@ -187,13 +190,13 @@ namespace LNUBookShare.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddReview(int bookId, int rating, string comment)
         {
-            var userIdString = _userManager.GetUserId(User);
-            if (string.IsNullOrEmpty(userIdString))
+            var currentUserId = GetCurrentUserId();
+            if (currentUserId == null)
             {
                 return Unauthorized();
             }
 
-            var result = await _reviewService.AddReviewAsync(bookId, int.Parse(userIdString), rating, comment);
+            var result = await _reviewService.AddReviewAsync(bookId, currentUserId.Value, rating, comment);
 
             if (result.IsSuccess)
             {
@@ -209,13 +212,13 @@ namespace LNUBookShare.Web.Controllers
 
         private async Task<HashSet<int>> GetUserFavoriteIdsAsync()
         {
-            var currentUser = await _userManager.GetUserAsync(User);
-            if (currentUser == null)
+            var currentUserId = GetCurrentUserId();
+            if (currentUserId == null)
             {
                 return new HashSet<int>();
             }
 
-            var favResult = await _favoriteService.GetUserFavoriteBookIdsAsync(currentUser.Id);
+            var favResult = await _favoriteService.GetUserFavoriteBookIdsAsync(currentUserId.Value);
             return favResult.IsSuccess ? favResult.Value.ToHashSet() : new HashSet<int>();
         }
     }

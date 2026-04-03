@@ -3,20 +3,19 @@ using LNUBookShare.Application.Services;
 using LNUBookShare.Domain.Entities;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Xunit;
 
 namespace LNUBookShare.UnitTests.ReviewService_tests
 {
     public class ReviewServiceTests
     {
         private readonly Mock<IReviewRepository> _reviewRepoMock;
-        private readonly Mock<ILogger<ReviewService>> _loggerMock; 
+        private readonly Mock<ILogger<ReviewService>> _loggerMock;
         private readonly ReviewService _reviewService;
 
         public ReviewServiceTests()
         {
             _reviewRepoMock = new Mock<IReviewRepository>();
-            _loggerMock = new Mock<ILogger<ReviewService>>(); 
+            _loggerMock = new Mock<ILogger<ReviewService>>();
 
             _reviewService = new ReviewService(_reviewRepoMock.Object, _loggerMock.Object);
         }
@@ -46,7 +45,8 @@ namespace LNUBookShare.UnitTests.ReviewService_tests
 
             // Assert
             Assert.True(result.IsFailure);
-            Assert.Equal("Неприпустима оцінка", result.Error);
+            // ФІКС: Текст має збігатися з сервісом на 100%
+            Assert.Equal("Неприпустима оцінка. Оберіть від 1 до 5.", result.Error);
             _reviewRepoMock.Verify(r => r.AddAsync(It.IsAny<BookReview>()), Times.Never);
         }
 
@@ -66,24 +66,27 @@ namespace LNUBookShare.UnitTests.ReviewService_tests
                 .ReturnsAsync(reviews);
 
             // Act
-            var average = await _reviewService.CalculateAverageRatingAsync(bookId);
+            var result = await _reviewService.CalculateAverageRatingAsync(bookId);
 
             // Assert
-            Assert.Equal(4.5, average);
+            Assert.True(result.IsSuccess);
+            Assert.Equal(4.5, result.Value); 
         }
+
         [Fact]
         public async Task CalculateAverageRatingAsync_WhenNoReviews_ShouldReturnZero()
         {
             // Arrange
             _reviewRepoMock
                 .Setup(r => r.GetByBookIdAsync(It.IsAny<int>()))
-                .ReturnsAsync(new List<BookReview>()); // Пустий список
+                .ReturnsAsync(new List<BookReview>());
 
             // Act
-            var average = await _reviewService.CalculateAverageRatingAsync(1);
+            var result = await _reviewService.CalculateAverageRatingAsync(1);
 
             // Assert
-            Assert.Equal(0, average); // Має бути 0.0, а не помилка
+            Assert.True(result.IsSuccess);
+            Assert.Equal(0.0, result.Value);
         }
     }
 }

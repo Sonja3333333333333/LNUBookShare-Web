@@ -25,5 +25,7 @@ namespace LNUBookShare.Web.Models
 
         // --- ОБРАНЕ ---
         public HashSet<int> FavoritedBookIds { get; set; } = new HashSet<int>();
+
+        public bool HasUserReviewed { get; set; }
     }
 }
