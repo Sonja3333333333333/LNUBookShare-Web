@@ -10,23 +10,25 @@ using Microsoft.AspNetCore.Mvc;
 namespace LNUBookShare.Web.Controllers
 {
     [Authorize]
-    public class OtherProfileController : Controller
+    public class OtherProfileController : BaseController
     {
-        private readonly UserManager<User> _userManager;
         private readonly IOtherProfileService _otherProfileService;
         private readonly IFavoriteService _favoriteService;
 
-        public OtherProfileController(UserManager<User> userManager, IOtherProfileService otherProfileService, IFavoriteService favoriteService)
+        public OtherProfileController(
+            UserManager<User> userManager,
+            IOtherProfileService otherProfileService,
+            IFavoriteService favoriteService)
+            : base(userManager)
         {
-            _userManager = userManager;
             _otherProfileService = otherProfileService;
             _favoriteService = favoriteService;
         }
 
         public async Task<IActionResult> Index(int userId, string sortBy = "title", string statusFilter = "all")
         {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null)
+            var currentUserId = GetCurrentUserId();
+            if (currentUserId == null)
             {
                 return RedirectToAction("Login", "Account");
             }
@@ -41,16 +43,12 @@ namespace LNUBookShare.Web.Controllers
             var books = await _otherProfileService.GetOtherUserBooks(userId, sortBy, statusFilter);
             var vbooks = books.Value;
 
-            var currentUser = await _userManager.GetUserAsync(User);
             HashSet<int> favBooksIds = new HashSet<int>();
 
-            if (currentUser != null)
+            var favResult = await _favoriteService.GetUserFavoriteBookIdsAsync(currentUserId.Value);
+            if (favResult.IsSuccess)
             {
-                var favResult = await _favoriteService.GetUserFavoriteBookIdsAsync(currentUser.Id);
-                if (favResult.IsSuccess)
-                {
-                    favBooksIds = favResult.Value.ToHashSet();
-                }
+                favBooksIds = favResult.Value.ToHashSet();
             }
 
             var model = new OtherProfileViewModel

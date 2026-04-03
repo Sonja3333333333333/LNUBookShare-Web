@@ -9,20 +9,19 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 namespace LNUBookShare.Web.Controllers
 {
     [Authorize]
-    public class ProfileController : Controller
+    public class ProfileController : BaseController
     {
-        private readonly UserManager<User> _userManager;
         private readonly IProfileService _profileService;
         private readonly IFacultyRepository _facultyRepository;
-        private readonly IPhotoService _photoService; // Додаємо наш новий сервіс
+        private readonly IPhotoService _photoService;
 
         public ProfileController(
             UserManager<User> userManager,
             IProfileService profileService,
             IFacultyRepository facultyRepository,
-            IPhotoService photoService) // IWebHostEnvironment більше не потрібен!
+            IPhotoService photoService)
+            : base(userManager)
         {
-            _userManager = userManager;
             _profileService = profileService;
             _facultyRepository = facultyRepository;
             _photoService = photoService;
@@ -31,7 +30,7 @@ namespace LNUBookShare.Web.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var user = await _userManager.GetUserAsync(User);
+            var user = await GetCurrentUserAsync();
             if (user == null)
             {
                 return RedirectToAction("Login", "Account");
@@ -61,7 +60,7 @@ namespace LNUBookShare.Web.Controllers
         [HttpGet]
         public async Task<IActionResult> Edit()
         {
-            var user = await _userManager.GetUserAsync(User);
+            var user = await GetCurrentUserAsync();
             if (user == null)
             {
                 return RedirectToAction("Login", "Account");
@@ -98,8 +97,8 @@ namespace LNUBookShare.Web.Controllers
                 return View(model);
             }
 
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null)
+            var userId = GetCurrentUserId();
+            if (userId == null)
             {
                 return RedirectToAction("Login", "Account");
             }
@@ -120,7 +119,7 @@ namespace LNUBookShare.Web.Controllers
             }
 
             var result = await _profileService.UpdateProfileAsync(
-                user.Id,
+                userId.Value,
                 model.FirstName,
                 model.LastName,
                 model.FacultyId,
@@ -146,8 +145,8 @@ namespace LNUBookShare.Web.Controllers
                 return RedirectToAction("Index");
             }
 
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null)
+            var userId = GetCurrentUserId();
+            if (userId == null)
             {
                 return RedirectToAction("Login", "Account");
             }
@@ -161,7 +160,7 @@ namespace LNUBookShare.Web.Controllers
                 Publisher = model.Publisher,
                 Language = model.Language,
                 CategoryId = model.CategoryId,
-                OwnerId = user.Id,
+                OwnerId = userId.Value,
                 Status = "available",
                 CreatedAt = DateTime.UtcNow,
             };
@@ -194,13 +193,13 @@ namespace LNUBookShare.Web.Controllers
                 return RedirectToAction("Index");
             }
 
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null)
+            var userId = GetCurrentUserId();
+            if (userId == null)
             {
                 return RedirectToAction("Login", "Account");
             }
 
-            var booksResult = await _profileService.GetUserBooksAsync(user.Id);
+            var booksResult = await _profileService.GetUserBooksAsync(userId.Value);
             var books = booksResult.IsSuccess ? booksResult.Value : new List<Book>();
             var book = books.Find(b => b.BookId == id);
 
@@ -244,8 +243,8 @@ namespace LNUBookShare.Web.Controllers
                 return RedirectToAction("Index");
             }
 
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null)
+            var userId = GetCurrentUserId();
+            if (userId == null)
             {
                 return RedirectToAction("Login", "Account");
             }
@@ -267,13 +266,13 @@ namespace LNUBookShare.Web.Controllers
         [HttpGet]
         public async Task<IActionResult> Queue(int bookId, [FromServices] IReservationService reservationService)
         {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null)
+            var userId = GetCurrentUserId();
+            if (userId == null)
             {
                 return RedirectToAction("Login", "Account");
             }
 
-            var myBooksResult = await _profileService.GetUserBooksAsync(user.Id);
+            var myBooksResult = await _profileService.GetUserBooksAsync(userId.Value);
             var myBooks = myBooksResult.IsSuccess ? myBooksResult.Value : new List<Book>();
 
             var book = myBooks.FirstOrDefault(b => b.BookId == bookId);
@@ -284,9 +283,11 @@ namespace LNUBookShare.Web.Controllers
                 return RedirectToAction("Index");
             }
 
-            var queueUsers = await reservationService.GetQueueUsersAsync(bookId);
+            var queueUsersResult = await reservationService.GetQueueUsersAsync(bookId);
+            var queueUsers = queueUsersResult.IsSuccess ? queueUsersResult.Value : new List<User>();
 
             ViewBag.BookTitle = book.Title;
+
             return View(queueUsers);
         }
 
@@ -302,7 +303,7 @@ namespace LNUBookShare.Web.Controllers
 
             return new LNUBookShare.Domain.Entities.Image
             {
-                ImagePath = photoResult.Value,
+                ImagePath = photoResult.IsSuccess ? photoResult.Value : "/images/default-book.png",
                 ImageType = "Book",
             };
         }

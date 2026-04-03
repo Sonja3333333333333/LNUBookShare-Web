@@ -1,7 +1,6 @@
 ﻿// <copyright file="AccountController.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
-
 using LNUBookShare.Application.Interfaces;
 using LNUBookShare.Domain.Entities;
 using LNUBookShare.Web.Models;
@@ -11,20 +10,21 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace LNUBookShare.Web.Controllers;
 
-public class AccountController : Controller
+public class AccountController : BaseController
 {
     private readonly UserManager<User> _userManager;
     private readonly SignInManager<User> _signInManager;
     private readonly ILogger<AccountController> _logger;
     private readonly IFacultyRepository _facultyRepository;
-    private readonly IEmailService _emailService; // Додано сервіс пошти
+    private readonly IEmailService _emailService;
 
     public AccountController(
         UserManager<User> userManager,
         SignInManager<User> signInManager,
         ILogger<AccountController> logger,
         IFacultyRepository facultyRepository,
-        IEmailService emailService) // Ін'єкція сервісу
+        IEmailService emailService)
+        : base(userManager)
     {
         _userManager = userManager;
         _signInManager = signInManager;
@@ -75,7 +75,6 @@ public class AccountController : Controller
         {
             _logger.LogInformation("Успішна реєстрація в БД: {Email}", model.Email);
 
-            // --- ГЕНЕРАЦІЯ ЛІНКА ТА ВІДПРАВКА ЛИСТА ---
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             var confirmationLink = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, token = token }, Request.Scheme);
 
@@ -152,7 +151,6 @@ public class AccountController : Controller
         {
             var user = await _userManager.FindByEmailAsync(model.Email);
 
-            // Ручна перевірка підтвердження пошти для виведення зрозумілої помилки
             if (user != null && !await _userManager.IsEmailConfirmedAsync(user))
             {
                 ModelState.AddModelError(string.Empty, "Пошта ще не підтверджена. Перевірте свою скриньку.");
