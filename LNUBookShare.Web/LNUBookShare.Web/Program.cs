@@ -98,6 +98,8 @@ try
     // Реєструємо сервіс
     builder.Services.AddScoped<IPhotoService, PhotoService>();
 
+    builder.Services.AddScoped<IFacultyService, FacultyService>();
+
     var app = builder.Build();
 
     // --- MIDDLEWARE ---

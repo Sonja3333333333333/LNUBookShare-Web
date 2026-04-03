@@ -13,7 +13,7 @@ public class BookSearchServiceLogicTests : BookSearchServiceTestBase
     [InlineData("")]
     [InlineData("   ")]
     [InlineData(null)]
-    public async Task SearchAsync_WhenQueryIsEmpty_ShouldReturnEmptyList_WithoutCallingRepo(string? emptyQuery)
+    public async Task SearchAsync_WhenQueryIsEmpty_ShouldReturnFailure_WithoutCallingRepo(string? emptyQuery)
     {
         // Act
         var result = await _searchService.SearchAsync(emptyQuery!);
@@ -31,12 +31,12 @@ public class BookSearchServiceLogicTests : BookSearchServiceTestBase
     }
 
     [Fact]
-    public async Task SearchAsync_WhenNoBooksFound_ShouldReturnEmptyCollection()
+    public async Task SearchAsync_WhenNoBooksFound_ShouldReturnSuccessAndEmptyCollection()
     {
         // Arrange
         var query = "Неіснуюча Книга";
         _bookRepoMock
-            .Setup(r => r.SearchBooksAsync(query, "title", "title", "all"))
+            .Setup(r => r.SearchBooksAsync("title", query, "title", "all"))
             .ReturnsAsync(new List<Book>());
 
         // Act
@@ -47,10 +47,11 @@ public class BookSearchServiceLogicTests : BookSearchServiceTestBase
         Assert.True(result.IsSuccess);
         Assert.NotNull(books);
         Assert.Empty(books);
+        Assert.Empty(result.Value);
     }
 
     [Fact]
-    public async Task SearchAsync_WhenBooksExist_ShouldReturnThemCorrectly()
+    public async Task SearchAsync_WhenBooksExist_ShouldReturnSuccessAndBooksCorrectly()
     {
         // Arrange
         var query = "C#";
@@ -61,7 +62,7 @@ public class BookSearchServiceLogicTests : BookSearchServiceTestBase
         };
 
         _bookRepoMock
-            .Setup(r => r.SearchBooksAsync(query, "title", "title", "all"))
+            .Setup(r => r.SearchBooksAsync("title", query, "title", "all"))
             .ReturnsAsync(expectedBooks);
 
         // Act
@@ -72,10 +73,11 @@ public class BookSearchServiceLogicTests : BookSearchServiceTestBase
         Assert.True(result.IsSuccess);
         Assert.Equal(2, books.Count());
         Assert.Contains(books, b => b.Title == "C# in Depth");
+        Assert.Equal(2, result.Value.Count());
     }
 
     [Fact]
-    public async Task SearchAsync_WithFilter_ShouldReturnOnlyFilteredBooks()
+    public async Task SearchAsync_WithFilter_ShouldReturnSuccessAndOnlyFilteredBooks()
     {
         // Arrange
         var query = "Java";
@@ -83,7 +85,7 @@ public class BookSearchServiceLogicTests : BookSearchServiceTestBase
         var filteredBooks = new List<Book> { new Book { Title = "Java Core", Status = "available" } };
 
         _bookRepoMock
-            .Setup(r => r.SearchBooksAsync(query, "title", "title", status))
+            .Setup(r => r.SearchBooksAsync("title", query, "title", status))
             .ReturnsAsync(filteredBooks);
 
         // Act
@@ -94,5 +96,7 @@ public class BookSearchServiceLogicTests : BookSearchServiceTestBase
         Assert.True(result.IsSuccess);
         Assert.Single(books); // Має бути рівно 1 книга
         Assert.All(books, b => Assert.Equal("available", b.Status));
+        Assert.Single(result.Value);
+        Assert.All(result.Value, b => Assert.Equal("available", b.Status));
     }
 }

@@ -24,7 +24,14 @@ public class ReviewRepository : IReviewRepository
         return await _context.BookReviews
             .Include(r => r.Reviewer) // Щоб вивести ім'я того, хто лишив відгук
             .Where(r => r.BookId == bookId)
+            .Include(r => r.Reviewer).ThenInclude(u => u.Avatar)
             .OrderByDescending(r => r.CreatedAt) // Свіжі відгуки зверху
             .ToListAsync();
+    }
+
+    public async Task<bool> ExistsAsync(int bookId, int userId)
+    {
+        return await _context.BookReviews
+            .AnyAsync(r => r.BookId == bookId && r.ReviewerId == userId);
     }
 }
