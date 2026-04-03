@@ -15,6 +15,10 @@ public class BookSearchServiceLogicTests : BookSearchServiceTestBase
     [InlineData(null)]
     public async Task SearchAsync_WhenQueryIsEmpty_ShouldReturnFailure_WithoutCallingRepo(string? emptyQuery)
     {
+        var result = await _searchService.SearchAsync(emptyQuery!);
+
+        Assert.NotNull(result);
+        Assert.True(result.IsFailure);
         // Act
         var result = await _searchService.SearchAsync(emptyQuery!);
 
@@ -26,23 +30,24 @@ public class BookSearchServiceLogicTests : BookSearchServiceTestBase
         Assert.NotNull(books);
         Assert.Empty(books); // Тепер Assert.Empty працює зі списком!
 
-        // Перевіряємо, що репозиторій навіть не смикали (економія ресурсів!)
-        _bookRepoMock.Verify(r => r.SearchBooksAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        _bookRepoMock.Verify(r => r.SearchBooksAsync(
+            It.IsAny<string>(), It.IsAny<string>(),
+            It.IsAny<string>(), It.IsAny<string>()), Times.Never);
     }
 
     [Fact]
+    public async Task SearchAsync_WhenNoBooksFound_ShouldReturnSuccessWithEmptyCollection()
     public async Task SearchAsync_WhenNoBooksFound_ShouldReturnSuccessAndEmptyCollection()
     {
-        // Arrange
         var query = "Неіснуюча Книга";
         _bookRepoMock
             .Setup(r => r.SearchBooksAsync("title", query, "title", "all"))
             .ReturnsAsync(new List<Book>());
 
-        // Act
         var result = await _searchService.SearchAsync(query);
         var books = result.Value; // Дістаємо список
 
+        Assert.True(result.IsSuccess);
         // Assert
         Assert.True(result.IsSuccess);
         Assert.NotNull(books);
@@ -53,7 +58,6 @@ public class BookSearchServiceLogicTests : BookSearchServiceTestBase
     [Fact]
     public async Task SearchAsync_WhenBooksExist_ShouldReturnSuccessAndBooksCorrectly()
     {
-        // Arrange
         var query = "C#";
         var expectedBooks = new List<Book>
         {
@@ -65,10 +69,12 @@ public class BookSearchServiceLogicTests : BookSearchServiceTestBase
             .Setup(r => r.SearchBooksAsync("title", query, "title", "all"))
             .ReturnsAsync(expectedBooks);
 
-        // Act
         var result = await _searchService.SearchAsync(query);
         var books = result.Value; // Дістаємо список
 
+        Assert.True(result.IsSuccess);
+        Assert.Equal(2, result.Value.Count());
+        Assert.Contains(result.Value, b => b.Title == "C# in Depth");
         // Assert
         Assert.True(result.IsSuccess);
         Assert.Equal(2, books.Count());
@@ -79,19 +85,21 @@ public class BookSearchServiceLogicTests : BookSearchServiceTestBase
     [Fact]
     public async Task SearchAsync_WithFilter_ShouldReturnSuccessAndOnlyFilteredBooks()
     {
-        // Arrange
         var query = "Java";
         var status = "available";
-        var filteredBooks = new List<Book> { new Book { Title = "Java Core", Status = "available" } };
+        var filteredBooks = new List<Book>
+        {
+            new Book { Title = "Java Core", Status = "available" }
+        };
 
         _bookRepoMock
             .Setup(r => r.SearchBooksAsync("title", query, "title", status))
             .ReturnsAsync(filteredBooks);
 
-        // Act
         var result = await _searchService.SearchAsync(query, "title", "title", status);
         var books = result.Value; // Дістаємо список
 
+        Assert.True(result.IsSuccess);
         // Assert
         Assert.True(result.IsSuccess);
         Assert.Single(books); // Має бути рівно 1 книга
