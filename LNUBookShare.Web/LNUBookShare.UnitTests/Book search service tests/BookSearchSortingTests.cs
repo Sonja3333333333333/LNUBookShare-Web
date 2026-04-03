@@ -16,7 +16,7 @@ public class BookSearchSortingTests : BookSearchServiceTestBase
         await _searchService.SearchAsync("алгебра", "title", sortBy);
 
         // Assert
-        _bookRepoMock.Verify(r => r.SearchBooksAsync("алгебра", "title", "year", "all"), Times.Once);
+        _bookRepoMock.Verify(r => r.SearchBooksAsync("title", "алгебра", "year", "all"), Times.Once);
     }
 
     [Fact]
@@ -29,6 +29,6 @@ public class BookSearchSortingTests : BookSearchServiceTestBase
         await _searchService.SearchAsync("алгебра", "title", sortBy);
 
         // Assert
-        _bookRepoMock.Verify(r => r.SearchBooksAsync("алгебра", "title", "author", "all"), Times.Once);
+        _bookRepoMock.Verify(r => r.SearchBooksAsync("title", "алгебра", "author", "all"), Times.Once);
     }
 }
