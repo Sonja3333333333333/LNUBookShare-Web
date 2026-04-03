@@ -5,7 +5,6 @@ namespace LNUBookShare.Application.Interfaces;
 
 public interface IReviewService
 {
-    // Метод повертає твій клас Result (успіх або помилка валідації)
     Task<Result> AddReviewAsync(int bookId, int userId, int rating, string? comment);
 
     // Рахує середній бал для книги

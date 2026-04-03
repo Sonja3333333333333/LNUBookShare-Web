@@ -77,5 +77,29 @@ namespace LNUBookShare.Application.Services
         {
             return await _reviewRepo.ExistsAsync(bookId, userId);
         }
+            BookId = bookId,
+            ReviewerId = userId,
+            Rating = rating,
+            Comment = comment,
+            CreatedAt = DateTime.UtcNow,
+        };
+
+        await _reviewRepo.AddAsync(review);
+        return Result.Success();
+    }
+
+    public async Task<Result<double>> CalculateAverageRatingAsync(int bookId)
+    {
+        var reviews = await _reviewRepo.GetByBookIdAsync(bookId);
+        var average = reviews.Any() ? Math.Round(reviews.Average(r => r.Rating), 1) : 0.0;
+
+        return average;
+    }
+
+    public async Task<Result<IEnumerable<BookReview>>> GetBookReviewsAsync(int bookId)
+    {
+        var reviews = await _reviewRepo.GetByBookIdAsync(bookId);
+
+        return Result<IEnumerable<BookReview>>.Success(reviews);
     }
 }

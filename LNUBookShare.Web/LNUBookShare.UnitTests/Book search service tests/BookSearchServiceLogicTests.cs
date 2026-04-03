@@ -10,39 +10,35 @@ public class BookSearchServiceLogicTests : BookSearchServiceTestBase
     [InlineData("")]
     [InlineData("   ")]
     [InlineData(null)]
-    public async Task SearchAsync_WhenQueryIsEmpty_ShouldReturnEmptyList_WithoutCallingRepo(string? emptyQuery)
+    public async Task SearchAsync_WhenQueryIsEmpty_ShouldReturnFailure_WithoutCallingRepo(string? emptyQuery)
     {
         // Act
-        // Навіть якщо query криве, сервіс має зреагувати
         var result = await _searchService.SearchAsync(emptyQuery!);
 
         // Assert
-        Assert.NotNull(result);
-        Assert.Empty(result);
-
-        // Перевіряємо, що репозиторій навіть не смикали (економія ресурсів!)
+        Assert.True(result.IsFailure);
         _bookRepoMock.Verify(r => r.SearchBooksAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
     }
 
     [Fact]
-    public async Task SearchAsync_WhenNoBooksFound_ShouldReturnEmptyCollection()
+    public async Task SearchAsync_WhenNoBooksFound_ShouldReturnSuccessAndEmptyCollection()
     {
         // Arrange
         var query = "Неіснуюча Книга";
         _bookRepoMock
-            .Setup(r => r.SearchBooksAsync(query, "title", "title", "all"))
+            .Setup(r => r.SearchBooksAsync("title", query, "title", "all"))
             .ReturnsAsync(new List<Book>());
 
         // Act
         var result = await _searchService.SearchAsync(query);
 
         // Assert
-        Assert.NotNull(result);
-        Assert.Empty(result);
+        Assert.True(result.IsSuccess);
+        Assert.Empty(result.Value);
     }
 
     [Fact]
-    public async Task SearchAsync_WhenBooksExist_ShouldReturnThemCorrectly()
+    public async Task SearchAsync_WhenBooksExist_ShouldReturnSuccessAndBooksCorrectly()
     {
         // Arrange
         var query = "C#";
@@ -65,7 +61,7 @@ public class BookSearchServiceLogicTests : BookSearchServiceTestBase
     }
 
     [Fact]
-    public async Task SearchAsync_WithFilter_ShouldReturnOnlyFilteredBooks()
+    public async Task SearchAsync_WithFilter_ShouldReturnSuccessAndOnlyFilteredBooks()
     {
         // Arrange
         var query = "Java";

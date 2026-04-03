@@ -29,7 +29,7 @@ namespace LNUBookShare.Application.Services
             }
 
             _logger.LogInformation("Спроба перегляду профілю користувача з ID: {UserId} успішна!", userId);
-            return Result<User?>.Success(user);
+            return user;
         }
 
         public async Task<Result<IEnumerable<Book>>> GetOtherUserBooks(int userId, string sortBy = "title", string statusFilter = "all")

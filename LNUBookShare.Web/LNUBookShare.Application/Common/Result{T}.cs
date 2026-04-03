@@ -18,6 +18,11 @@ namespace LNUBookShare.Application.Common
             ? _value!
             : throw new InvalidOperationException("Не можна отримати значення з результату з помилкою.");
 
+        public static implicit operator Result<T>(T value)
+        {
+            return Success(value);
+        }
+
         public static Result<T> Success(T value) => new Result<T>(value, true, string.Empty);
         public static new Result<T> Failure(string error) => new Result<T>(default, false, error);
     }

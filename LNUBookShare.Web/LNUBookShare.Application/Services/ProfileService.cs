@@ -42,7 +42,7 @@ namespace LNUBookShare.Application.Services
                 AvatarPath = user.Avatar?.ImagePath,
             };
 
-            return Result<UserProfileDto>.Success(dto);
+            return dto;
         }
 
         public async Task<Result> AddBookToProfileAsync(Book book)
@@ -61,14 +61,16 @@ namespace LNUBookShare.Application.Services
             return Result.Success();
         }
 
-        public async Task<List<Book>> GetUserBooksAsync(int userId)
+        public async Task<Result<List<Book>>> GetUserBooksAsync(int userId)
         {
             var allBooks = await _bookRepository.GetAllAsync();
 
-            return allBooks
+            var userBooks = allBooks
                 .Where(b => b.OwnerId == userId)
                 .OrderByDescending(b => b.CreatedAt)
                 .ToList();
+
+            return userBooks;
         }
 
         public async Task<Result> UpdateBookAsync(Book book)
@@ -100,7 +102,6 @@ namespace LNUBookShare.Application.Services
 
         public async Task<Result> UpdateProfileAsync(int userId, string firstName, string lastName, int facultyId, string? avatarPath)
         {
-            // Отримуємо користувача з бази
             var user = await _profileRepository.GetUserByIdAsync(userId);
 
             if (user == null)
@@ -108,12 +109,10 @@ namespace LNUBookShare.Application.Services
                 return Result.Failure("Користувача не знайдено.");
             }
 
-            // Оновлюємо базові дані
             user.FirstName = firstName;
             user.LastName = lastName;
             user.FacultyId = facultyId;
 
-            // Якщо користувач завантажив нове фото
             if (!string.IsNullOrEmpty(avatarPath))
             {
                 user.Avatar = new Image
