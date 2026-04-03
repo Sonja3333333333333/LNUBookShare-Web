@@ -27,4 +27,10 @@ public class ReviewRepository : IReviewRepository
             .OrderByDescending(r => r.CreatedAt) // Свіжі відгуки зверху
             .ToListAsync();
     }
+
+    public async Task<bool> ExistsAsync(int bookId, int userId)
+    {
+        return await _context.BookReviews
+            .AnyAsync(r => r.BookId == bookId && r.ReviewerId == userId);
+    }
 }

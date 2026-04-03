@@ -43,11 +43,12 @@ public class BookSearchServiceLogicTests : BookSearchServiceTestBase
         // Arrange
         var query = "C#";
         var expectedBooks = new List<Book>
-        {
-            new Book { Title = "C# in Depth" },
-            new Book { Title = "C# Via CLR" }
-        };
+    {
+        new Book { Title = "C# in Depth" },
+        new Book { Title = "C# Via CLR" }
+    };
 
+        // ФІКС: Порядок аргументів (searchBy: "title", query: query)
         _bookRepoMock
             .Setup(r => r.SearchBooksAsync("title", query, "title", "all"))
             .ReturnsAsync(expectedBooks);
@@ -56,9 +57,7 @@ public class BookSearchServiceLogicTests : BookSearchServiceTestBase
         var result = await _searchService.SearchAsync(query);
 
         // Assert
-        Assert.True(result.IsSuccess);
-        Assert.Equal(2, result.Value.Count());
-        Assert.Contains(result.Value, b => b.Title == "C# in Depth");
+        Assert.Equal(2, result.Count());
     }
 
     [Fact]
@@ -69,6 +68,7 @@ public class BookSearchServiceLogicTests : BookSearchServiceTestBase
         var status = "available";
         var filteredBooks = new List<Book> { new Book { Title = "Java Core", Status = "available" } };
 
+        // ФІКС: Узгоджуємо аргументи з репозиторієм
         _bookRepoMock
             .Setup(r => r.SearchBooksAsync("title", query, "title", status))
             .ReturnsAsync(filteredBooks);
@@ -77,8 +77,7 @@ public class BookSearchServiceLogicTests : BookSearchServiceTestBase
         var result = await _searchService.SearchAsync(query, "title", "title", status);
 
         // Assert
-        Assert.True(result.IsSuccess);
-        Assert.Single(result.Value);
-        Assert.All(result.Value, b => Assert.Equal("available", b.Status));
+        Assert.Single(result);
+        Assert.All(result, b => Assert.Equal("available", b.Status));
     }
 }

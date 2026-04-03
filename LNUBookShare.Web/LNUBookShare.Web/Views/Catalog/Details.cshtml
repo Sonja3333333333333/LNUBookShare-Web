@@ -70,16 +70,12 @@
                         <tr>
                             <td class="text-dark fw-bold pe-3">Власник</td>
                             <td>
-                                <p class="card-text mb-1 text-muted" style="font-size: 0.9rem;">
-                                    <a asp-controller="OtherProfile"
-                                       asp-action="Index"
-                                       asp-route-userId="@Model.Owner?.Id"
-                                       class="text-primary link-dark-hover text-decoration-none fw-medium"
-                                       style="font-size: 0.9rem;"
-                                       title="Переглянути профіль">
-                                        @(Model.Owner?.FirstName ?? "Невідомо") @(Model.Owner?.LastName ?? "")
-                                    </a>
-                                </p>
+                                <a asp-controller="OtherProfile"
+                                   asp-action="Index"
+                                   asp-route-userId="@Model.Owner?.Id"
+                                   class="text-primary text-decoration-none fw-medium">
+                                     @(Model.Owner?.FirstName ?? "Невідомо") @(Model.Owner?.LastName ?? "")
+                                </a>
                             </td>
                         </tr>
                         <tr>
@@ -97,34 +93,15 @@
                         <tr>
                             <td class="text-dark fw-bold pe-3">Рейтинг</td>
                             <td>
-                                @for (int i = 0; i < fullStars; i++)
-                                {
-                                    <i class="bi bi-star-fill text-warning"></i>
-                                }
-                                @for (int i = 0; i < emptyStars; i++)
-                                {
-                                    <i class="bi bi-star text-warning"></i>
-                                }
+                                @for (int i = 0; i < fullStars; i++) { <i class="bi bi-star-fill text-warning"></i> }
+                                @for (int i = 0; i < emptyStars; i++) { <i class="bi bi-star text-warning"></i> }
                                 <span class="ms-1 text-secondary">(@Model.AverageRating.ToString("0.0"))</span>
                             </td>
                         </tr>
-                        <tr>
-                            <td class="text-dark fw-bold pe-3">Категорія</td>
-                            <td>@(Model.Category?.CategoryName ?? "Невідомо")</td>
-                        </tr>
-                        <tr>
-                            <td class="text-dark fw-bold pe-3">Мова</td>
-                            <td>@Model.Language</td>
-                        </tr>
-                        <tr>
-                            <td class="text-dark fw-bold pe-3">Видання</td>
-                            <td>@Model.Publisher</td>
-                        </tr>
-                        <tr>
-                            <td class="text-dark fw-bold pe-3">ISBN</td>
-                            <td>@Model.Isbn</td>
-                        </tr>
-                        @* ТУТ БУЛИ ДУБЛІКАТИ - Я ЇХ ВИДАЛИВ *@
+                        <tr><td class="text-dark fw-bold pe-3">Категорія</td><td>@(Model.Category?.CategoryName ?? "Невідомо")</td></tr>
+                        <tr><td class="text-dark fw-bold pe-3">Мова</td><td>@Model.Language</td></tr>
+                        <tr><td class="text-dark fw-bold pe-3">Видання</td><td>@Model.Publisher</td></tr>
+                        <tr><td class="text-dark fw-bold pe-3">ISBN</td><td>@Model.Isbn</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -136,14 +113,15 @@
                 <div class="d-grid gap-2 mt-auto ms-auto" style="width: 100%; max-width: 220px;">
                     @if (Model.Owner != null && Model.Owner.Id == currentUserId)
                     {
-                        @* Власнику не показуємо кнопки бронювання *@
+                        @* Власник бачить лише інформацію *@
+                        <div class="text-center text-muted small">Це ваша книга</div>
                     }
                     else
                     {
                         @if (Model.Status == "available") {
                             <form asp-action="Reserve" asp-controller="Catalog" method="post" class="d-grid">
                                 <input type="hidden" name="bookId" value="@Model.BookId" />
-                                <button type="submit" class="btn btn-primary btn-sm fw-medium rounded-pill text-white py-2 shadow-sm">
+                                <button type="submit" class="btn btn-primary btn-sm fw-medium rounded-pill py-2 shadow-sm">
                                     <i class="bi bi-bookmark-check me-1"></i> Забронювати
                                 </button>
                             </form>
@@ -173,8 +151,19 @@
     @* --- ВІДГУКИ --- *@
     <div class="text-center mb-5">
         <h3 class="fw-bold text-dark">Відгуки про @Model.Title</h3>
+        
         @if (User.Identity?.IsAuthenticated == true) {
-            <button type="button" class="btn btn-secondary rounded-pill px-5 py-2 mt-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#addReviewModal">Залишити відгук</button>
+            @if (!Model.HasUserReviewed) {
+                <button type="button" class="btn btn-secondary rounded-pill px-5 py-2 mt-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#addReviewModal">
+                    Залишити відгук
+                </button>
+            } else {
+                <div class="mt-3">
+                    <span class="badge bg-light text-secondary rounded-pill px-4 py-2 border">
+                        <i class="bi bi-check2-all me-1"></i> 
+                    </span>
+                </div>
+            }
         } else {
             <p class="text-muted mt-3">Увійдіть, щоб залишити відгук.</p>
         }
@@ -183,7 +172,7 @@
     <div class="reviews-container mx-auto" style="max-width: 800px;">
         @if (Model.BookReviews?.Any() == true) {
             @foreach (var review in Model.BookReviews) {
-                <div class="review-item mb-4">
+                <div class="review-item mb-4 p-3 rounded-3 bg-white border shadow-sm">
                     <div class="d-flex justify-content-between">
                         <div class="d-flex align-items-center gap-3">
                             <div class="user-avatar bg-light rounded-circle d-flex align-items-center justify-content-center" style="width: 45px; height: 45px; border: 1px solid #ddd;">
@@ -199,7 +188,6 @@
                         <div class="text-muted small">@review.CreatedAt.ToString("dd.MM.yyyy")</div>
                     </div>
                     <div class="ps-5 mt-2"><p class="text-dark mb-0">@review.Comment</p></div>
-                    <hr class="mt-4 opacity-25" />
                 </div>
             }
         } else {
