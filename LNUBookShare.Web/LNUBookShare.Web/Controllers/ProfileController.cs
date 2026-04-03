@@ -12,18 +12,18 @@ namespace LNUBookShare.Web.Controllers
     public class ProfileController : BaseController
     {
         private readonly IProfileService _profileService;
-        private readonly IFacultyRepository _facultyRepository;
+        private readonly IFacultyService _facultyService;
         private readonly IPhotoService _photoService;
 
         public ProfileController(
             UserManager<User> userManager,
             IProfileService profileService,
-            IFacultyRepository facultyRepository,
+            IFacultyService facultyService,
             IPhotoService photoService)
             : base(userManager)
         {
             _profileService = profileService;
-            _facultyRepository = facultyRepository;
+            _facultyService = facultyService;
             _photoService = photoService;
         }
 
@@ -293,7 +293,8 @@ namespace LNUBookShare.Web.Controllers
 
         private async Task LoadFacultiesToViewBag()
         {
-            var faculties = await _facultyRepository.GetAllAsync();
+            var facultiesResult = await _facultyService.GetAllFacultiesAsync();
+            var faculties = facultiesResult.IsSuccess ? facultiesResult.Value : new List<Faculty>();
             ViewBag.Faculties = new SelectList(faculties, "FacultyId", "FacultyName");
         }
 

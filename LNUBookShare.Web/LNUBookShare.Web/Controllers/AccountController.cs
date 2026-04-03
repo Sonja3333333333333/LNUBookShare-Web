@@ -15,21 +15,21 @@ public class AccountController : BaseController
     private readonly UserManager<User> _userManager;
     private readonly SignInManager<User> _signInManager;
     private readonly ILogger<AccountController> _logger;
-    private readonly IFacultyRepository _facultyRepository;
+    private readonly IFacultyService _facultyService;
     private readonly IEmailService _emailService;
 
     public AccountController(
         UserManager<User> userManager,
         SignInManager<User> signInManager,
         ILogger<AccountController> logger,
-        IFacultyRepository facultyRepository,
+        IFacultyService facultyService,
         IEmailService emailService)
         : base(userManager)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _logger = logger;
-        _facultyRepository = facultyRepository;
+        _facultyService = facultyService;
         _emailService = emailService;
     }
 
@@ -186,7 +186,8 @@ public class AccountController : BaseController
 
     private async Task LoadFacultiesToViewBag()
     {
-        var faculties = await _facultyRepository.GetAllAsync();
+        var facultiesResult = await _facultyService.GetAllFacultiesAsync();
+        var faculties = facultiesResult.IsSuccess ? facultiesResult.Value : new List<Faculty>();
         ViewBag.Faculties = new SelectList(faculties, "FacultyId", "FacultyName");
     }
 }
