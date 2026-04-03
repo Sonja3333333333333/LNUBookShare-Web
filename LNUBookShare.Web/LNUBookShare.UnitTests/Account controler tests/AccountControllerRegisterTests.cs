@@ -4,12 +4,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Xunit;
+using LNUBookShare.Application.Common; 
 
 namespace LNUBookShare.UnitTests.AccountControllerTests;
 
-// Успадковуємо AccountControllerTestBase. 
-// Весь конструктор і моки автоматично "прилетіли" сюди.
 public class AccountControllerRegisterTests : AccountControllerTestBase
 {
     [Fact]
@@ -17,7 +15,9 @@ public class AccountControllerRegisterTests : AccountControllerTestBase
     {
         // Arrange
         var model = new RegisterViewModel { Email = "hacker@gmail.com", Password = "Password123" };
-        _facultyRepoMock.Setup(r => r.GetAllAsync()).ReturnsAsync(new List<Faculty>());
+
+        _facultyServiceMock.Setup(s => s.GetAllFacultiesAsync())
+                           .ReturnsAsync(Result<IEnumerable<Faculty>>.Success(new List<Faculty>()));
 
         // Act
         var result = await _controller.Register(model);
@@ -33,7 +33,7 @@ public class AccountControllerRegisterTests : AccountControllerTestBase
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.Once);
     }
-        
+
     [Fact]
     public async Task Register_SuccessfulRegistration_LogsInformationAndRedirects()
     {

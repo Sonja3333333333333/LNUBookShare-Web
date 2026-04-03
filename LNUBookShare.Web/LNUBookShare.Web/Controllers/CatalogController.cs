@@ -96,8 +96,8 @@ namespace LNUBookShare.Web.Controllers
 
             bool isInQueue = false;
             int queuePosition = 0;
-            bool hasReviewed = false; // Додаємо прапорець
-            var currentUser = await _userManager.GetUserAsync(User);
+            bool hasReviewed = false;
+            var currentUser = await GetCurrentUserAsync();
 
             if (currentUser != null)
             {
@@ -109,8 +109,8 @@ namespace LNUBookShare.Web.Controllers
                     queuePosition = positionResult.IsSuccess ? positionResult.Value : 0;
                 }
 
-                // ПЕРЕВІРКА: чи є вже відгук від цього юзера
-                hasReviewed = await _reviewService.HasUserReviewedAsync(id, currentUser.Id);
+                var hasReviewedResult = await _reviewService.HasUserReviewedAsync(id, currentUser.Id);
+                hasReviewed = hasReviewedResult.IsSuccess && hasReviewedResult.Value;
             }
 
             ViewBag.ReturnUrl = returnUrl;
