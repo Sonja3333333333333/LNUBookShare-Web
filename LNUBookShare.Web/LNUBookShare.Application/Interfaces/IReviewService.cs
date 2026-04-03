@@ -1,17 +1,13 @@
 ﻿using LNUBookShare.Application.Common;
 using LNUBookShare.Domain.Entities;
 
-namespace LNUBookShare.Application.Interfaces;
-
-public interface IReviewService
+namespace LNUBookShare.Application.Interfaces
 {
-    Task<Result> AddReviewAsync(int bookId, int userId, int rating, string? comment);
-
-    // Рахує середній бал для книги
-    Task<double> CalculateAverageRatingAsync(int bookId);
-
-    // Повертає список відгуків для виводу на сторінці
-    Task<IEnumerable<BookReview>> GetBookReviewsAsync(int bookId);
-
-    Task<bool> HasUserReviewedAsync(int bookId, int userId);
+    public interface IReviewService
+    {
+        Task<Result> AddReviewAsync(int bookId, int userId, int rating, string? comment);
+        Task<Result<double>> CalculateAverageRatingAsync(int bookId);
+        Task<Result<IEnumerable<BookReview>>> GetBookReviewsAsync(int bookId);
+        Task<Result<bool>> HasUserReviewedAsync(int bookId, int userId);
+    }
 }

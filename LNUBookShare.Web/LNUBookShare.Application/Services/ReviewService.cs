@@ -20,7 +20,6 @@ namespace LNUBookShare.Application.Services
         {
             _logger.LogInformation("Спроба додати відгук від {UserId} для книги {BookId}", userId, bookId);
 
-            // 1. Валідація вхідних даних
             if (rating < 1 || rating > 5)
             {
                 return Result.Failure("Неприпустима оцінка. Оберіть від 1 до 5.");
@@ -31,19 +30,16 @@ namespace LNUBookShare.Application.Services
                 return Result.Failure("Коментар не може бути порожнім.");
             }
 
-            // 2. ПЕРЕВІРКА НА ДУБЛІКАТ (Ось тут фікс!)
-            // Ми питаємо в репозиторія, чи вже є відгук від цього юзера на цю книгу
             if (await _reviewRepo.ExistsAsync(bookId, userId))
             {
                 _logger.LogWarning("Користувач {UserId} намагався повторно оцінити книгу {BookId}", userId, bookId);
                 return Result.Failure("Ви вже залишили відгук до цієї книги. Один користувач — один відгук.");
             }
 
-            // 3. Якщо все ок — створюємо відгук
             var review = new BookReview
             {
                 BookId = bookId,
-                ReviewerId = userId, // Використовуємо правильне поле з ентіті
+                ReviewerId = userId,
                 Rating = rating,
                 Comment = comment,
                 CreatedAt = DateTime.UtcNow,
@@ -62,44 +58,24 @@ namespace LNUBookShare.Application.Services
             }
         }
 
-        public async Task<double> CalculateAverageRatingAsync(int bookId)
+        public async Task<Result<double>> CalculateAverageRatingAsync(int bookId)
         {
             var reviews = await _reviewRepo.GetByBookIdAsync(bookId);
-            return reviews.Any() ? Math.Round(reviews.Average(r => r.Rating), 1) : 0.0;
+            var average = reviews.Any() ? Math.Round(reviews.Average(r => r.Rating), 1) : 0.0;
+
+            return average;
         }
 
-        public async Task<IEnumerable<BookReview>> GetBookReviewsAsync(int bookId)
+        public async Task<Result<IEnumerable<BookReview>>> GetBookReviewsAsync(int bookId)
         {
-            return await _reviewRepo.GetByBookIdAsync(bookId);
+            var reviews = await _reviewRepo.GetByBookIdAsync(bookId);
+
+            return Result<IEnumerable<BookReview>>.Success(reviews);
         }
 
-        public async Task<bool> HasUserReviewedAsync(int bookId, int userId)
+        public async Task<Result<bool>> HasUserReviewedAsync(int bookId, int userId)
         {
-            return await _reviewRepo.ExistsAsync(bookId, userId);
+            return await _reviewRepo.ExistsAsync(bookId, userId); // Неявне перетворення спрацює
         }
-            BookId = bookId,
-            ReviewerId = userId,
-            Rating = rating,
-            Comment = comment,
-            CreatedAt = DateTime.UtcNow,
-        };
-
-        await _reviewRepo.AddAsync(review);
-        return Result.Success();
-    }
-
-    public async Task<Result<double>> CalculateAverageRatingAsync(int bookId)
-    {
-        var reviews = await _reviewRepo.GetByBookIdAsync(bookId);
-        var average = reviews.Any() ? Math.Round(reviews.Average(r => r.Rating), 1) : 0.0;
-
-        return average;
-    }
-
-    public async Task<Result<IEnumerable<BookReview>>> GetBookReviewsAsync(int bookId)
-    {
-        var reviews = await _reviewRepo.GetByBookIdAsync(bookId);
-
-        return Result<IEnumerable<BookReview>>.Success(reviews);
     }
 }
