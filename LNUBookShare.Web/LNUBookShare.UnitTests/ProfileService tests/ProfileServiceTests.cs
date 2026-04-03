@@ -97,32 +97,24 @@ namespace LNUBookShare.UnitTests.ProfileService_tests
             int targetUserId = 1;
             var allBooksFromDb = new List<Book>
             {
-                // Книга чужого юзера (має відфільтруватися)
                 new Book { BookId = 1, Title = "Книга іншого", OwnerId = 99, CreatedAt = DateTime.UtcNow.AddDays(-10) },
                 
-                // Старіша книга нашого юзера
                 new Book { BookId = 2, Title = "Стара книга", OwnerId = targetUserId, CreatedAt = DateTime.UtcNow.AddDays(-5) },
                 
-                // Найновіша книга нашого юзера
                 new Book { BookId = 3, Title = "Нова книга", OwnerId = targetUserId, CreatedAt = DateTime.UtcNow }
             };
 
-            // Мокаємо саме GetAllAsync, бо так працює твій сервіс
             _bookRepositoryMock
                 .Setup(repo => repo.GetAllAsync())
                 .ReturnsAsync(allBooksFromDb);
 
-            // Act
             var result = await _profileService.GetUserBooksAsync(targetUserId);
 
-            // Assert
             Assert.True(result.IsSuccess);
             Assert.NotNull(result.Value);
 
-            // Перевіряємо, що повернуло лише 2 книги
             Assert.Equal(2, result.Value.Count);
 
-            // Перевіряємо, що вони відсортовані від найновішої до найстарішої (OrderByDescending)
             Assert.Equal("Нова книга", result.Value.First().Title);
             Assert.Equal("Стара книга", result.Value.Last().Title);
         }
@@ -146,7 +138,7 @@ namespace LNUBookShare.UnitTests.ProfileService_tests
 
             // Assert
             Assert.True(result.IsSuccess);
-            Assert.Empty(result.Value); // Має бути порожньо
+            Assert.Empty(result.Value); 
         }
 
         [Fact]
@@ -186,7 +178,6 @@ namespace LNUBookShare.UnitTests.ProfileService_tests
             Assert.True(result.IsFailure);
             Assert.Equal("Дані для оновлення відсутні.", result.Error);
 
-            // Перевіряємо, що до бази навіть не зверталися
             _bookRepositoryMock.Verify(repo => repo.UpdateAsync(It.IsAny<Book>()), Times.Never);
         }
     }
