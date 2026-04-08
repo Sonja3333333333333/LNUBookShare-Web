@@ -100,6 +100,11 @@ try
 
     builder.Services.AddScoped<IFacultyService, FacultyService>();
 
+    builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+    builder.Services.AddScoped<INotificationService, NotificationService>();
+
+    builder.Services.AddScoped<IBookStatusService, BookStatusService>();
+
     var app = builder.Build();
 
     // --- MIDDLEWARE ---

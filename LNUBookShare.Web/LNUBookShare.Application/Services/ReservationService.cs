@@ -111,5 +111,26 @@ namespace LNUBookShare.Application.Services
 
             return usersInQueue;
         }
+
+        public async Task<Result> LeaveQueueAsync(int bookId, int userId)
+        {
+            var queueResult = await GetQueueUsersAsync(bookId);
+
+            if (queueResult.IsFailure)
+            {
+                return Result.Failure("Помилка при перевірці черги.");
+            }
+
+            var queueItem = await _reservationRepo.GetByUserAndBookAsync(userId, bookId);
+
+            if (queueItem == null)
+            {
+                return Result.Failure("Користувача не знайдено в черзі.");
+            }
+
+            await _reservationRepo.DeleteAsync(queueItem);
+
+            return Result.Success();
+        }
     }
 }

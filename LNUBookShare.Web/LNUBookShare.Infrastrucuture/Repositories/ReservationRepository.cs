@@ -48,5 +48,17 @@ namespace LNUBookShare.Infrastructure.Repositories
                     (rq, u) => u)
                 .ToListAsync();
         }
+
+        public async Task<ReservationQueue?> GetByUserAndBookAsync(int userId, int bookId)
+        {
+            return await _context.ReservationQueues
+                .FirstOrDefaultAsync(q => q.UserId == userId && q.BookId == bookId);
+        }
+
+        public async Task DeleteAsync(ReservationQueue queueItem)
+        {
+            _context.ReservationQueues.Remove(queueItem);
+            await _context.SaveChangesAsync();
+        }
     }
 }

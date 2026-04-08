@@ -10,5 +10,6 @@ namespace LNUBookShare.Application.Interfaces
         Task<Result<int>> GetQueuePositionAsync(int bookId, int userId);
         Task<Result<bool>> IsUserInQueueAsync(int bookId, int userId);
         Task<Result<List<User>>> GetQueueUsersAsync(int bookId);
+        Task<Result> LeaveQueueAsync(int bookId, int userId);
     }
 }
