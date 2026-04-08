@@ -9,5 +9,7 @@ namespace LNUBookShare.Application.Interfaces
         Task<int> GetPositionAsync(int bookId, int userId);
 
         Task<List<User>> GetQueueUsersAsync(int bookId);
+        Task<ReservationQueue?> GetByUserAndBookAsync(int userId, int bookId);
+        Task DeleteAsync(ReservationQueue queueItem);
     }
 }

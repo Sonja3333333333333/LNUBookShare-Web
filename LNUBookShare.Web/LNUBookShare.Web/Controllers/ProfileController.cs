@@ -14,17 +14,20 @@ namespace LNUBookShare.Web.Controllers
         private readonly IProfileService _profileService;
         private readonly IFacultyService _facultyService;
         private readonly IPhotoService _photoService;
+        private readonly IBookStatusService bookStatusService;
 
         public ProfileController(
             UserManager<User> userManager,
             IProfileService profileService,
             IFacultyService facultyService,
-            IPhotoService photoService)
+            IPhotoService photoService,
+            IBookStatusService bookStatusService)
             : base(userManager)
         {
             _profileService = profileService;
             _facultyService = facultyService;
             _photoService = photoService;
+            this.bookStatusService = bookStatusService;
         }
 
         [HttpGet]
@@ -289,6 +292,52 @@ namespace LNUBookShare.Web.Controllers
             ViewBag.BookTitle = book.Title;
 
             return View(queueUsers);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> IssueBook(int bookId, [FromServices] IBookStatusService bookStatusService)
+        {
+            var userId = GetCurrentUserId();
+            if (userId == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var result = await bookStatusService.IssueBookAsync(bookId, userId.Value);
+
+            if (result.IsSuccess)
+            {
+                TempData["SuccessMessage"] = "Книгу успішно видано.";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = result.Error;
+            }
+
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ConfirmReturn(int bookId, [FromServices] IBookStatusService bookStatusService)
+        {
+            var userId = GetCurrentUserId();
+            if (userId == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var result = await bookStatusService.ConfirmReturnAsync(bookId, userId.Value);
+
+            if (result.IsSuccess)
+            {
+                TempData["SuccessMessage"] = "Повернення підтверджено. Статус оновлено.";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = result.Error;
+            }
+
+            return RedirectToAction("Index");
         }
 
         private async Task LoadFacultiesToViewBag()

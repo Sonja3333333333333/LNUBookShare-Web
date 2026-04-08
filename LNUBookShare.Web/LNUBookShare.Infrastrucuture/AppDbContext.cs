@@ -31,6 +31,8 @@ public partial class AppDbContext : IdentityDbContext<User, Role, int>
     public virtual DbSet<ReservationQueue> ReservationQueues { get; set; }
     public virtual DbSet<UserReview> UserReviews { get; set; }
 
+    public virtual DbSet<Notification> Notifications { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -241,6 +243,37 @@ public partial class AppDbContext : IdentityDbContext<User, Role, int>
             entity.HasOne(d => d.Reviewer).WithMany().HasForeignKey(d => d.ReviewerId).OnDelete(DeleteBehavior.Cascade).HasConstraintName("user_review_reviewer_id_fkey");
         });
 
+        // 13. ТАБЛИЦЯ: notification
+        modelBuilder.Entity<Notification>(entity =>
+        {
+            entity.ToTable("notification");
+            entity.HasKey(e => e.Id).HasName("notification_pkey");
+
+            entity.Property(e => e.Id).HasColumnName("notification_id");
+            entity.Property(e => e.UserId).HasColumnName("user_id").IsRequired();
+            entity.Property(e => e.BookId).HasColumnName("book_id");
+            entity.Property(e => e.Message).HasColumnName("message_").IsRequired();
+            entity.Property(e => e.IsRead).HasDefaultValue(false).HasColumnName("is_read").IsRequired();
+
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("now()")
+                .HasColumnType("timestamp without time zone")
+                .HasColumnName("created_at")
+                .IsRequired();
+
+            entity.HasOne(d => d.User)
+                .WithMany()
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("notification_user_id_fkey");
+
+            entity.HasOne(d => d.Book)
+                .WithMany()
+                .HasForeignKey(d => d.BookId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("notification_book_id_fkey");
+        });
+
         // ------------------ SEEDING (Тестові Дані) ------------------
         modelBuilder.Entity<Faculty>().HasData(new Faculty { FacultyId = 1, FacultyName = "Прикладна математика та інформатика" });
         modelBuilder.Entity<Category>().HasData(new Category { CategoryId = 1, CategoryName = "Програмування" });
@@ -262,6 +295,7 @@ public partial class AppDbContext : IdentityDbContext<User, Role, int>
             PasswordHash = "AQAAAAIAAYagAAAAEKA2vL5nQ69q4rQxG+E+mO2e8q1b9wXYZ...",
             SecurityStamp = "STATIC-STAMP-1111-2222-3333",
             ConcurrencyStamp = "STATIC-USER-STAMP-4444",
+            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc),
         };
         modelBuilder.Entity<User>().HasData(testUser);
 
@@ -277,6 +311,7 @@ public partial class AppDbContext : IdentityDbContext<User, Role, int>
             Status = "available",
             Language = "Українська",
             Publisher = "Фабула",
+            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc),
         });
     }
 }

@@ -19,7 +19,8 @@ namespace LNUBookShare.Infrastructure.Repositories
 
         public async Task<IEnumerable<Book>> GetAllAsync()
         {
-            return await _context.Books.Include(b => b.Owner).Include(b => b.Cover).ToListAsync();
+            return await _context.Books.Include(b => b.Owner).Include(b => b.Cover).Include(b => b.ReservationQueues)
+            .ThenInclude(rq => rq.User).ToListAsync();
         }
 
         public async Task<Book?> GetByIdAsync(int id)
