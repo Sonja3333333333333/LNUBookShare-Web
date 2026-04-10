@@ -11,6 +11,7 @@ namespace LNUBookShare.UnitTests.ReservationService_tests
     {
         private readonly Mock<IReservationRepository> _reservationRepoMock;
         private readonly Mock<IBookRepository> _bookRepoMock;
+        private readonly Mock<INotificationRepository> _notificationRepoMock; // НОВЕ: Мок для сповіщень
         private readonly Mock<ILogger<ReservationService>> _loggerMock;
         private readonly ReservationService _reservationService;
 
@@ -18,11 +19,13 @@ namespace LNUBookShare.UnitTests.ReservationService_tests
         {
             _reservationRepoMock = new Mock<IReservationRepository>();
             _bookRepoMock = new Mock<IBookRepository>();
+            _notificationRepoMock = new Mock<INotificationRepository>(); 
             _loggerMock = new Mock<ILogger<ReservationService>>();
 
             _reservationService = new ReservationService(
                 _reservationRepoMock.Object,
                 _bookRepoMock.Object,
+                _notificationRepoMock.Object,
                 _loggerMock.Object);
         }
 
@@ -87,6 +90,50 @@ namespace LNUBookShare.UnitTests.ReservationService_tests
             // Assert
             Assert.True(result.IsFailure);
             Assert.Equal("Ви вже у черзі.", result.Error);
+        }
+
+
+        [Fact]
+        public async Task ReserveBookAsync_WhenSuccessful_ShouldCreateNotificationForOwner()
+        {
+            // Arrange
+            int bookId = 1;
+            int readerId = 10;
+            int ownerId = 99;
+
+            var book = new Book { BookId = bookId, Status = "available", OwnerId = ownerId };
+            _bookRepoMock.Setup(r => r.GetByIdAsync(bookId)).ReturnsAsync(book);
+
+            // Act
+            var result = await _reservationService.ReserveBookAsync(bookId, readerId);
+
+            // Assert
+            Assert.True(result.IsSuccess);
+
+            _notificationRepoMock.Verify(n => n.AddAsync(It.Is<Notification>(
+                notif => notif.UserId == ownerId &&
+                         notif.BookId == bookId &&
+                         notif.IsRead == false
+            )), Times.Once);
+        }
+
+        [Fact]
+        public async Task ReserveBookAsync_WhenFails_ShouldNotCreateNotification()
+        {
+            // Arrange
+            int bookId = 1;
+            int ownerId = 10; 
+
+            var book = new Book { BookId = bookId, Status = "available", OwnerId = ownerId };
+            _bookRepoMock.Setup(r => r.GetByIdAsync(bookId)).ReturnsAsync(book);
+
+            // Act
+            var result = await _reservationService.ReserveBookAsync(bookId, ownerId);
+
+            // Assert
+            Assert.True(result.IsFailure);
+
+            _notificationRepoMock.Verify(n => n.AddAsync(It.IsAny<Notification>()), Times.Never);
         }
     }
 }
