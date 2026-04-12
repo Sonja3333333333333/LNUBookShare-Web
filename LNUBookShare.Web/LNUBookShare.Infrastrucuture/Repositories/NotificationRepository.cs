@@ -38,5 +38,11 @@ namespace LNUBookShare.Infrastructure.Repositories // Перевір свій н
             _context.Notifications.Update(notification);
             await _context.SaveChangesAsync();
         }
+
+        public async Task DeleteAsync(Notification notification)
+        {
+            _context.Notifications.Remove(notification);
+            await _context.SaveChangesAsync();
+        }
     }
 }

@@ -55,8 +55,7 @@ namespace LNUBookShare.Application.Services
                 return Result.Failure("Немає доступу до цього сповіщення.");
             }
 
-            notification.IsRead = true;
-            await _notificationRepository.UpdateAsync(notification);
+            await _notificationRepository.DeleteAsync(notification);
 
             return Result.Success();
         }
