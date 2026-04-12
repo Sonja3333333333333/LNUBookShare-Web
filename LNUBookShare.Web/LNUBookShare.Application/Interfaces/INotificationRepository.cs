@@ -8,5 +8,7 @@ namespace LNUBookShare.Application.Interfaces
         Task<IEnumerable<Notification>> GetByUserIdAsync(int userId);
         Task<Notification?> GetByIdAsync(int id);
         Task UpdateAsync(Notification notification);
+
+        Task DeleteAsync(Notification notification);
     }
 }
