@@ -313,5 +313,18 @@ public partial class AppDbContext : IdentityDbContext<User, Role, int>
             Publisher = "Фабула",
             CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc),
         });
+
+        //-------------повідомлення
+        // Тестові сповіщення
+        modelBuilder.Entity<Notification>().HasData(
+            new Notification
+            {
+                Id = 1,
+                UserId = 9, // ID нашого testUser
+                BookId = 1, // ID нашої книги "Чиста Архітектура"
+                Message = "Книга 'Чиста Архітектура' тепер доступна для бронювання!",
+                IsRead = false,
+                CreatedAt = new DateTime(2024, 4, 12, 10, 0, 0, DateTimeKind.Utc),
+            });
     }
 }

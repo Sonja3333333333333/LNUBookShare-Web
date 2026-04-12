@@ -1,0 +1,61 @@
+﻿@using Microsoft.AspNetCore.Identity
+@inject UserManager<LNUBookShare.Domain.Entities.User> UserManager
+
+@model IEnumerable<LNUBookShare.Domain.Entities.Notification>
+
+<div class="container">
+    <div class="mt-4">
+        @if (TempData["StatusMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show alert-pill px-4 shadow-sm" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i> @TempData["StatusMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show alert-pill px-4 shadow-sm" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["ErrorMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+    </div>    
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="notifications-list">
+            @foreach (var item in Model)
+            {
+                <div class="notification-card mb-3 p-3 border rounded shadow-sm">
+                    <h4>@(item.Book?.Title ?? "Книга") доступна для вас</h4>
+                    <p>
+                        Натисніть
+                        <a asp-controller="Catalog" 
+                        asp-action="Details" 
+                        asp-route-id="@item.BookId" 
+                        class="fw-bold link-dark-hover text-decoration-none text-dark" 
+                        title="Переглянути деталі">
+                        тут
+                        </a>, аби переглянути інформацію про книгу та забронювати її
+                    </p>
+                    
+                    
+                    <form asp-controller="Notification" asp-action="MarkAsRead" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="notificationId" value="@item.BookId" />
+                        <button type="submit" class="btn btn-sm btn-outline-secondary">
+                            Позначити як прочитане
+                        </button>
+                    </form>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="text-center mt-5">
+            <i class="bi bi-bell-slash text-muted" style="font-size: 3rem;"></i>
+            <p class="mt-2">У вас немає нових сповіщень.</p>
+        </div>
+    }
+</div>
