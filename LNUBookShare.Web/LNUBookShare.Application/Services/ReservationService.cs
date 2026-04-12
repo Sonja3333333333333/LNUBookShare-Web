@@ -9,15 +9,19 @@ namespace LNUBookShare.Application.Services
     {
         private readonly IReservationRepository _reservationRepo;
         private readonly IBookRepository _bookRepo;
+        private readonly INotificationRepository _notificationRepo; // НОВЕ: додаємо репозиторій сповіщень
         private readonly ILogger<ReservationService> _logger;
 
+        // НОВЕ: оновлюємо конструктор
         public ReservationService(
             IReservationRepository reservationRepo,
             IBookRepository bookRepo,
+            INotificationRepository notificationRepo,
             ILogger<ReservationService> logger)
         {
             _reservationRepo = reservationRepo;
             _bookRepo = bookRepo;
+            _notificationRepo = notificationRepo; // НОВЕ: ініціалізація
             _logger = logger;
         }
 
@@ -51,6 +55,18 @@ namespace LNUBookShare.Application.Services
 
             await _reservationRepo.AddAsync(entry);
             _logger.LogInformation("User {UserId} reserved book {BookId}", userId, bookId);
+
+            var notification = new Notification
+            {
+                UserId = book.OwnerId,
+                Message = $"Вашу книгу «{book.Title}» щойно забронювали. Будь ласка, перегляньте деталі.",
+                BookId = bookId,
+                IsRead = false,
+                CreatedAt = DateTime.UtcNow,
+            };
+
+            await _notificationRepo.AddAsync(notification);
+            _logger.LogInformation("Створено сповіщення в БД для власника {OwnerId} про книгу {BookId}", book.OwnerId, bookId);
 
             return Result.Success();
         }
