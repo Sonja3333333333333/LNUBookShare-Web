@@ -112,15 +112,8 @@ try
     // --- MIDDLEWARE ---
     app.UseSerilogRequestLogging();
 
-    if (!app.Environment.IsDevelopment())
-    {
-        app.UseExceptionHandler("/Home/Error");
-        app.UseHsts();
-    }
-    else
-    {
-        app.UseDeveloperExceptionPage();
-    }
+    app.UseExceptionHandler("/Home/Error");
+    app.UseHsts();
 
     app.UseHttpsRedirection();
     app.MapStaticAssets();

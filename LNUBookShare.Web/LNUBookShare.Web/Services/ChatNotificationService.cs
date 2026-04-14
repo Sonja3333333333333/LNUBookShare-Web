@@ -15,8 +15,16 @@ namespace LNUBookShare.Web.Services
 
         public async Task NotifyNewMessageAsync(int receiverId, int senderId, string content)
         {
+            var time = DateTime.UtcNow.ToString("HH:mm");
+
+            // 1. Шлемо отримувачу (щоб у нього з'явився бабл)
             await _hubContext.Clients.Group(receiverId.ToString())
-                .SendAsync("ReceiveMessage", senderId, content, DateTime.UtcNow.ToString("HH:mm"));
+                .SendAsync("ReceiveMessage", senderId, content, time);
+
+            // 2. Шлемо відправнику (тобі), щоб твій JS теж намалював бабл
+            // Це важливо, бо ми не рефрешимо сторінку через AJAX!
+            await _hubContext.Clients.Group(senderId.ToString())
+                .SendAsync("ReceiveMessage", senderId, content, time);
         }
 
         public async Task NotifyStatusChangedAsync(int userId, bool isOnline)
