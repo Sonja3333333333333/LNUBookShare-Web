@@ -11,7 +11,7 @@ namespace LNUBookShare.UnitTests.ReservationService_tests
     {
         private readonly Mock<IReservationRepository> _reservationRepoMock;
         private readonly Mock<IBookRepository> _bookRepoMock;
-        private readonly Mock<INotificationRepository> _notificationRepoMock; // НОВЕ: Мок для сповіщень
+        private readonly Mock<INotificationService> _notificationServiceMock;
         private readonly Mock<ILogger<ReservationService>> _loggerMock;
         private readonly ReservationService _reservationService;
 
@@ -19,13 +19,13 @@ namespace LNUBookShare.UnitTests.ReservationService_tests
         {
             _reservationRepoMock = new Mock<IReservationRepository>();
             _bookRepoMock = new Mock<IBookRepository>();
-            _notificationRepoMock = new Mock<INotificationRepository>();
+            _notificationServiceMock = new Mock<INotificationService>();
             _loggerMock = new Mock<ILogger<ReservationService>>();
 
             _reservationService = new ReservationService(
                 _reservationRepoMock.Object,
                 _bookRepoMock.Object,
-                _notificationRepoMock.Object,
+                _notificationServiceMock.Object,
                 _loggerMock.Object);
         }
 
@@ -110,11 +110,11 @@ namespace LNUBookShare.UnitTests.ReservationService_tests
             // Assert
             Assert.True(result.IsSuccess);
 
-            _notificationRepoMock.Verify(n => n.AddAsync(It.Is<Notification>(
-                notif => notif.UserId == ownerId &&
-                         notif.BookId == bookId &&
-                         notif.IsRead == false
-            )), Times.Once);
+            _notificationServiceMock.Verify(n => n.CreateNotificationAsync(
+                 ownerId,
+                 It.IsAny<string>(),
+                 bookId
+             ), Times.Once);
         }
 
         [Fact]
@@ -133,7 +133,11 @@ namespace LNUBookShare.UnitTests.ReservationService_tests
             // Assert
             Assert.True(result.IsFailure);
 
-            _notificationRepoMock.Verify(n => n.AddAsync(It.IsAny<Notification>()), Times.Never);
+            _notificationServiceMock.Verify(n => n.CreateNotificationAsync(
+                 It.IsAny<int>(),
+                 It.IsAny<string>(),
+                 It.IsAny<int?>()
+             ), Times.Never);
         }
     }
 }
