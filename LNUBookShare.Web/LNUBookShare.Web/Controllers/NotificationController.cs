@@ -69,5 +69,31 @@ namespace LNUBookShare.Web.Controllers
 
             return RedirectToAction(nameof(Index), new { userId = userId });
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteAll()
+        {
+            var userId = GetCurrentUserId();
+            if (userId == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var notificationsResult = await _notificationService
+                .GetUserNotificationsAsync(userId.Value);
+
+            if (notificationsResult.IsSuccess)
+            {
+                foreach (var notification in notificationsResult.Value)
+                {
+                    await _notificationService.MarkAsReadAsync(
+                        notification.Id, userId.Value);
+                }
+            }
+
+            TempData["SuccessMessage"] = "Усі сповіщення видалено.";
+            return RedirectToAction(nameof(Index));
+        }
     }
 }
