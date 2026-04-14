@@ -44,9 +44,9 @@ namespace LNUBookShare.UnitTests.Notification_tests
             // Arrange
             int userId = 1;
             var notifications = new List<Notification>
-            {
-                new Notification { Id = 1, UserId = userId, Message = "Msg 1" }
-            };
+    {
+        new Notification { Id = 1, UserId = userId, Message = "Msg 1" }
+    };
             _notifRepoMock.Setup(r => r.GetByUserIdAsync(userId)).ReturnsAsync(notifications);
 
             // Act
@@ -55,7 +55,17 @@ namespace LNUBookShare.UnitTests.Notification_tests
             // Assert
             Assert.True(result.IsSuccess);
             Assert.Equal(notifications, result.Value);
+
+            // Змінено на LogLevel.Debug, щоб відповідати коду сервісу
+            _loggerMock.Verify(x => x.Log(
+                LogLevel.Debug,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Отримано")),
+                It.IsAny<Exception>(),
+                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+            Times.Once);
         }
+
 
         [Fact]
         public async Task MarkAsReadAsync_ShouldReturnFailure_WhenNotificationNotFound()
@@ -70,6 +80,14 @@ namespace LNUBookShare.UnitTests.Notification_tests
             // Assert
             Assert.False(result.IsSuccess);
             Assert.Equal("Сповіщення не знайдено.", result.Error);
+
+            _loggerMock.Verify(x => x.Log(
+                LogLevel.Warning,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Спроба видалити неіснуюче сповіщення")),
+                It.IsAny<Exception>(),
+                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+            Times.Once);
         }
 
         [Fact]
@@ -85,6 +103,14 @@ namespace LNUBookShare.UnitTests.Notification_tests
             // Assert
             Assert.False(result.IsSuccess);
             Assert.Equal("Немає доступу до цього сповіщення.", result.Error);
+
+            _loggerMock.Verify(x => x.Log(
+                LogLevel.Warning,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("отримати доступ до чужого сповіщення")),
+                It.IsAny<Exception>(),
+                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+            Times.Once);
         }
 
         [Fact]
@@ -100,6 +126,14 @@ namespace LNUBookShare.UnitTests.Notification_tests
             // Assert
             Assert.True(result.IsSuccess);
             _notifRepoMock.Verify(r => r.DeleteAsync(notification), Times.Once);
+
+            _loggerMock.Verify(x => x.Log(
+                LogLevel.Information,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("успішно видалив")),
+                It.IsAny<Exception>(),
+                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+            Times.Once);
         }
     }
 }
