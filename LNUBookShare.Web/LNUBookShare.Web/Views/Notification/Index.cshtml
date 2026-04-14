@@ -36,26 +36,28 @@
                     </div>
 
                     <div class="notification-body-container flex-grow-1">
-                        <h4 class="fw-bold text-dark">
-                            "@(item.Book?.Title ?? "Книга")" доступна для вас
-                        </h4>
+                        <h5 class="fw-medium text-dark mb-2" style="line-height: 1.4;">
+                            @item.Message
+                        </h5>
                     
-                        <p class="text-muted mb-3">
-                            Натисніть
-                            <a asp-controller="Catalog"
-                                   asp-action="Details"
-                                   asp-route-id="@item.BookId"
-                                   class="fw-bold link-dark-hover text-decoration-none text-dark"
-                                   title="Переглянути деталі">
-                                тут
-                            </a>, аби переглянути інформацію про книгу та забронювати її
-                        </p>
+                        @if (item.BookId != null)
+                        {
+                            <p class="mb-3" style="font-size: 0.95rem;">
+                                <a asp-controller="Catalog"
+                                       asp-action="Details"
+                                       asp-route-id="@item.BookId"
+                                       class="fw-semibold text-primary text-decoration-none link-opacity-75-hover"
+                                       title="Переглянути деталі">
+                                    Перейти до сторінки книги <i class="bi bi-arrow-right-short"></i>
+                                </a>
+                            </p>
+                        }
                     
                         <form asp-controller="Notification" asp-action="MarkAsRead" method="post" class="mt-2">
-                            @Html.AntiForgeryToken()                            
+                            @Html.AntiForgeryToken()
                             <input type="hidden" name="notificationId" value="@item.Id" />
                             <button type="submit" class="btn btn-sm btn-outline-secondary">
-                                Позначити як прочитане
+                                <i class="bi bi-check2"></i> Зрозуміло (видалити)
                             </button>
                         </form>
                     </div>
