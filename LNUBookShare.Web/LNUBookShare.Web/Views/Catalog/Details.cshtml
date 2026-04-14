@@ -113,7 +113,6 @@
                 <div class="d-grid gap-2 mt-auto ms-auto" style="width: 100%; max-width: 220px;">
                     @if (Model.Owner != null && Model.Owner.Id == currentUserId)
                     {
-                        @* Власник бачить лише інформацію *@
                         <div class="text-center text-muted small">Це ваша книга</div>
                     }
                     else
@@ -139,7 +138,10 @@
                                 </form>
                             }
                         }
-                        <a href="#" class="btn btn-secondary btn-sm fw-medium rounded-pill text-white py-2" style="background-color: #6c757d;">
+                        
+                        @* ТУТ ФІКС: Направляємо в чат до власника *@
+                        <a asp-action="Index" asp-controller="Chat" asp-route-receiverId="@Model.Owner?.Id" 
+                           class="btn btn-secondary btn-sm fw-medium rounded-pill text-white py-2" style="background-color: #6c757d;">
                             <i class="bi bi-chat-dots me-1"></i> Написати власнику
                         </a>
                     }
@@ -160,7 +162,7 @@
             } else {
                 <div class="mt-3">
                     <span class="badge bg-light text-secondary rounded-pill px-4 py-2 border">
-                        <i class="bi bi-check2-all me-1"></i> 
+                        <i class="bi bi-check2-all me-1"></i> Ви вже оцінили цю книгу
                     </span>
                 </div>
             }
@@ -174,7 +176,6 @@
             @foreach (var review in Model.BookReviews) {
                 <div class="review-item mb-4 p-3 rounded-3 bg-white border shadow-sm">
                     <div class="d-flex justify-content-between">
-                        
                         <div class="d-flex align-items-center gap-3">
                             @if (review.Reviewer?.Avatar != null && !string.IsNullOrEmpty(review.Reviewer.Avatar.ImagePath))
                             {
@@ -196,7 +197,6 @@
                                 </div>
                             </div>
                         </div>
-
                         <div class="text-muted small">@review.CreatedAt.ToString("dd.MM.yyyy")</div>
                     </div>
                     
@@ -212,6 +212,7 @@
             </div>
         }
     </div>
+</div>
 
 @* --- МОДАЛКА ВІДГУКУ --- *@
 <div class="modal fade" id="addReviewModal" tabindex="-1">

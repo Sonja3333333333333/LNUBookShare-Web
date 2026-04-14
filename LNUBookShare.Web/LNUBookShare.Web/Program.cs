@@ -8,6 +8,8 @@ using LNUBookShare.Domain.Entities;
 using LNUBookShare.Infrastructure;
 using LNUBookShare.Infrastructure.Repositories;
 using LNUBookShare.Infrastructure.Services;
+using LNUBookShare.Web.Hubs;
+using LNUBookShare.Web.Services; // Додав для нашого нового сервісу сповіщень
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
@@ -27,7 +29,6 @@ try
     Log.Information("Запуск веб-додатка LNU Book Share!");
 
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-    Console.WriteLine($"DEBUG: Connection String is: {connectionString}");
 
     // --- DATABASE ---
     builder.Services.AddDbContext<AppDbContext>(options =>
@@ -57,61 +58,69 @@ try
 
     // --- REPOSITORIES & SERVICES REGISTRATION ---
 
-    // Core infrastructure
-    builder.Services.AddScoped<IBookRepository, BookRepository>();
+    // Infrastructure & Core
     builder.Services.AddScoped<IFacultyRepository, FacultyRepository>();
+    builder.Services.AddScoped<IFacultyService, FacultyService>();
     builder.Services.AddTransient<IEmailService, EmailService>();
+    builder.Services.AddScoped<IPhotoService, PhotoService>();
 
-    // Book Search & Details
+    // Books logic
+    builder.Services.AddScoped<IBookRepository, BookRepository>();
     builder.Services.AddScoped<IBookSearchService, BookSearchService>();
     builder.Services.AddScoped<IBookDetailsService, BookDetailsService>();
+    builder.Services.AddScoped<IBookStatusService, BookStatusService>();
 
     // Favorites
     builder.Services.AddScoped<IFavoriteRepository, FavoriteRepository>();
     builder.Services.AddScoped<IFavoriteService, FavoriteService>();
 
-    builder.Services.AddScoped<IBookDetailsService, BookDetailsService>();
-
-    builder.Services.AddScoped<IProfileService, ProfileService>();
-
-    // --- ТАСКА #57: ВІДГУКИ ТА РЕЙТИНГ ---
-    // Реєструємо репозиторій (робота з БД) та сервіс (логіка)
-    // Reviews
+    // Reviews & Rating
     builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
     builder.Services.AddScoped<IReviewService, ReviewService>();
 
-    // --- RESERVATION QUEUE (NEW) ---
+    // Reservation Queue
     builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
     builder.Services.AddScoped<IReservationService, ReservationService>();
 
-    // Profile
+    // Profiles
     builder.Services.AddScoped<IProfileRepository, ProfileRepository>();
     builder.Services.AddScoped<IProfileService, ProfileService>();
-
     builder.Services.AddScoped<IOtherProfileRepository, OtherProfileRepository>();
     builder.Services.AddScoped<IOtherProfileService, OtherProfileService>();
-    builder.Services.AddControllersWithViews();
 
-    // Реєструємо налаштування Cloudinary
-    builder.Services.Configure<LNUBookShare.Application.Common.CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
-
-    // Реєструємо сервіс
-    builder.Services.AddScoped<IPhotoService, PhotoService>();
-
-    builder.Services.AddScoped<IFacultyService, FacultyService>();
-
+    // Notifications
     builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
     builder.Services.AddScoped<INotificationService, NotificationService>();
 
-    builder.Services.AddScoped<IBookStatusService, BookStatusService>();
+    // Системні повідомлення (Чат)
+    builder.Services.AddScoped<IChatRepository, ChatRepository>();
+    builder.Services.AddScoped<IChatService, ChatService>();
+
+    // ОСЬ ТУТ: Реєстрація архітектурно-правильного сервісу сповіщень
+    builder.Services.AddScoped<IChatNotificationService, ChatNotificationService>();
+
+    // --- SIGNALR REGISTRATION ---
+    builder.Services.AddSignalR();
+
+    // Додаткові налаштування
+    builder.Services.Configure<LNUBookShare.Application.Common.CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
+
+    builder.Services.AddControllersWithViews();
 
     var app = builder.Build();
 
     // --- MIDDLEWARE ---
     app.UseSerilogRequestLogging();
 
-    app.UseExceptionHandler("/Home/Error");
-    app.UseHsts();
+    if (!app.Environment.IsDevelopment())
+    {
+        app.UseExceptionHandler("/Home/Error");
+        app.UseHsts();
+    }
+    else
+    {
+        app.UseDeveloperExceptionPage();
+    }
 
     app.UseHttpsRedirection();
     app.MapStaticAssets();
@@ -119,6 +128,9 @@ try
 
     app.UseAuthentication();
     app.UseAuthorization();
+
+    // --- SIGNALR ENDPOINTS ---
+    app.MapHub<ChatHub>("/chatHub");
 
     app.MapControllerRoute(
         name: "default",
