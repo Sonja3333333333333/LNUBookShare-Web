@@ -1,0 +1,73 @@
+﻿@using Microsoft.AspNetCore.Identity
+@inject UserManager<LNUBookShare.Domain.Entities.User> UserManager
+
+@model IEnumerable<LNUBookShare.Domain.Entities.Notification>
+
+<div class="container">
+    <div class="mt-4">
+        @if (TempData["StatusMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show alert-pill px-4 shadow-sm" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i> @TempData["StatusMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show alert-pill px-4 shadow-sm" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["ErrorMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+    </div>    
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="notifications-list mt-4">
+            @foreach (var item in Model)
+            {
+               
+                <div class="notification-card-custom mb-3 p-4 border rounded shadow-sm d-flex align-items-start">
+                
+                    
+                    <div class="notification-icon-container me-4 mt-1">
+                        @* синій дзвоник. text-primary робить його синім *@
+                        <i class="bi bi-bell-fill text-primary" style="font-size: 2.5rem;"></i>
+                    </div>
+
+                    <div class="notification-body-container flex-grow-1">
+                        <h4 class="fw-bold text-dark">
+                            "@(item.Book?.Title ?? "Книга")" доступна для вас
+                        </h4>
+                    
+                        <p class="text-muted mb-3">
+                            Натисніть
+                            <a asp-controller="Catalog"
+                                   asp-action="Details"
+                                   asp-route-id="@item.BookId"
+                                   class="fw-bold link-dark-hover text-decoration-none text-dark"
+                                   title="Переглянути деталі">
+                                тут
+                            </a>, аби переглянути інформацію про книгу та забронювати її
+                        </p>
+                    
+                        <form asp-controller="Notification" asp-action="MarkAsRead" method="post" class="mt-2">
+                            @Html.AntiForgeryToken()                            
+                            <input type="hidden" name="notificationId" value="@item.Id" />
+                            <button type="submit" class="btn btn-sm btn-outline-secondary">
+                                Позначити як прочитане
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="text-center mt-5">
+            <i class="bi bi-bell-slash text-muted" style="font-size: 3rem;"></i>
+            <p class="mt-2">У вас немає нових сповіщень.</p>
+        </div>
+    }
+</div>
