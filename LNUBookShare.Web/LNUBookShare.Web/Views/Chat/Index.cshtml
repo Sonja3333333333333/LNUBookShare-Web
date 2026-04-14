@@ -8,13 +8,26 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
 
 <style>
+    body {
+        overflow: hidden;
+    }
+
     .chat-container {
-        height: calc(100vh - 150px);
+        /* 2. ЗМІНЕНО: Віднімаємо трохи більше пікселів для верхнього меню, щоб низ не обрізало */
+        height: calc(100vh - 76px); 
         min-height: 500px;
         background-color: #fff;
-        border-radius: 15px;
         display: flex;
         overflow: hidden;
+        
+        width: 100vw;
+        position: relative;
+        left: 50%;
+        right: 50%;
+        margin-left: -50vw;
+        margin-right: -50vw;
+        
+        border-top: 1px solid #eaeaea; 
     }
 
     /* Ліва панель (Діалоги) */
@@ -88,108 +101,110 @@
     .empty-chat { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #adb5bd; }
 </style>
 
-<div class="container mt-3">
-    <div class="chat-container shadow-sm border">
-        
-        <div class="chat-sidebar">
-            <div class="p-3 border-bottom bg-white">
-                <h5 class="fw-bold mb-0">Повідомлення</h5>
-            </div>
-            <div class="conversation-list">
-                @if (Model.Conversations != null && Model.Conversations.Any())
-                {
-                    foreach (var conv in Model.Conversations)
-                    {
-                        <a asp-action="Index" asp-route-receiverId="@conv.InterlocutorId"
-                           class="conversation-item @(Model.SelectedUser?.Id == conv.InterlocutorId ? "active" : "")">
-                            <div class="d-flex align-items-center">
-                                <div class="avatar-placeholder rounded-circle bg-primary d-flex align-items-center justify-content-center text-white me-3" style="width: 48px; height: 48px; flex-shrink: 0;">
-                                    @if (!string.IsNullOrEmpty(conv.InterlocutorAvatar))
-                                    {
-                                        <img src="@conv.InterlocutorAvatar" class="rounded-circle w-100 h-100" style="object-fit: cover;" alt="Avatar" />
-                                    }
-                                    else
-                                    {
-                                        <i class="bi bi-person-fill fs-4"></i>
-                                    }
-                                </div>
-                                <div class="w-100 overflow-hidden">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <h6 class="mb-0 text-truncate fw-bold" style="max-width: 140px;">@conv.InterlocutorName</h6>
-                                        <small class="text-muted" style="font-size: 0.75rem;">@conv.LastMessageTime.ToString("HH:mm")</small>
-                                    </div>
-                                    <p class="mb-0 text-truncate small text-muted">@conv.LastMessage</p>
-                                </div>
-                            </div>
-                        </a>
-                    }
-                }
-                else
-                {
-                    <div class="text-center mt-5 p-3 text-muted">
-                        <i class="bi bi-chat-left-dots fs-1 opacity-25"></i>
-                        <p class="mt-2 small">Діалогів ще немає</p>
-                    </div>
-                }
-            </div>
-        </div>
-
-        <div class="chat-main">
-            @if (Model.SelectedUser != null)
+<div class="chat-container">  
+    <div class="chat-sidebar">
+        <div class="conversation-list">
+            @if (Model.Conversations != null && Model.Conversations.Any())
             {
-                <div class="chat-header shadow-sm">
-                    <div class="avatar-small rounded-circle bg-secondary d-flex align-items-center justify-content-center text-white me-3" style="width: 40px; height: 40px;">
-                        @if (!string.IsNullOrEmpty(Model.SelectedUser.Avatar?.ImagePath))
-                        {
-                            <img src="@Model.SelectedUser.Avatar.ImagePath" class="rounded-circle w-100 h-100" style="object-fit: cover;" alt="User" />
-                        }
-                        else
-                        {
-                            <i class="bi bi-person-fill"></i>
-                        }
-                    </div>
-                    <div>
-                        <h6 class="mb-0 fw-bold">@Model.SelectedUser.FirstName @Model.SelectedUser.LastName</h6>
-                        <small id="statusBadge" class="text-muted" style="font-size: 0.75rem;">
-                            <i class="bi bi-circle-fill" style="font-size: 0.5rem;"></i> офлайн
-                        </small>
-                    </div>
-                </div>
-
-                <div class="chat-messages" id="chatWindow">
-                    @foreach (var msg in Model.Messages)
-                    {
-                        var isMine = msg.SenderId == Model.CurrentUserId;
-                        <div class="message-bubble @(isMine ? "message-sent" : "message-received")">
-                            @msg.Content
-                            <span class="message-time">@msg.SentAt.ToString("HH:mm")</span>
+                foreach (var conv in Model.Conversations)
+                {
+                    <a asp-action="Index" asp-route-receiverId="@conv.InterlocutorId"
+                        class="conversation-item @(Model.SelectedUser?.Id == conv.InterlocutorId ? "active" : "")"
+                        data-user-id="@conv.InterlocutorId">
+                        <div class="d-flex align-items-center">
+                            <div class="avatar-placeholder rounded-circle bg-primary d-flex align-items-center justify-content-center text-white me-3" style="width: 48px; height: 48px; flex-shrink: 0;">
+                                @if (!string.IsNullOrEmpty(conv.InterlocutorAvatar))
+                                {
+                                    <img src="@conv.InterlocutorAvatar" class="rounded-circle w-100 h-100" style="object-fit: cover;" alt="Avatar" />
+                                }
+                                else
+                                {
+                                    <i class="bi bi-person-fill fs-4"></i>
+                                }
+                            </div>
+                            <div class="w-100 overflow-hidden">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0 text-truncate fw-bold" style="max-width: 140px;">@conv.InterlocutorName</h6>
+                                    <small class="text-muted" style="font-size: 0.75rem;">@conv.LastMessageTime.ToString("HH:mm")</small>
+                                </div>
+                                <p class="mb-0 text-truncate small text-muted">@conv.LastMessage</p>
+                            </div>
                         </div>
-                    }
-                </div>
-
-                <div class="chat-input-area">
-                    <form asp-action="SendMessage" method="post" class="d-flex gap-2" id="chatForm">
-                        @Html.AntiForgeryToken()
-                        <input type="hidden" name="receiverId" id="receiverId" value="@Model.SelectedUser.Id" />
-                        <input type="text" name="content" id="messageContent" class="form-control rounded-pill border-0 bg-light px-4"
-                               placeholder="Введіть повідомлення..." required autocomplete="off" />
-                        <button type="submit" class="btn btn-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 45px; height: 45px;">
-                            <i class="bi bi-send-fill"></i>
-                        </button>
-                    </form>
-                </div>
+                    </a>
+                }
             }
             else
             {
-                <div class="empty-chat">
-                    <div class="text-center">
-                        <i class="bi bi-chat-right-quote" style="font-size: 5rem; opacity: 0.1;"></i>
-                        <h5 class="mt-3 fw-bold opacity-50">Оберіть чат</h5>
-                        <p class="opacity-50">Почніть спілкування з власником книги</p>
-                    </div>
+                <div class="text-center mt-5 p-3 text-muted">
+                    <i class="bi bi-chat-left-dots fs-1 opacity-25"></i>
+                    <p class="mt-2 small">Діалогів ще немає</p>
                 </div>
             }
         </div>
+    </div>
+
+    <div class="chat-main">
+        @if (Model.SelectedUser != null)
+        {
+            <div class="chat-header shadow-sm">
+                <div class="avatar-small rounded-circle bg-secondary d-flex align-items-center justify-content-center text-white me-3" style="width: 40px; height: 40px;">
+                    @if (!string.IsNullOrEmpty(Model.SelectedUser.Avatar?.ImagePath))
+                    {
+                        <img src="@Model.SelectedUser.Avatar.ImagePath" class="rounded-circle w-100 h-100" style="object-fit: cover;" alt="User" />
+                    }
+                    else
+                    {
+                        <i class="bi bi-person-fill"></i>
+                    }
+                </div>
+                <div>
+                    <h6 class="mb-0 fw-bold">
+                        <a asp-controller="OtherProfile" 
+                           asp-action="Index" 
+                           asp-route-userId="@Model.SelectedUser.Id" 
+                           class="text-dark text-decoration-none link-primary">
+                            @Model.SelectedUser.FirstName @Model.SelectedUser.LastName
+                        </a>
+                    </h6>
+                    <small id="statusBadge" class="text-muted" style="font-size: 0.75rem;">
+                        <i class="bi bi-circle-fill" style="font-size: 0.5rem;"></i> офлайн
+                    </small>
+                </div>
+            </div>
+
+            <div class="chat-messages" id="chatWindow">
+                @foreach (var msg in Model.Messages)
+                {
+                    var isMine = msg.SenderId == Model.CurrentUserId;
+                    <div class="message-bubble @(isMine ? "message-sent" : "message-received")">
+                        @msg.Content
+                        <span class="message-time">@msg.SentAt.ToString("HH:mm")</span>
+                    </div>
+                }
+            </div>
+
+            <div class="chat-input-area">
+                <form asp-action="SendMessage" method="post" class="d-flex gap-2" id="chatForm">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="receiverId" id="receiverId" value="@Model.SelectedUser.Id" />
+                    <input type="text" name="content" id="messageContent" class="form-control rounded-pill border-0 bg-light px-4"
+                            placeholder="Введіть повідомлення..." required autocomplete="off" />
+                    <button type="submit" class="btn btn-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 45px; height: 45px;">
+                        <i class="bi bi-send-fill"></i>
+                    </button>
+                </form>
+            </div>
+        }
+        else
+        {
+            <div class="empty-chat">
+                <div class="text-center">
+                    <i class="bi bi-chat-right-quote" style="font-size: 5rem; opacity: 0.1;"></i>
+                    <h5 class="mt-3 fw-bold opacity-50">Оберіть чат</h5>
+                    <p class="opacity-50">Почніть спілкування з власником книги</p>
+                </div>
+            </div>
+        }
     </div>
 </div>
 
@@ -213,10 +228,10 @@
             .withUrl("/chatHub")
             .build();
 
-        // ОБРОБКА ПОВІДОМЛЕННЯ
         connection.on("ReceiveMessage", function (senderId, content, time) {
+            const isMine = senderId == currentUserId;
+            const interlocutorId = isMine ? selectedUserId : senderId;
             if (senderId == selectedUserId || senderId == currentUserId) {
-                const isMine = senderId == currentUserId;
                 const messageHtml = `
                     <div class="message-bubble ${isMine ? 'message-sent' : 'message-received'}">
                         ${content}
@@ -224,6 +239,24 @@
                     </div>`;
                 chatWindow.insertAdjacentHTML('beforeend', messageHtml);
                 scrollToBottom();
+            }
+
+            const sidebarItem = document.querySelector(`.conversation-item[data-user-id="${interlocutorId}"]`);
+            
+            if (sidebarItem) {
+                // Якщо діалог вже є в списку – оновлюємо текст і кидаємо нагору
+                const lastMsgEl = sidebarItem.querySelector('p.text-muted');
+                const timeEl = sidebarItem.querySelector('small.text-muted');
+                
+                if (lastMsgEl) lastMsgEl.innerText = content;
+                if (timeEl) timeEl.innerText = time;
+                
+                const list = document.querySelector('.conversation-list');
+                if (list) list.prepend(sidebarItem); // Магія! Чат стрибає наверх списку
+            } else {
+                // Якщо це абсолютно новий діалог (ви щойно написали власнику вперше)
+                // Робимо швидкий рефреш, щоб сервер підтягнув його аватарку та ім'я в список
+                window.location.reload();
             }
         });
 

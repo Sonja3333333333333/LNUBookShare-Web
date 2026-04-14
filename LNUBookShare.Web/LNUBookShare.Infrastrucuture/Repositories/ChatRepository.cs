@@ -30,15 +30,15 @@ namespace LNUBookShare.Infrastructure.Repositories
 
         public async Task<IEnumerable<ChatMessage>> GetUserConversationsAsync(int userId)
         {
-            // Отримуємо всі повідомлення, де юзер бере участь
             var allMessages = await _context.ChatMessages
                 .Include(m => m.Sender)
+                .ThenInclude(u => u.Avatar)
                 .Include(m => m.Receiver)
+                .ThenInclude(u => u.Avatar)
                 .Where(m => m.SenderId == userId || m.ReceiverId == userId)
                 .OrderByDescending(m => m.SentAt)
                 .ToListAsync();
 
-            // Групуємо за співрозмовником і беремо перше (найновіше) повідомлення
             return allMessages
                 .GroupBy(m => m.SenderId == userId ? m.ReceiverId : m.SenderId)
                 .Select(g => g.First())
