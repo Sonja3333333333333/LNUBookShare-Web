@@ -19,7 +19,7 @@ namespace LNUBookShare.UnitTests.ReservationService_tests
         {
             _reservationRepoMock = new Mock<IReservationRepository>();
             _bookRepoMock = new Mock<IBookRepository>();
-            _notificationRepoMock = new Mock<INotificationRepository>(); 
+            _notificationRepoMock = new Mock<INotificationRepository>();
             _loggerMock = new Mock<ILogger<ReservationService>>();
 
             _reservationService = new ReservationService(
@@ -122,7 +122,7 @@ namespace LNUBookShare.UnitTests.ReservationService_tests
         {
             // Arrange
             int bookId = 1;
-            int ownerId = 10; 
+            int ownerId = 10;
 
             var book = new Book { BookId = bookId, Status = "available", OwnerId = ownerId };
             _bookRepoMock.Setup(r => r.GetByIdAsync(bookId)).ReturnsAsync(book);

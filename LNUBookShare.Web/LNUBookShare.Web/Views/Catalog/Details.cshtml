@@ -73,7 +73,7 @@
                                 <a asp-controller="OtherProfile"
                                    asp-action="Index"
                                    asp-route-userId="@Model.Owner?.Id"
-                                   class="text-primary text-decoration-none fw-medium">
+                                   class="fw-bold link-dark-hover text-decoration-none text-dark">
                                      @(Model.Owner?.FirstName ?? "Невідомо") @(Model.Owner?.LastName ?? "")
                                 </a>
                             </td>
