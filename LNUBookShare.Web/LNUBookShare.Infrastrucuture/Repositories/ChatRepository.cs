@@ -23,7 +23,7 @@ namespace LNUBookShare.Infrastructure.Repositories
         {
             return await _context.ChatMessages
                 .Where(m => (m.SenderId == userId1 && m.ReceiverId == userId2 && !m.IsDeletedBySender) ||
-                            (m.SenderId == userId2 && m.ReceiverId == userId1 && !m.IsDeletedBySender))
+                            (m.SenderId == userId2 && m.ReceiverId == userId1 && !m.IsDeletedByReceiver))
                 .OrderBy(m => m.SentAt)
                 .ToListAsync();
         }
