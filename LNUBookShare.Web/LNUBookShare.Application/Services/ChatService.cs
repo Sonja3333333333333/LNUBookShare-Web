@@ -75,5 +75,28 @@ namespace LNUBookShare.Application.Services
 
             return Result<IEnumerable<ConversationDto>>.Success(conversations);
         }
+
+        public async Task<Result> DeleteConversationAsync(int currentUserId, int interlocutorId)
+        {
+            if (currentUserId == interlocutorId)
+            {
+                _logger.LogWarning("Спроба видалення діалогу з самим собою: UserId {UserId}", currentUserId);
+                return Result.Failure("Неможливо виконати операцію для однакових ID.");
+            }
+
+            var messages = await _chatRepo.GetMessagesAsync(currentUserId, interlocutorId);
+
+            if (messages == null || !messages.Any())
+            {
+                _logger.LogInformation("Діалог між {UserId} та {InterlocutorId} не знайдений або вже порожній", currentUserId, interlocutorId);
+                return Result.Failure("Діалог уже порожній або не існує.");
+            }
+
+            await _chatRepo.DeleteConversationAsync(currentUserId, interlocutorId);
+
+            _logger.LogInformation("Чат між {UserId} та {InterlocutorId} успішно позначено як видалений", currentUserId, interlocutorId);
+
+            return Result.Success();
+        }
     }
 }

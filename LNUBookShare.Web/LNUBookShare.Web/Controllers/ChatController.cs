@@ -69,5 +69,35 @@ namespace LNUBookShare.Web.Controllers
 
             return RedirectToAction(nameof(Index), new { receiverId });
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConversation(int receiverId)
+        {
+            var userId = GetCurrentUserId();
+            if (userId == null)
+            {
+                return Unauthorized();
+            }
+
+            var result = await _chatService.DeleteConversationAsync(userId.Value, receiverId);
+
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                if (result.IsSuccess)
+                {
+                    return Ok();
+                }
+
+                return BadRequest(result.Error);
+            }
+
+            if (!result.IsSuccess)
+            {
+                TempData["ErrorMessage"] = result.Error;
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
     }
 }
