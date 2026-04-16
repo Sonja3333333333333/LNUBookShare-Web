@@ -127,5 +127,70 @@ namespace LNUBookShare.UnitTests.ReservationService_tests
             _reservationRepoMock.Verify(r => r.DeleteAsync(
                 It.Is<ReservationQueue>(q => q.UserId == otherUserId)), Times.Never);
         }
+
+        [Fact]
+        public async Task LeaveQueueAsync_WhenFirstUserLeavesAndOthersRemain_ShouldNotifyNextUser()
+        {
+            // Arrange
+            int bookId = 1;
+            int leavingUserId = 10;
+            int nextUserId = 20;
+
+            var queueItem = new ReservationQueue { QueueId = 1, BookId = bookId, UserId = leavingUserId };
+            var book = new Book { BookId = bookId, Title = "Кобзар", Status = "reserved" };
+
+            var usersInQueue = new List<User>
+            {
+                new User { Id = leavingUserId, FirstName = "Максим", LastName = "Б" },
+                new User { Id = nextUserId, FirstName = "Софія", LastName = "В" }
+            };
+
+            _reservationRepoMock.Setup(r => r.GetQueueUsersAsync(bookId)).ReturnsAsync(usersInQueue);
+            _reservationRepoMock.Setup(r => r.GetByUserAndBookAsync(leavingUserId, bookId)).ReturnsAsync(queueItem);
+            _bookRepoMock.Setup(r => r.GetByIdAsync(bookId)).ReturnsAsync(book);
+
+            var result = await _reservationService.LeaveQueueAsync(bookId, leavingUserId);
+
+            Assert.True(result.IsSuccess);
+
+            _notificationServiceMock.Verify(n => n.CreateNotificationAsync(
+                nextUserId,
+                It.Is<string>(msg => msg.Contains("автоматично заброньована за вами")),
+                bookId), Times.Once);
+
+            _bookRepoMock.Verify(b => b.UpdateAsync(It.IsAny<Book>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task LeaveQueueAsync_WhenLastUserLeaves_ShouldMakeBookAvailable()
+        {
+            // Arrange
+            int bookId = 1;
+            int userId = 10;
+
+            var queueItem = new ReservationQueue { QueueId = 1, BookId = bookId, UserId = userId };
+            var book = new Book { BookId = bookId, Title = "Кобзар", Status = "reserved" };
+
+            var usersInQueue = new List<User>
+            {
+                new User { Id = userId, FirstName = "Максим" }
+            };
+
+            _reservationRepoMock.Setup(r => r.GetQueueUsersAsync(bookId)).ReturnsAsync(usersInQueue);
+            _reservationRepoMock.Setup(r => r.GetByUserAndBookAsync(userId, bookId)).ReturnsAsync(queueItem);
+            _bookRepoMock.Setup(r => r.GetByIdAsync(bookId)).ReturnsAsync(book);
+
+            // Act
+            var result = await _reservationService.LeaveQueueAsync(bookId, userId);
+
+            // Assert
+            Assert.True(result.IsSuccess);
+
+            Assert.Equal("available", book.Status);
+            _bookRepoMock.Verify(b => b.UpdateAsync(book), Times.Once);
+
+            _notificationServiceMock.Verify(n => n.CreateNotificationAsync(
+                It.IsAny<int>(), It.IsAny<string>(), It.IsAny<int>()), Times.Never);
+        }
     }
 }

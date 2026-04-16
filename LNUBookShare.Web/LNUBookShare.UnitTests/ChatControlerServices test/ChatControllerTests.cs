@@ -23,25 +23,22 @@ namespace LNUBookShare.UnitTests.Controllers
         {
             _chatServiceMock = new Mock<IChatService>();
 
-            // Створюємо Mock для UserManager
             var store = new Mock<IUserStore<User>>();
             _userManagerMock = new Mock<UserManager<User>>(
                 store.Object, null!, null!, null!, null!, null!, null!, null!, null!);
 
             _controller = new ChatController(_chatServiceMock.Object, _userManagerMock.Object);
 
-            // --- НАЛАШТУВАННЯ КОНТЕКСТУ (ОСЬ ТУТ МОЖЕ БУТИ СОБАКА ЗАРИТА) ---
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, "1"),
-                new Claim(ClaimTypes.Name, "Bohdanovych"), // На всяк випадок
-                new Claim("sub", "1") // Деякі системи шукають "sub"
+                new Claim(ClaimTypes.Name, "Bohdanovych"),
+                new Claim("sub", "1")
             };
 
             var identity = new ClaimsIdentity(claims, "TestAuth");
             var principal = new ClaimsPrincipal(identity);
 
-            // Мокаємо поведінку UserManager, якщо BaseController викликає його методи
             _userManagerMock.Setup(m => m.GetUserId(principal)).Returns("1");
             _userManagerMock.Setup(m => m.GetUserAsync(principal))
                 .ReturnsAsync(new User { Id = 1, FirstName = "Max" });
