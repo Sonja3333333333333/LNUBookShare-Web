@@ -72,5 +72,59 @@ namespace LNUBookShare.UnitTests.Services
             Assert.False(res.IsSuccess);
             Assert.Contains("Не вдалося", res.Error);
         }
+
+
+        // Тестування видалення діалогу
+
+
+
+        [Fact]
+        public async Task DeleteConversationAsync_ShouldReturnFailure_WhenIdsAreEqual()
+        {
+            // Arrange
+            int userId = 1;
+
+            // Act
+            var result = await _chatService.DeleteConversationAsync(userId, userId);
+
+            // Assert
+            Assert.False(result.IsSuccess);
+            Assert.Equal("Неможливо виконати операцію для однакових ID.", result.Error);
+            _chatRepoMock.Verify(r => r.DeleteConversationAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task DeleteConversationAsync_ShouldReturnFailure_WhenChatIsEmpty()
+        {
+            // Arrange: чат порожній 
+            int uId = 1, iId = 2;
+            _chatRepoMock.Setup(r => r.GetMessagesAsync(uId, iId))
+                         .ReturnsAsync(new List<ChatMessage>());
+
+            // Act
+            var result = await _chatService.DeleteConversationAsync(uId, iId);
+
+            // Assert
+            Assert.False(result.IsSuccess);
+            Assert.Equal("Діалог уже порожній або не існує.", result.Error);
+        }
+
+        [Fact]
+        public async Task DeleteConversationAsync_ShouldReturnSuccess_WhenMessagesExist()
+        {
+            // Arrange: у чаті є повідомлення
+            int uId = 1, iId = 2;
+            var messages = new List<ChatMessage> { new ChatMessage { Content = "Test message" } };
+
+            _chatRepoMock.Setup(r => r.GetMessagesAsync(uId, iId))
+                         .ReturnsAsync(messages);
+
+            // Act
+            var result = await _chatService.DeleteConversationAsync(uId, iId);
+
+            // Assert
+            Assert.True(result.IsSuccess);
+            _chatRepoMock.Verify(r => r.DeleteConversationAsync(uId, iId), Times.Once);
+        }
     }
 }

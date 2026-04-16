@@ -7,5 +7,6 @@ namespace LNUBookShare.Application.Interfaces
         Task AddAsync(ChatMessage message);
         Task<IEnumerable<ChatMessage>> GetMessagesAsync(int userId1, int userId2);
         Task<IEnumerable<ChatMessage>> GetUserConversationsAsync(int userId);
+        Task DeleteConversationAsync(int currentUserId, int interlocutorId);
     }
 }

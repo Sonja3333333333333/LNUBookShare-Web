@@ -19,6 +19,10 @@ public partial class ChatMessage
 
     public DateTime SentAt { get; set; }
 
+    // поля для "видалення у себе"
+    public bool IsDeletedBySender { get; set; } = false;
+    public bool IsDeletedByReceiver { get; set; } = false;
+
     public virtual User Receiver { get; set; } = null!;
 
     public virtual User Sender { get; set; } = null!;
