@@ -129,12 +129,12 @@ namespace LNUBookShare.Application.Services
         public async Task<Result> LeaveQueueAsync(int bookId, int userId)
         {
             var queueResult = await GetQueueUsersAsync(bookId);
-
             if (queueResult.IsFailure)
             {
                 return Result.Failure("Помилка при перевірці черги.");
             }
 
+            var usersInQueue = queueResult.Value.ToList();
             var queueItem = await _reservationRepo.GetByUserAndBookAsync(userId, bookId);
 
             if (queueItem == null)
@@ -142,9 +142,41 @@ namespace LNUBookShare.Application.Services
                 return Result.Failure("Користувача не знайдено в черзі.");
             }
 
+            bool isFirstInQueue = usersInQueue.FirstOrDefault()?.Id == userId;
+
             await _reservationRepo.DeleteAsync(queueItem);
 
+            if (usersInQueue.Count == 1)
+            {
+                await MakeBookAvailableAsync(bookId);
+            }
+            else if (isFirstInQueue && usersInQueue.Count > 1)
+            {
+                await NotifyNextUserInQueueAsync(bookId, usersInQueue[0], usersInQueue[1]);
+            }
+
             return Result.Success();
+        }
+
+        private async Task MakeBookAvailableAsync(int bookId)
+        {
+            var book = await _bookRepo.GetByIdAsync(bookId);
+            if (book != null)
+            {
+                book.Status = "available";
+                await _bookRepo.UpdateAsync(book);
+            }
+        }
+
+        private async Task NotifyNextUserInQueueAsync(int bookId, User leavingUser, User newFirstUser)
+        {
+            var book = await _bookRepo.GetByIdAsync(bookId);
+            if (book != null)
+            {
+                string message = $"Користувач {leavingUser.FirstName} {leavingUser.LastName} вийшов із черги на книгу '{book.Title}', і тепер вона автоматично заброньована за вами! Зв'яжіться з власником.";
+
+                await _notificationService.CreateNotificationAsync(newFirstUser.Id, message, bookId);
+            }
         }
     }
 }
