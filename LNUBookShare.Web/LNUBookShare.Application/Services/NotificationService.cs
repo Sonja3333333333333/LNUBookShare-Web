@@ -38,6 +38,8 @@ namespace LNUBookShare.Application.Services
         public async Task<Result<IEnumerable<Notification>>> GetUserNotificationsAsync(int userId)
         {
             var notifications = await _notificationRepository.GetByUserIdAsync(userId);
+            _logger.LogDebug("Отримано {Count} сповіщень для користувача {UserId}.", notifications.Count(), userId);
+
             return Result<IEnumerable<Notification>>.Success(notifications);
         }
 
@@ -47,15 +49,18 @@ namespace LNUBookShare.Application.Services
 
             if (notification == null)
             {
+                _logger.LogWarning("Спроба видалити неіснуюче сповіщення {NotificationId} користувачем {UserId}.", notificationId, userId);
                 return Result.Failure("Сповіщення не знайдено.");
             }
 
             if (notification.UserId != userId)
             {
+                _logger.LogWarning("Користувач {UserId} намагався отримати доступ до чужого сповіщення {NotificationId}, яке належить користувачу {OwnerId}.", userId, notificationId, notification.UserId);
                 return Result.Failure("Немає доступу до цього сповіщення.");
             }
 
             await _notificationRepository.DeleteAsync(notification);
+            _logger.LogInformation("Користувач {UserId} успішно видалив сповіщення {NotificationId}.", userId, notificationId);
 
             return Result.Success();
         }
