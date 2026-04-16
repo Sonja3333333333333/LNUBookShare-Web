@@ -113,37 +113,44 @@
                 <div class="d-grid gap-2 mt-auto ms-auto" style="width: 100%; max-width: 220px;">
                     @if (Model.Owner != null && Model.Owner.Id == currentUserId)
                     {
-                        <div class="text-center text-muted small">Це ваша книга</div>
+                    <div class="text-center text-muted small">Це ваша книга</div>
                     }
                     else
                     {
-                        @if (Model.Status == "available") {
-                            <form asp-action="Reserve" asp-controller="Catalog" method="post" class="d-grid">
-                                <input type="hidden" name="bookId" value="@Model.BookId" />
-                                <button type="submit" class="btn btn-primary btn-sm fw-medium rounded-pill py-2 shadow-sm">
-                                    <i class="bi bi-bookmark-check me-1"></i> Забронювати
-                                </button>
-                            </form>
+                    @if (Model.Status == "available") {
+                    <form asp-action="Reserve" asp-controller="Catalog" method="post" class="d-grid">
+                        <input type="hidden" name="bookId" value="@Model.BookId" />
+                        <button type="submit" class="btn btn-primary btn-sm fw-medium rounded-pill py-2 shadow-sm">
+                            <i class="bi bi-bookmark-check me-1"></i> Забронювати
+                        </button>
+                    </form>
                         } else {
                             if (Model.IsInQueue) {
-                                <div class="alert alert-info py-2 px-3 rounded-pill text-center mb-0 shadow-sm" style="font-size: 0.85rem; border: none;">
-                                    <i class="bi bi-clock-history me-1"></i> Ви у черзі (№@Model.QueuePosition)
-                                </div>
+                    <div class="alert alert-info py-2 px-3 rounded-3 text-center mb-0 shadow-sm"
+                         style="font-size: 0.85rem; border: none;">
+                        <i class="bi bi-clock-history me-1"></i> Ви у черзі (№@Model.QueuePosition)
+                    </div>
+                    <form asp-action="LeaveQueue" asp-controller="Catalog" method="post" class="d-grid mt-2">
+                        <input type="hidden" name="bookId" value="@Model.BookId" />
+                        <button type="submit" class="btn btn-outline-danger btn-sm fw-medium rounded-pill py-2 shadow-sm">
+                            <i class="bi bi-x-circle me-1"></i> Покинути чергу
+                        </button>
+                    </form>
                             } else {
-                                <form asp-action="JoinQueue" asp-controller="Catalog" method="post" class="d-grid">
-                                    <input type="hidden" name="bookId" value="@Model.BookId" />
-                                    <button type="submit" class="btn btn-outline-primary btn-sm fw-medium rounded-pill py-2 shadow-sm">
-                                        <i class="bi bi-people me-1"></i> Стати в чергу
-                                    </button>
-                                </form>
+                    <form asp-action="JoinQueue" asp-controller="Catalog" method="post" class="d-grid">
+                        <input type="hidden" name="bookId" value="@Model.BookId" />
+                        <button type="submit" class="btn btn-outline-primary btn-sm fw-medium rounded-pill py-2 shadow-sm">
+                            <i class="bi bi-people me-1"></i> Стати в чергу
+                        </button>
+                    </form>
                             }
                         }
-                        
-                        @* ТУТ ФІКС: Направляємо в чат до власника *@
-                        <a asp-action="Index" asp-controller="Chat" asp-route-receiverId="@Model.Owner?.Id" 
-                           class="btn btn-secondary btn-sm fw-medium rounded-pill text-white py-2" style="background-color: #6c757d;">
-                            <i class="bi bi-chat-dots me-1"></i> Написати власнику
-                        </a>
+
+                    @* ТУТ ФІКС: Направляємо в чат до власника *@
+                    <a asp-action="Index" asp-controller="Chat" asp-route-receiverId="@Model.Owner?.Id"
+                       class="btn btn-secondary btn-sm fw-medium rounded-pill text-white py-2" style="background-color: #6c757d;">
+                        <i class="bi bi-chat-dots me-1"></i> Написати власнику
+                    </a>
                     }
                 </div>
             </div>

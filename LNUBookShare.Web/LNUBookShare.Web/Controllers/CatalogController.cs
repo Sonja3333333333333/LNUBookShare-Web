@@ -188,6 +188,30 @@ namespace LNUBookShare.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        public async Task<IActionResult> LeaveQueue(int bookId)
+        {
+            var currentUserId = GetCurrentUserId();
+            if (currentUserId == null)
+            {
+                return Unauthorized();
+            }
+
+            var result = await _reservationService.LeaveQueueAsync(bookId, currentUserId.Value);
+
+            if (result.IsSuccess)
+            {
+                TempData["SuccessMessage"] = "Ви покинули чергу.";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = result.Error;
+            }
+
+            return RedirectToAction(nameof(Details), new { id = bookId });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddReview(int bookId, int rating, string comment)
         {
             var currentUserId = GetCurrentUserId();
