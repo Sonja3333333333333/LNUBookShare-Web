@@ -2,7 +2,9 @@ using LNUBookShare.Application.Common;
 using LNUBookShare.Application.Interfaces;
 using LNUBookShare.Application.Services;
 using LNUBookShare.Domain.Entities;
+using LNUBookShare.Domain.Models;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Moq;
 using Xunit;
 
@@ -23,11 +25,16 @@ namespace LNUBookShare.UnitTests.ReservationService_tests
             _notificationServiceMock = new Mock<INotificationService>();
             _loggerMock = new Mock<ILogger<ReservationService>>();
 
+            var reservationSettings = new ReservationSettings { MaxQueueSize = 5 };
+
+            var optionsWrapper = Options.Create(reservationSettings);
+
             _reservationService = new ReservationService(
                 _reservationRepoMock.Object,
                 _bookRepoMock.Object,
                 _notificationServiceMock.Object,
-                _loggerMock.Object);
+                _loggerMock.Object,
+                optionsWrapper);
         }
 
         [Fact]

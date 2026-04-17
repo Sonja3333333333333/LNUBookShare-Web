@@ -3,7 +3,9 @@ using LNUBookShare.Application.Interfaces;
 using LNUBookShare.Application.Models;
 using LNUBookShare.Application.Services;
 using LNUBookShare.Domain.Entities;
+using LNUBookShare.Domain.Models;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Moq;
 using Xunit;
 
@@ -22,10 +24,15 @@ namespace LNUBookShare.UnitTests.Services
             _notificationMock = new Mock<IChatNotificationService>();
             _loggerMock = new Mock<ILogger<ChatService>>();
 
+            var chatSettings = new ChatSettings { MaxMessageLength = 1000 };
+
+            var optionsWrapper = Options.Create(chatSettings);
+
             _chatService = new ChatService(
                 _chatRepoMock.Object,
                 _notificationMock.Object,
-                _loggerMock.Object);
+                _loggerMock.Object,
+                optionsWrapper);
         }
 
         [Fact]
