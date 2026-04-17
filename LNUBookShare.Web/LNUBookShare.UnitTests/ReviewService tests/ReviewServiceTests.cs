@@ -1,7 +1,9 @@
 ﻿using LNUBookShare.Application.Interfaces;
 using LNUBookShare.Application.Services;
 using LNUBookShare.Domain.Entities;
+using LNUBookShare.Domain.Models;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Moq;
 
 namespace LNUBookShare.UnitTests.ReviewService_tests
@@ -17,7 +19,19 @@ namespace LNUBookShare.UnitTests.ReviewService_tests
             _reviewRepoMock = new Mock<IReviewRepository>();
             _loggerMock = new Mock<ILogger<ReviewService>>();
 
-            _reviewService = new ReviewService(_reviewRepoMock.Object, _loggerMock.Object);
+            var reviewSettings = new ReviewSettings
+            {
+                MinRating = 1,
+                MaxRating = 5,
+                MaxCommentLength = 1000
+            };
+
+            var optionsWrapper = Options.Create(reviewSettings);
+
+            _reviewService = new ReviewService(
+                _reviewRepoMock.Object,
+                _loggerMock.Object,
+                optionsWrapper);
         }
 
         [Fact]

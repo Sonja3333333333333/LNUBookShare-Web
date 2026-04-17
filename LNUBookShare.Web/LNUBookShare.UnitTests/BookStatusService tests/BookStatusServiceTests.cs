@@ -1,7 +1,9 @@
-﻿using LNUBookShare.Application.Common;
+﻿using Castle.Core.Logging;
+using LNUBookShare.Application.Common;
 using LNUBookShare.Application.Interfaces;
 using LNUBookShare.Application.Services;
 using LNUBookShare.Domain.Entities;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -12,6 +14,7 @@ namespace LNUBookShare.UnitTests.Services
         private readonly Mock<IProfileService> _profileServiceMock;
         private readonly Mock<IReservationService> _reservationServiceMock;
         private readonly Mock<INotificationService> _notificationServiceMock;
+        private readonly Mock<ILogger<BookStatusService>> _loggerMock;
         private readonly BookStatusService _service;
 
         public BookStatusServiceTests()
@@ -19,11 +22,13 @@ namespace LNUBookShare.UnitTests.Services
             _profileServiceMock = new Mock<IProfileService>();
             _reservationServiceMock = new Mock<IReservationService>();
             _notificationServiceMock = new Mock<INotificationService>();
+            _loggerMock = new Mock<ILogger<BookStatusService>>();
 
             _service = new BookStatusService(
                 _profileServiceMock.Object,
                 _reservationServiceMock.Object,
-                _notificationServiceMock.Object);
+                _notificationServiceMock.Object,
+                _loggerMock.Object);
         }
 
         [Fact]

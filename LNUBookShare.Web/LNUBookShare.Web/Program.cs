@@ -3,19 +3,23 @@
 // </copyright>
 
 using LNUBookShare.Application.Interfaces;
+using LNUBookShare.Application.Models;
 using LNUBookShare.Application.Services;
 using LNUBookShare.Domain.Entities;
+using LNUBookShare.Domain.Models;
 using LNUBookShare.Infrastructure;
 using LNUBookShare.Infrastructure.Repositories;
 using LNUBookShare.Infrastructure.Services;
 using LNUBookShare.Web.Hubs;
-using LNUBookShare.Web.Services; // Додав для нашого нового сервісу сповіщень
+using LNUBookShare.Web.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 var builder = WebApplication.CreateBuilder(args);
+
+Console.WriteLine($"  ПОТОЧНЕ СЕРЕДОВИЩЕ: {builder.Environment.EnvironmentName}");
 
 // --- SERILOG CONFIGURATION ---
 Log.Logger = new LoggerConfiguration()
@@ -102,8 +106,12 @@ try
     // --- SIGNALR REGISTRATION ---
     builder.Services.AddSignalR();
 
-    // Додаткові налаштування
     builder.Services.Configure<LNUBookShare.Application.Common.CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
+    builder.Services.Configure<PhotoSettings>(builder.Configuration.GetSection("PhotoSettings"));
+
+    builder.Services.Configure<ReservationSettings>(builder.Configuration.GetSection("ReservationSettings"));
+    builder.Services.Configure<ReviewSettings>(builder.Configuration.GetSection("ReviewSettings"));
+    builder.Services.Configure<ChatSettings>(builder.Configuration.GetSection("ChatSettings"));
 
     builder.Services.AddControllersWithViews();
 

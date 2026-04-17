@@ -1,7 +1,9 @@
 ﻿using LNUBookShare.Application.Common;
 using LNUBookShare.Application.Interfaces;
 using LNUBookShare.Domain.Entities;
+using LNUBookShare.Domain.Models;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace LNUBookShare.Application.Services
 {
@@ -9,25 +11,33 @@ namespace LNUBookShare.Application.Services
     {
         private readonly IReviewRepository _reviewRepo;
         private readonly ILogger<ReviewService> _logger;
+        private readonly ReviewSettings _settings;
 
-        public ReviewService(IReviewRepository reviewRepo, ILogger<ReviewService> logger)
+        public ReviewService(IReviewRepository reviewRepo, ILogger<ReviewService> logger, IOptions<ReviewSettings> options)
         {
             _reviewRepo = reviewRepo;
             _logger = logger;
+            _settings = options.Value;
         }
 
         public async Task<Result> AddReviewAsync(int bookId, int userId, int rating, string? comment)
         {
             _logger.LogInformation("Спроба додати відгук від {UserId} для книги {BookId}", userId, bookId);
 
-            if (rating < 1 || rating > 5)
+            if (rating < _settings.MinRating || rating > _settings.MaxRating)
             {
-                return Result.Failure("Неприпустима оцінка. Оберіть від 1 до 5.");
+                return Result.Failure($"Неприпустима оцінка. Оберіть від {_settings.MinRating} до {_settings.MaxRating}.");
             }
 
             if (string.IsNullOrWhiteSpace(comment))
             {
                 return Result.Failure("Коментар не може бути порожнім.");
+            }
+
+            if (comment.Length > _settings.MaxCommentLength)
+            {
+                _logger.LogWarning("Користувач {UserId} намагався залишити занадто довгий відгук ({Length} символів)", userId, comment.Length);
+                return Result.Failure($"Коментар занадто довгий. Максимальна кількість символів: {_settings.MaxCommentLength}.");
             }
 
             if (await _reviewRepo.ExistsAsync(bookId, userId))
