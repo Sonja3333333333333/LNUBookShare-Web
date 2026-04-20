@@ -117,6 +117,8 @@ try
 
     builder.Services.AddScoped<IUserRepository, UserRepository>();
 
+    builder.Services.AddScoped<IAdminBookService, AdminBookService>();
+
     builder.Services.AddControllersWithViews();
 
     var app = builder.Build();

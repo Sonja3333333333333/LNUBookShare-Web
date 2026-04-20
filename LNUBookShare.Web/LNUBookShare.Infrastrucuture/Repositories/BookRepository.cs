@@ -37,6 +37,14 @@ namespace LNUBookShare.Infrastructure.Repositories
                 .FirstOrDefaultAsync(b => b.BookId == id);
         }
 
+        public async Task<IEnumerable<Book>> GetAllBooksWithOwnersAsync()
+        {
+            return await _context.Books
+                .Include(b => b.Owner)
+                .AsNoTracking()
+                .ToListAsync();
+        }
+
         public async Task AddAsync(Book book)
         {
             await _context.Books.AddAsync(book);

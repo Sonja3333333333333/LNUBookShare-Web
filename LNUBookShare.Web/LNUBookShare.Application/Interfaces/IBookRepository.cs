@@ -15,6 +15,8 @@ namespace LNUBookShare.Application.Interfaces
         Task UpdateAsync(Book book); // Update
         Task DeleteAsync(Book book); // Delete
 
+        Task<IEnumerable<Book>> GetAllBooksWithOwnersAsync();
+
         Task ClearAllAsync();
 
         Task<IEnumerable<Book>> SearchBooksAsync(string searchBy, string query, string sortBy = "title", string statusFilter = "all"); // search
