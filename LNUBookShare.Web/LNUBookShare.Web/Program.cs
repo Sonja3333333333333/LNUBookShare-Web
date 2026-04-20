@@ -117,6 +117,19 @@ try
 
     var app = builder.Build();
 
+    using (var scope = app.Services.CreateScope())
+    {
+        var services = scope.ServiceProvider;
+        try
+        {
+            await LNUBookShare.Infrastructure.Data.SeedData.InitializeAsync(services);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Помилка під час створення адміна.");
+        }
+    }
+
     // --- MIDDLEWARE ---
     app.UseSerilogRequestLogging();
 
