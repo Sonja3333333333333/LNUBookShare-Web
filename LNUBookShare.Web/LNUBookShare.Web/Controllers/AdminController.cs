@@ -1,4 +1,5 @@
-﻿using LNUBookShare.Domain.Models;
+﻿using LNUBookShare.Application.Interfaces;
+using LNUBookShare.Domain.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -6,10 +7,12 @@ using Microsoft.AspNetCore.Mvc;
 public class AdminController : Controller
 {
     private readonly IAdminUserService _adminService;
+    private readonly IAdminBookService _adminBookService;
 
-    public AdminController(IAdminUserService adminService)
+    public AdminController(IAdminUserService adminService, IAdminBookService adminBookService)
     {
         _adminService = adminService;
+        _adminBookService = adminBookService;
     }
 
     public async Task<IActionResult> Users()
@@ -20,6 +23,19 @@ public class AdminController : Controller
         {
             ViewBag.Error = result.Error;
             return View(new List<UserDto>());
+        }
+
+        return View(result.Value);
+    }
+
+    public async Task<IActionResult> Books()
+    {
+        var result = await _adminBookService.GetAllBooksAsync();
+
+        if (result.IsFailure)
+        {
+            ViewBag.Error = result.Error;
+            return View(new List<AdminBookDto>());
         }
 
         return View(result.Value);
