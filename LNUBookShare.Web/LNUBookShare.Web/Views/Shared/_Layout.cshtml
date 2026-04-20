@@ -16,13 +16,13 @@
                 
                     <ul class="navbar-nav nav-main flex-grow-1 px-4 gap-2">
                         <li class="nav-item">
-                            <a class="nav-link active" asp-area="" asp-controller="Catalog" asp-action="Search">Головна</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Catalog" asp-action="Search">Головна</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" asp-controller="Profile" asp-action="Index">Кабінет</a>
+                            <a class="nav-link text-dark" asp-controller="Profile" asp-action="Index">Кабінет</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" asp-controller="Notification" asp-action="Index">Сповіщення</a>
+                            <a class="nav-link text-dark" asp-controller="Notification" asp-action="Index">Сповіщення</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Chat" asp-action="Index">Чат</a>
@@ -32,6 +32,14 @@
                                 Уподобання
                             </a>
                         </li>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Admin" asp-action="Users">
+                                    Керування користувачами
+                                </a>
+                            </li>
+                        }
                     </ul>
 
                     <ul class="navbar-nav ms-auto px-4 gap-2 align-items-center">

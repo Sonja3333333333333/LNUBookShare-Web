@@ -14,6 +14,8 @@ namespace LNUBookShare.Application.Interfaces
         Task UpdateAsync(User user); // Update
         Task DeleteAsync(User user); // Delete
 
+        Task<IEnumerable<User>> GetUsersWithDetailsAsync(string? searchTerm = null);
+
         Task ClearAllAsync();
     }
 }

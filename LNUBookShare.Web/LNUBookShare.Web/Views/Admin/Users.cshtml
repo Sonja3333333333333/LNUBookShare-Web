@@ -1,0 +1,60 @@
+﻿@model IEnumerable<LNUBookShare.Domain.Models.UserDto>
+
+@{
+    ViewData["Title"] = "Адмін-панель: Користувачі";
+}
+
+<div class="container mt-5">
+
+    @if (ViewBag.Error != null)
+    {
+        <div class="alert alert-danger shadow-sm" role="alert">
+            <i class="bi bi-exclamation-triangle-fill"></i> @ViewBag.Error
+        </div>
+    }
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="px-4">ПІБ</th>
+                            <th>Email</th>
+                            <th>Факультет</th>
+                            <th class="text-center">Статус пошти</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var user in Model)
+                        {
+                            <tr>
+                                <td class="px-4">
+                                    <div class="fw-bold">@user.FullName</div>
+                                    <small class="text-muted">ID: @user.Id</small>
+                                </td>
+                                <td>@user.Email</td>
+                                <td>
+                                    <span class="badge rounded-pill bg-info text-dark">@user.FacultyName</span>
+                                </td>
+                                <td class="text-center">
+                                    @if (user.EmailConfirmed)
+                                    {
+                                        <span class="text-success"><i class="bi bi-check-circle-fill"></i> Підтверджено</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-warning"><i class="bi bi-clock-history"></i> Очікує</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer bg-white text-center py-3">
+            <small class="text-muted">Всього в базі: @Model.Count() користувачів</small>
+        </div>
+    </div>
+</div>

@@ -22,6 +22,24 @@ namespace LNUBookShare.Infrastructure.Repositories
             return await _context.Users.ToListAsync();
         }
 
+        public async Task<IEnumerable<User>> GetUsersWithDetailsAsync(string? searchTerm = null)
+        {
+            var query = _context.Users
+                .Include(u => u.Faculty)
+                .AsNoTracking();
+
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                var searchLower = searchTerm.Trim().ToLower();
+                query = query.Where(u =>
+                    u.Email!.ToLower().Contains(searchLower) ||
+                    u.FirstName!.ToLower().Contains(searchLower) ||
+                    u.LastName!.ToLower().Contains(searchLower));
+            }
+
+            return await query.ToListAsync();
+        }
+
         public async Task<User?> GetByIdAsync(int id)
         {
             return await _context.Users.FindAsync(id);

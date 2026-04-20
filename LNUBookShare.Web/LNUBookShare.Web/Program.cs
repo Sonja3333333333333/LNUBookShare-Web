@@ -113,6 +113,10 @@ try
     builder.Services.Configure<ReviewSettings>(builder.Configuration.GetSection("ReviewSettings"));
     builder.Services.Configure<ChatSettings>(builder.Configuration.GetSection("ChatSettings"));
 
+    builder.Services.AddScoped<IAdminUserService, AdminUserService>();
+
+    builder.Services.AddScoped<IUserRepository, UserRepository>();
+
     builder.Services.AddControllersWithViews();
 
     var app = builder.Build();
