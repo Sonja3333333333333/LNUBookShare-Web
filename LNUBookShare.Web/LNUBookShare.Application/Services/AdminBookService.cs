@@ -43,5 +43,30 @@ namespace LNUBookShare.Application.Services
                 return Result<IEnumerable<AdminBookDto>>.Failure("Помилка при завантаженні бази книг.");
             }
         }
+        public async Task<Result> DeleteBookAsync(int bookId)
+        {
+            _logger.LogInformation("Адміністратор намагається видалити книгу з ID: {BookId}", bookId);
+
+            try
+            {
+                var book = await _bookRepository.GetByIdAsync(bookId);
+
+                if (book is null)
+                {
+                    _logger.LogWarning("Книгу з ID {BookId} не знайдено.", bookId);
+                    return Result.Failure("Книгу не знайдено.");
+                }
+
+                await _bookRepository.DeleteAsync(book);
+
+                _logger.LogInformation("Книгу з ID {BookId} успішно видалено адміністратором.", bookId);
+                return Result.Success();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Помилка при видаленні книги з ID {BookId}.", bookId);
+                return Result.Failure("Помилка при видаленні книги.");
+            }
+        }
     }
 }
