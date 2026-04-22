@@ -42,5 +42,47 @@ namespace LNUBookShare.Application.Services
                 return Result<IEnumerable<UserDto>>.Failure("Помилка при завантаженні даних.");
             }
         }
+
+        public async Task<Result> BlockUserAsync(int userId)
+        {
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null)
+            {
+                return Result.Failure("Користувача не знайдено.");
+            }
+
+            if (!user.IsActive)
+            {
+                return Result.Failure("Користувач вже заблокований.");
+            }
+
+            user.IsActive = false;
+            await _userRepository.UpdateAsync(user);
+
+            _logger.LogInformation("Адміністратор заблокував користувача з ID: {UserId}", userId);
+
+            return Result.Success();
+        }
+
+        public async Task<Result> UnblockUserAsync(int userId)
+        {
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null)
+            {
+                return Result.Failure("Користувача не знайдено.");
+            }
+
+            if (user.IsActive)
+            {
+                return Result.Failure("Користувач вже розблокований (активний).");
+            }
+
+            user.IsActive = true;
+            await _userRepository.UpdateAsync(user);
+
+            _logger.LogInformation("Адміністратор розблокував користувача з ID: {UserId}", userId);
+
+            return Result.Success();
+        }
     }
 }
