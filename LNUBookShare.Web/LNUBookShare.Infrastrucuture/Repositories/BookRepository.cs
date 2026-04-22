@@ -1,10 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using CloudinaryDotNet;
 using LNUBookShare.Application.Interfaces;
 using LNUBookShare.Domain.Entities;
 using LNUBookShare.Infrastructure;
 using Microsoft.EntityFrameworkCore;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace LNUBookShare.Infrastructure.Repositories
 {
@@ -68,35 +70,17 @@ namespace LNUBookShare.Infrastructure.Repositories
             await _context.Books.ExecuteDeleteAsync();
         }
 
+        public async Task<IEnumerable<Book>> SearchBooksByCriteriaAsync(string searchBy, string query)
+        {
+            var dbQuery = GetSearchQuery(searchBy, query);
+            return await dbQuery.ToListAsync();
+        }
+
         public async Task<IEnumerable<Book>> SearchBooksAsync(string searchBy, string query, string sortBy = "title", string statusFilter = "all")
         {
-            if (string.IsNullOrWhiteSpace(query))
-            {
-                return new List<Book>();
-            }
-
-            var lowerQuery = query.ToLower();
-            var lowerSearchBy = searchBy.ToLower();
-
-            var dbQuery = _context.Books
-                .Include(b => b.Owner)
-                .Include(b => b.Cover)
-                .AsQueryable();
-
-            if (lowerSearchBy == "author")
-            {
-                dbQuery = dbQuery.Where(b => EF.Functions.ILike(b.Author, $"%{lowerQuery}%"));
-            }
-            else if (lowerSearchBy == "title")
-            {
-                dbQuery = dbQuery.Where(b => EF.Functions.ILike(b.Title, $"%{lowerQuery}%"));
-            }
-            else
-            {
-                dbQuery = dbQuery.Where(b => b.Isbn != null && b.Isbn.Contains(lowerQuery));
-            }
-
-            return await ApplySortingAndFiltering(dbQuery, sortBy, statusFilter).ToListAsync();
+            var dbQuery = GetSearchQuery(searchBy, query);
+            var finalQuery = ApplySortingAndFiltering(dbQuery, sortBy, statusFilter);
+            return await finalQuery.ToListAsync();
         }
 
         public async Task<IEnumerable<Book>> GetRecommendationsAsync(int facultyId, int currentUserId, string sortBy = "title", string statusFilter = "all")
@@ -107,6 +91,36 @@ namespace LNUBookShare.Infrastructure.Repositories
                 .Where(b => b.Owner.FacultyId == facultyId && b.OwnerId != currentUserId);
 
             return await ApplySortingAndFiltering(dbQuery, sortBy, statusFilter).ToListAsync();
+        }
+
+        private IQueryable<Book> GetBooksBaseQuery()
+        {
+            return _context.Books
+                .Include(b => b.Owner)
+                .Include(b => b.Cover);
+        }
+
+        private IQueryable<Book> GetSearchQuery(string searchBy, string query)
+        {
+            var baseQuery = GetBooksBaseQuery();
+
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                return Enumerable.Empty<Book>().AsQueryable();
+            }
+
+            var lowerQuery = query.ToLower();
+
+            return searchBy?.ToLower() switch
+            {
+                "author" => baseQuery.Where(b => EF.Functions.ILike(b.Author, $"%{lowerQuery}%")),
+                "title" => baseQuery.Where(b => EF.Functions.ILike(b.Title, $"%{lowerQuery}%")),
+                "isbn" => baseQuery.Where(b => b.Isbn != null && b.Isbn.Contains(lowerQuery)),
+                "owner" => baseQuery.Where(b => b.Owner != null &&
+                    (EF.Functions.ILike(b.Owner.FirstName, $"%{lowerQuery}%") ||
+                     EF.Functions.ILike(b.Owner.LastName, $"%{lowerQuery}%"))),
+                _ => baseQuery
+            };
         }
 
         private IQueryable<Book> ApplySortingAndFiltering(IQueryable<Book> query, string sortBy, string statusFilter)

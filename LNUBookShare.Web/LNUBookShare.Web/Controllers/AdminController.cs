@@ -3,7 +3,6 @@ using LNUBookShare.Domain.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-[Authorize(Roles = "Admin")]
 public class AdminController : Controller
 {
     private readonly IAdminUserService _adminService;
@@ -39,5 +38,21 @@ public class AdminController : Controller
         }
 
         return View(result.Value);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> AdminSearchBooks(string searchBy, string query)
+    {
+        var result = await _adminBookService.AdminSearchBooksAsync(searchBy, query);
+
+        if (result.IsFailure)
+        {
+            return RedirectToAction(nameof(Books));
+        }
+
+        ViewBag.CurrentQuery = query;
+        ViewBag.CurrentSearchBy = searchBy;
+
+        return View("Books", result.Value);
     }
 }

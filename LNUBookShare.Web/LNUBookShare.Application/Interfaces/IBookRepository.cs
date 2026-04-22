@@ -18,6 +18,7 @@ namespace LNUBookShare.Application.Interfaces
         Task<IEnumerable<Book>> GetAllBooksWithOwnersAsync();
 
         Task ClearAllAsync();
+        Task<IEnumerable<Book>> SearchBooksByCriteriaAsync(string searchBy, string query);
 
         Task<IEnumerable<Book>> SearchBooksAsync(string searchBy, string query, string sortBy = "title", string statusFilter = "all"); // search
         Task<IEnumerable<Book>> GetRecommendationsAsync(int facultyId, int currentUserId, string sortBy = "title", string statusFilter = "all"); // recs
