@@ -103,6 +103,9 @@ try
     // ОСЬ ТУТ: Реєстрація архітектурно-правильного сервісу сповіщень
     builder.Services.AddScoped<IChatNotificationService, ChatNotificationService>();
 
+    builder.Services.AddMemoryCache(); // Вмикаємо сам кеш
+    builder.Services.Configure<CacheSettings>(builder.Configuration.GetSection("CacheSettings"));
+
     // --- SIGNALR REGISTRATION ---
     builder.Services.AddSignalR();
 
@@ -137,7 +140,7 @@ try
     }
 
     // --- MIDDLEWARE ---
-    // app.UseMiddleware<LNUBookShare.Web.Middleware.RequestTimingMiddleware>();
+    app.UseMiddleware<LNUBookShare.Web.Middleware.RequestTimingMiddleware>();
     app.UseSerilogRequestLogging();
 
     app.UseExceptionHandler("/Home/Error");
@@ -149,7 +152,7 @@ try
     app.UseAuthentication();
     app.UseAuthorization();
 
-    // app.UseMiddleware<LNUBookShare.Web.Middleware.RequestLoggingMiddleware>();
+    app.UseMiddleware<LNUBookShare.Web.Middleware.RequestLoggingMiddleware>();
     app.UseMiddleware<UserStatusMiddleware>();
 
     // --- SIGNALR ENDPOINTS ---
