@@ -1,14 +1,49 @@
 ﻿@model IEnumerable<LNUBookShare.Domain.Models.AdminBookDto>
-
 @{
     ViewData["Title"] = "Керування оголошеннями";
+    var currentQuery = ViewBag.CurrentQuery as string;
+    var currentSearchBy = ViewBag.CurrentSearchBy as string ?? "title";
 }
 
 <div class="container mt-5">
     @if (ViewBag.Error != null)
     {
-        <div class="alert alert-danger shadow-sm">
+        <div class="alert alert-danger shadow-sm mb-4">
             <i class="bi bi-exclamation-triangle-fill"></i> @ViewBag.Error
+        </div>
+    }
+
+    <form asp-action="AdminSearchBooks" method="get" class="mb-4">
+        <div class="d-flex gap-2">
+            
+            <select name="searchBy" class="form-select border border-secondary-subtle shadow-sm" style="width: 140px; border-radius: 8px;">
+                <option value="title" selected="@(currentSearchBy == "title")">Назва книги</option>
+                <option value="author" selected="@(currentSearchBy == "author")">Автор</option>
+                <option value="isbn" selected="@(currentSearchBy == "isbn")">ISBN</option>
+                <option value="owner" selected="@(currentSearchBy == "owner")">Власник</option>
+            </select>
+
+            <div class="position-relative flex-grow-1" style="min-width: 0;">
+                <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted" style="z-index: 5;"></i>
+                <input type="text"
+                       name="query"
+                       value="@currentQuery"
+                       class="form-control border border-secondary-subtle ps-5 py-2 shadow-sm"
+                       style="border-radius: 8px; width: 100%;"
+                       placeholder="Введіть текст для пошуку..."
+                       autocomplete="off" />
+            </div>
+
+            <button type="submit" class="d-none"></button>
+
+            <a asp-action="Books" class="btn btn-outline-secondary px-4 shadow-sm" style="border-radius: 8px;">Скинути</a>
+        </div>
+    </form>
+
+    @if (!string.IsNullOrEmpty(currentQuery))
+    {
+        <div class="mb-3">
+            <span class="text-muted small">Знайдено результатів для: <strong>"@currentQuery"</strong></span>
         </div>
     }
 
@@ -21,27 +56,46 @@
                             <th class="px-4">Назва книги</th>
                             <th>Автор</th>
                             <th>Власник</th>
+                            <th>ISBN</th>
                             <th>Email власника</th>
                             <th>Статус</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var book in Model)
+                        @if (!Model.Any())
                         {
                             <tr>
-                                <td class="px-4 fw-bold text-primary">@book.Title</td>
-                                <td>@book.Author</td>
-                                <td>@book.OwnerName</td>
-                                <td>@book.OwnerEmail</td>
-                                <td><span class="badge bg-secondary">@book.Status</span></td>
+                                <td colspan="6" class="text-center py-5 text-muted">
+                                    <i class="bi bi-search d-block fs-1 mb-2"></i>
+                                    За вашим запитом нічого не знайдено.
+                                </td>
                             </tr>
+                        }
+                        else
+                        {
+                            @foreach (var book in Model)
+                            {
+                                <tr>
+                                    <td class="px-4 fw-bold text-primary">@book.Title</td>
+                                    <td>@book.Author</td>
+                                    <td>@book.OwnerName</td>
+                                    <td>@book.Isbn</td>
+                                    <td>@book.OwnerEmail</td>
+                                    <td>
+                                        @{
+                                            var badgeClass = book.Status?.ToLower() == "available" ? "bg-success" : "bg-secondary";
+                                        }
+                                        <span class="badge @badgeClass">@book.Status</span>
+                                    </td>
+                                </tr>
+                            }
                         }
                     </tbody>
                 </table>
             </div>
         </div>
         <div class="card-footer bg-white text-center py-3">
-            <small class="text-muted">Всього оголошень: @Model.Count()</small>
+            <small class="text-muted">Всього в списку: @Model.Count()</small>
         </div>
     </div>
 </div>
