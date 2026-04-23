@@ -31,6 +31,7 @@ namespace LNUBookShare.Application.Services
                     Email = u.Email!,
                     FacultyName = u.Faculty != null ? u.Faculty.FacultyName : "Не вказано",
                     EmailConfirmed = u.EmailConfirmed,
+                    IsActive = u.IsActive,
                 });
 
                 _logger.LogInformation("Успішно отримано {Count} користувачів.", users.Count());
@@ -41,6 +42,48 @@ namespace LNUBookShare.Application.Services
                 _logger.LogError(ex, "Помилка при отриманні списку користувачів.");
                 return Result<IEnumerable<UserDto>>.Failure("Помилка при завантаженні даних.");
             }
+        }
+
+        public async Task<Result> BlockUserAsync(int userId)
+        {
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null)
+            {
+                return Result.Failure("Користувача не знайдено.");
+            }
+
+            if (!user.IsActive)
+            {
+                return Result.Failure("Користувач вже заблокований.");
+            }
+
+            user.IsActive = false;
+            await _userRepository.UpdateAsync(user);
+
+            _logger.LogInformation("Адміністратор заблокував користувача з ID: {UserId}", userId);
+
+            return Result.Success();
+        }
+
+        public async Task<Result> UnblockUserAsync(int userId)
+        {
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null)
+            {
+                return Result.Failure("Користувача не знайдено.");
+            }
+
+            if (user.IsActive)
+            {
+                return Result.Failure("Користувач вже розблокований (активний).");
+            }
+
+            user.IsActive = true;
+            await _userRepository.UpdateAsync(user);
+
+            _logger.LogInformation("Адміністратор розблокував користувача з ID: {UserId}", userId);
+
+            return Result.Success();
         }
     }
 }

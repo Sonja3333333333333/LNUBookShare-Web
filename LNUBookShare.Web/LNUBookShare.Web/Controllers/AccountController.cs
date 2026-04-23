@@ -151,10 +151,20 @@ public class AccountController : BaseController
         {
             var user = await _userManager.FindByEmailAsync(model.Email);
 
-            if (user != null && !await _userManager.IsEmailConfirmedAsync(user))
+            if (user != null)
             {
-                ModelState.AddModelError(string.Empty, "Пошта ще не підтверджена. Перевірте свою скриньку.");
-                return View(model);
+                if (!await _userManager.IsEmailConfirmedAsync(user))
+                {
+                    ModelState.AddModelError(string.Empty, "Пошта ще не підтверджена. Перевірте свою скриньку.");
+                    return View(model);
+                }
+
+                if (!user.IsActive)
+                {
+                    _logger.LogWarning("Спроба входу заблокованого користувача {Email}.", model.Email);
+                    ModelState.AddModelError(string.Empty, "Ваш акаунт заблоковано адміністратором. Зверніться до підтримки.");
+                    return View(model);
+                }
             }
 
             var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
