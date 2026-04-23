@@ -1,18 +1,73 @@
 ﻿@model IEnumerable<LNUBookShare.Domain.Models.AdminBookDto>
-@{
-    ViewData["Title"] = "Керування оголошеннями";
-    var currentQuery = ViewBag.CurrentQuery as string;
-    var currentSearchBy = ViewBag.CurrentSearchBy as string ?? "title";
-}
 
-<div class="container mt-5">
-    @if (ViewBag.Error != null)
+    @{
+    ViewData["Title"] = "Керування оголошеннями";
+    }
+
+    <div class="container mt-5">
+        @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+        @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+        @if (ViewBag.Error != null)
     {
         <div class="alert alert-danger shadow-sm mb-4">
             <i class="bi bi-exclamation-triangle-fill"></i> @ViewBag.Error
         </div>
     }
 
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="px-4">Назва книги</th>
+                                <th>Автор</th>
+                                <th>Власник</th>
+                                <th>Email власника</th>
+                                <th>Статус</th>
+                                <th class="text-center">Дії</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var book in Model)
+                        {
+                            <tr>
+                                <td class="px-4 fw-bold text-primary">@book.Title</td>
+                                <td>@book.Author</td>
+                                <td>@book.OwnerName</td>
+                                <td>@book.OwnerEmail</td>
+                                <td><span class="badge bg-secondary">@book.Status</span></td>
+                                <td class="text-center">
+                                    <form asp-controller="Admin" asp-action="DeleteBook" method="post"
+                                          onsubmit="return confirm('Видалити оголошення «@book.Title»?');">
+                                        <input type="hidden" name="bookId" value="@book.Id" />
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-danger btn-sm">
+                                            <i class="bi bi-trash"></i> Видалити
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer bg-white text-center py-3">
+                <small class="text-muted">Всього оголошень: @Model.Count()</small>
+            </div>
     <form asp-action="AdminSearchBooks" method="get" class="mb-4">
         <div class="d-flex gap-2">
             
@@ -98,4 +153,3 @@
             <small class="text-muted">Всього в списку: @Model.Count()</small>
         </div>
     </div>
-</div>

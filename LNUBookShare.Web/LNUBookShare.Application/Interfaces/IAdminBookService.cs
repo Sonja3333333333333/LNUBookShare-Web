@@ -6,6 +6,8 @@ namespace LNUBookShare.Application.Interfaces
     public interface IAdminBookService
     {
         Task<Result<IEnumerable<AdminBookDto>>> GetAllBooksAsync();
+        Task<Result> DeleteBookAsync(int bookId);
         Task<Result<IEnumerable<AdminBookDto>>> AdminSearchBooksAsync(string searchBy, string query);
     }
+
 }

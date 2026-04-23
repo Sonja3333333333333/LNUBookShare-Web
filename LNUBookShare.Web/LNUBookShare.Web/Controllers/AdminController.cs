@@ -41,6 +41,18 @@ public class AdminController : Controller
 
         return View(result.Value);
     }
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteBook(int bookId)
+    {
+        var result = await _adminBookService.DeleteBookAsync(bookId);
+
+        if (result.IsSuccess)
+            TempData["SuccessMessage"] = "Оголошення успішно видалено.";
+        else
+            TempData["ErrorMessage"] = result.Error;
+
+        return RedirectToAction(nameof(Books));
 
     [HttpGet]
     public async Task<IActionResult> AdminSearchBooks(string searchBy, string query)
