@@ -7,5 +7,7 @@
         public string Email { get; set; } = string.Empty;
         public string FacultyName { get; set; } = string.Empty;
         public bool EmailConfirmed { get; set; }
+
+        public bool IsActive { get; set; }
     }
 }
