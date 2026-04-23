@@ -1,5 +1,4 @@
 ﻿using LNUBookShare.Application.Interfaces;
-using LNUBookShare.Application.Services;
 using LNUBookShare.Domain.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -41,6 +40,7 @@ public class AdminController : Controller
 
         return View(result.Value);
     }
+
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteBook(int bookId)
@@ -48,11 +48,16 @@ public class AdminController : Controller
         var result = await _adminBookService.DeleteBookAsync(bookId);
 
         if (result.IsSuccess)
+        {
             TempData["SuccessMessage"] = "Оголошення успішно видалено.";
+        }
         else
+        {
             TempData["ErrorMessage"] = result.Error;
+        }
 
         return RedirectToAction(nameof(Books));
+    }
 
     [HttpGet]
     public async Task<IActionResult> AdminSearchBooks(string searchBy, string query)

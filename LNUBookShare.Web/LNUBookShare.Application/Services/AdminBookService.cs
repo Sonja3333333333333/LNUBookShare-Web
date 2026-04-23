@@ -54,19 +54,6 @@ namespace LNUBookShare.Application.Services
             return Result<IEnumerable<AdminBookDto>>.Success(dtos);
         }
 
-        private IEnumerable<AdminBookDto> MapToAdminBookDto(IEnumerable<Book> books)
-        {
-            return books.Select(b => new AdminBookDto
-            {
-                Id = b.BookId,
-                Title = b.Title ?? "Без назви",
-                Author = b.Author ?? "Невідомий автор",
-                Isbn = b.Isbn ?? "Невідомо",
-                OwnerName = b.Owner != null ? $"{b.Owner.FirstName} {b.Owner.LastName}" : "Невідомо",
-                OwnerEmail = b.Owner?.Email ?? "Невідомо",
-                Status = b.Status,
-            }).ToList();
-        }
         public async Task<Result> DeleteBookAsync(int bookId)
         {
             _logger.LogInformation("Адміністратор намагається видалити книгу з ID: {BookId}", bookId);
@@ -91,6 +78,20 @@ namespace LNUBookShare.Application.Services
                 _logger.LogError(ex, "Помилка при видаленні книги з ID {BookId}.", bookId);
                 return Result.Failure("Помилка при видаленні книги.");
             }
+        }
+
+        private IEnumerable<AdminBookDto> MapToAdminBookDto(IEnumerable<Book> books)
+        {
+            return books.Select(b => new AdminBookDto
+            {
+                Id = b.BookId,
+                Title = b.Title ?? "Без назви",
+                Author = b.Author ?? "Невідомий автор",
+                Isbn = b.Isbn ?? "Невідомо",
+                OwnerName = b.Owner != null ? $"{b.Owner.FirstName} {b.Owner.LastName}" : "Невідомо",
+                OwnerEmail = b.Owner?.Email ?? "Невідомо",
+                Status = b.Status,
+            }).ToList();
         }
     }
 }

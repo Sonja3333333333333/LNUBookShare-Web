@@ -1,76 +1,36 @@
 ﻿@model IEnumerable<LNUBookShare.Domain.Models.AdminBookDto>
 
-    @{
+@{
     ViewData["Title"] = "Керування оголошеннями";
-    }
+    var currentQuery = ViewBag.CurrentQuery as string;
+    var currentSearchBy = ViewBag.CurrentSearchBy as string ?? "title";
+}
 
-    <div class="container mt-5">
-        @if (TempData["SuccessMessage"] != null)
+<div class="container mt-5">
+    @if (TempData["SuccessMessage"] != null)
     {
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            @TempData["SuccessMessage"]
+        <div class="alert alert-success alert-dismissible fade show shadow-sm mb-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     }
-        @if (TempData["ErrorMessage"] != null)
+    @if (TempData["ErrorMessage"] != null)
     {
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            @TempData["ErrorMessage"]
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["ErrorMessage"]
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     }
-        @if (ViewBag.Error != null)
+    @if (ViewBag.Error != null)
     {
-        <div class="alert alert-danger shadow-sm mb-4">
-            <i class="bi bi-exclamation-triangle-fill"></i> @ViewBag.Error
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>@ViewBag.Error
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }
 
-        <div class="card shadow-sm border-0">
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th class="px-4">Назва книги</th>
-                                <th>Автор</th>
-                                <th>Власник</th>
-                                <th>Email власника</th>
-                                <th>Статус</th>
-                                <th class="text-center">Дії</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var book in Model)
-                        {
-                            <tr>
-                                <td class="px-4 fw-bold text-primary">@book.Title</td>
-                                <td>@book.Author</td>
-                                <td>@book.OwnerName</td>
-                                <td>@book.OwnerEmail</td>
-                                <td><span class="badge bg-secondary">@book.Status</span></td>
-                                <td class="text-center">
-                                    <form asp-controller="Admin" asp-action="DeleteBook" method="post"
-                                          onsubmit="return confirm('Видалити оголошення «@book.Title»?');">
-                                        <input type="hidden" name="bookId" value="@book.Id" />
-                                        @Html.AntiForgeryToken()
-                                        <button type="submit" class="btn btn-danger btn-sm">
-                                            <i class="bi bi-trash"></i> Видалити
-                                        </button>
-                                    </form>
-                                </td>
-                            </tr>
-                        }
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <div class="card-footer bg-white text-center py-3">
-                <small class="text-muted">Всього оголошень: @Model.Count()</small>
-            </div>
     <form asp-action="AdminSearchBooks" method="get" class="mb-4">
         <div class="d-flex gap-2">
-            
             <select name="searchBy" class="form-select border border-secondary-subtle shadow-sm" style="width: 140px; border-radius: 8px;">
                 <option value="title" selected="@(currentSearchBy == "title")">Назва книги</option>
                 <option value="author" selected="@(currentSearchBy == "author")">Автор</option>
@@ -90,7 +50,6 @@
             </div>
 
             <button type="submit" class="d-none"></button>
-
             <a asp-action="Books" class="btn btn-outline-secondary px-4 shadow-sm" style="border-radius: 8px;">Скинути</a>
         </div>
     </form>
@@ -114,13 +73,14 @@
                             <th>ISBN</th>
                             <th>Email власника</th>
                             <th>Статус</th>
+                            <th class="text-end px-4">Дії</th>
                         </tr>
                     </thead>
                     <tbody>
                         @if (!Model.Any())
                         {
                             <tr>
-                                <td colspan="6" class="text-center py-5 text-muted">
+                                <td colspan="7" class="text-center py-5 text-muted">
                                     <i class="bi bi-search d-block fs-1 mb-2"></i>
                                     За вашим запитом нічого не знайдено.
                                 </td>
@@ -142,6 +102,16 @@
                                         }
                                         <span class="badge @badgeClass">@book.Status</span>
                                     </td>
+                                    <td class="text-end px-4">
+                                        <form asp-controller="Admin" asp-action="DeleteBook" method="post" class="d-inline"
+                                              onsubmit="return confirm('Видалити оголошення «@book.Title»?');">
+                                            <input type="hidden" name="bookId" value="@book.Id" />
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-outline-danger btn-sm" title="Видалити">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
                                 </tr>
                             }
                         }
@@ -153,3 +123,4 @@
             <small class="text-muted">Всього в списку: @Model.Count()</small>
         </div>
     </div>
+</div>
