@@ -1,7 +1,12 @@
 ﻿using LNUBookShare.Application.Common;
 using LNUBookShare.Domain.Models;
 
-public interface IAdminUserService
+namespace LNUBookShare.Application.Interfaces
 {
-    Task<Result<IEnumerable<UserDto>>> GetAllUsersAsync(string? searchTerm = null);
+    public interface IAdminUserService
+    {
+        Task<Result<IEnumerable<UserDto>>> GetAllUsersAsync(string? searchTerm = null);
+        Task<Result> BlockUserAsync(int userId);
+        Task<Result> UnblockUserAsync(int userId);
+    }
 }
