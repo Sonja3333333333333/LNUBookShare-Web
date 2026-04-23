@@ -84,7 +84,7 @@ namespace LNUBookShare.UnitTests.Controllers
         [Fact]
         public async Task SendMessage_Redirects_ForNormalRequest()
         {
-            // Arrange (без AJAX заголовка)
+            // Arrange 
             _chatServiceMock.Setup(s => s.SendMessageAsync(1, 2, "Test"))
                 .ReturnsAsync(Result.Success());
 
