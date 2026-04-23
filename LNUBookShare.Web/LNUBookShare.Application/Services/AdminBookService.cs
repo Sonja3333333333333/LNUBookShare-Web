@@ -1,5 +1,6 @@
 ﻿using LNUBookShare.Application.Common;
 using LNUBookShare.Application.Interfaces;
+using LNUBookShare.Domain.Entities;
 using LNUBookShare.Domain.Models;
 using Microsoft.Extensions.Logging;
 
@@ -20,28 +21,51 @@ namespace LNUBookShare.Application.Services
         {
             _logger.LogInformation("Адміністратор запитує список усіх оголошень (книг).");
 
-            try
-            {
-                var books = await _bookRepository.GetAllBooksWithOwnersAsync();
+            var books = await _bookRepository.GetAllBooksWithOwnersAsync();
 
-                var dtos = books.Select(b => new AdminBookDto
-                {
-                    Id = b.BookId,
-                    Title = b.Title ?? "Без назви",
-                    Author = b.Author ?? "Невідомий автор",
-                    OwnerName = b.Owner != null ? $"{b.Owner.FirstName} {b.Owner.LastName}" : "Невідомо",
-                    OwnerEmail = b.Owner != null ? b.Owner.Email! : "Невідомо",
-                    Status = b.Status,
-                });
-
-                _logger.LogInformation("Успішно отримано {Count} оголошень.", books.Count());
-                return Result<IEnumerable<AdminBookDto>>.Success(dtos);
-            }
-            catch (Exception ex)
+            if (books == null)
             {
-                _logger.LogError(ex, "Помилка при отриманні списку оголошень.");
-                return Result<IEnumerable<AdminBookDto>>.Failure("Помилка при завантаженні бази книг.");
+                _logger.LogWarning("Список книг повернув null.");
+                return Result<IEnumerable<AdminBookDto>>.Failure("Дані про книги відсутні.");
             }
+
+            var dtos = MapToAdminBookDto(books);
+
+            _logger.LogInformation("Успішно отримано {Count} оголошень.", books.Count());
+            return Result<IEnumerable<AdminBookDto>>.Success(dtos);
+        }
+
+        public async Task<Result<IEnumerable<AdminBookDto>>> AdminSearchBooksAsync(string searchBy, string query)
+        {
+            _logger.LogInformation("Адмін-пошук за критерієм: {SearchBy}, запит: {Query}", searchBy, query);
+
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                _logger.LogWarning("Спроба пошуку з порожнім запитом.");
+                return Result<IEnumerable<AdminBookDto>>.Failure("Пошуковий запит не може бути порожнім.");
+            }
+
+            var trimmedQuery = query.Trim();
+            var books = await _bookRepository.SearchBooksByCriteriaAsync(searchBy, trimmedQuery);
+
+            var dtos = MapToAdminBookDto(books);
+
+            _logger.LogInformation("Пошук завершено. Знайдено: {Count}", dtos.Count());
+            return Result<IEnumerable<AdminBookDto>>.Success(dtos);
+        }
+
+        private IEnumerable<AdminBookDto> MapToAdminBookDto(IEnumerable<Book> books)
+        {
+            return books.Select(b => new AdminBookDto
+            {
+                Id = b.BookId,
+                Title = b.Title ?? "Без назви",
+                Author = b.Author ?? "Невідомий автор",
+                Isbn = b.Isbn ?? "Невідомо",
+                OwnerName = b.Owner != null ? $"{b.Owner.FirstName} {b.Owner.LastName}" : "Невідомо",
+                OwnerEmail = b.Owner?.Email ?? "Невідомо",
+                Status = b.Status,
+            }).ToList();
         }
     }
 }
