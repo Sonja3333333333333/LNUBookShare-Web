@@ -145,9 +145,9 @@ try
     app.UseHttpsRedirection();
     app.MapStaticAssets();
     app.UseRouting();
-
     app.UseAuthentication();
     app.UseAuthorization();
+    app.UseMiddleware<LNUBookShare.Web.Middleware.RequestLoggingMiddleware>();
 
     app.UseMiddleware<UserStatusMiddleware>();
 
