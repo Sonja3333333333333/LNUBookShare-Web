@@ -137,6 +137,7 @@ try
     }
 
     // --- MIDDLEWARE ---
+    // app.UseMiddleware<LNUBookShare.Web.Middleware.RequestTimingMiddleware>();
     app.UseSerilogRequestLogging();
 
     app.UseExceptionHandler("/Home/Error");
@@ -147,8 +148,8 @@ try
     app.UseRouting();
     app.UseAuthentication();
     app.UseAuthorization();
-    app.UseMiddleware<LNUBookShare.Web.Middleware.RequestLoggingMiddleware>();
 
+    // app.UseMiddleware<LNUBookShare.Web.Middleware.RequestLoggingMiddleware>();
     app.UseMiddleware<UserStatusMiddleware>();
 
     // --- SIGNALR ENDPOINTS ---
