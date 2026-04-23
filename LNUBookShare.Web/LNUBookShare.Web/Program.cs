@@ -149,6 +149,8 @@ try
     app.UseAuthentication();
     app.UseAuthorization();
 
+    app.UseMiddleware<UserStatusMiddleware>();
+
     // --- SIGNALR ENDPOINTS ---
     app.MapHub<ChatHub>("/chatHub");
 

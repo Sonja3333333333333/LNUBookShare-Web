@@ -31,6 +31,7 @@ namespace LNUBookShare.Application.Services
                     Email = u.Email!,
                     FacultyName = u.Faculty != null ? u.Faculty.FacultyName : "Не вказано",
                     EmailConfirmed = u.EmailConfirmed,
+                    IsActive = u.IsActive,
                 });
 
                 _logger.LogInformation("Успішно отримано {Count} користувачів.", users.Count());
