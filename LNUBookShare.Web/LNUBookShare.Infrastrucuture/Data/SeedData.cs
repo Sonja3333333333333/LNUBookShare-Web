@@ -23,7 +23,7 @@ namespace LNUBookShare.Infrastructure.Data
 
             if (string.IsNullOrEmpty(adminEmail) || string.IsNullOrEmpty(adminPassword))
             {
-                Console.WriteLine("ПОПЕРЕДЖЕННЯ: Дані адміна (Email або Пароль) не знайдені в конфігурації. Адміна не створено.");
+                Console.WriteLine("Admin data not found");
                 return;
             }
 
@@ -36,7 +36,7 @@ namespace LNUBookShare.Infrastructure.Data
 
             if (existingFaculty == null)
             {
-                Console.WriteLine("ПОМИЛКА: В базі немає жодного факультету! Додайте хоча б один.");
+                Console.WriteLine("No faculty was found");
                 return;
             }
 
@@ -59,13 +59,13 @@ namespace LNUBookShare.Infrastructure.Data
                 if (result.Succeeded)
                 {
                     await userManager.AddToRoleAsync(adminUser, "Admin");
-                    Console.WriteLine($"СУПЕР-АДМІНА ({adminEmail}) УСПІШНО СТВОРЕНО!");
+                    Console.WriteLine($"admin ({adminEmail}) created succesfully");
                 }
                 else
                 {
                     foreach (var error in result.Errors)
                     {
-                        Console.WriteLine($"ПОМИЛКА СТВОРЕННЯ АДМІНА: {error.Description}");
+                        Console.WriteLine($"Error while creating admin: {error.Description}");
                     }
                 }
             }

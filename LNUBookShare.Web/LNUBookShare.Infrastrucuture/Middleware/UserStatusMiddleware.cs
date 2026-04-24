@@ -19,7 +19,7 @@ public class UserStatusMiddleware
 
             if (user != null && !user.IsActive)
             {
-                await signInManager.SignOutAsync(); // Вихід із системи
+                await signInManager.SignOutAsync();
                 context.Response.Redirect("/Account/Login?error=blocked");
                 return;
             }
