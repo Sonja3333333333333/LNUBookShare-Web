@@ -30,12 +30,38 @@ public partial class AppDbContext : IdentityDbContext<User, Role, int>
     public virtual DbSet<Image> Images { get; set; }
     public virtual DbSet<ReservationQueue> ReservationQueues { get; set; }
     public virtual DbSet<UserReview> UserReviews { get; set; }
-
     public virtual DbSet<Notification> Notifications { get; set; }
+    public virtual DbSet<Report> Reports { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        // --- НОВА ТАБЛИЦЯ: report ---
+        modelBuilder.Entity<Report>(entity =>
+        {
+            entity.ToTable("report");
+            entity.HasKey(e => e.Id).HasName("report_pkey");
+            entity.HasIndex(e => new { e.SenderId, e.ReportedUserId }, "report_sender_reported_unique").IsUnique();
+
+            entity.Property(e => e.Id).HasColumnName("report_id");
+            entity.Property(e => e.SenderId).HasColumnName("sender_id").IsRequired();
+            entity.Property(e => e.ReportedUserId).HasColumnName("reported_user_id").IsRequired();
+            entity.Property(e => e.Context).HasColumnName("context_").IsRequired();
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("now()").HasColumnType("timestamp without time zone").HasColumnName("created_at").IsRequired();
+
+            entity.HasOne(d => d.Sender)
+                .WithMany()
+                .HasForeignKey(d => d.SenderId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("report_sender_id_fkey");
+
+            entity.HasOne(d => d.ReportedUser)
+                .WithMany()
+                .HasForeignKey(d => d.ReportedUserId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("report_reported_user_id_fkey");
+        });
 
         // 1. ТАБЛИЦЯ: book
         modelBuilder.Entity<Book>(entity =>
@@ -205,7 +231,6 @@ public partial class AppDbContext : IdentityDbContext<User, Role, int>
             entity.Property(e => e.IsActive).HasDefaultValue(true).HasColumnName("is_active").IsRequired();
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("now()").HasColumnType("timestamp without time zone").HasColumnName("created_at").IsRequired();
 
-            // Мапінг стандартних полів Identity
             entity.Property(e => e.Email).HasMaxLength(100).HasColumnName("email");
             entity.Property(e => e.PasswordHash).HasMaxLength(255).HasColumnName("password_hash");
             entity.Property(e => e.UserName).HasColumnName("UserName");
@@ -254,24 +279,10 @@ public partial class AppDbContext : IdentityDbContext<User, Role, int>
             entity.Property(e => e.BookId).HasColumnName("book_id");
             entity.Property(e => e.Message).HasColumnName("message_").IsRequired();
             entity.Property(e => e.IsRead).HasDefaultValue(false).HasColumnName("is_read").IsRequired();
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("now()").HasColumnType("timestamp without time zone").HasColumnName("created_at").IsRequired();
 
-            entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("now()")
-                .HasColumnType("timestamp without time zone")
-                .HasColumnName("created_at")
-                .IsRequired();
-
-            entity.HasOne(d => d.User)
-                .WithMany()
-                .HasForeignKey(d => d.UserId)
-                .OnDelete(DeleteBehavior.Cascade)
-                .HasConstraintName("notification_user_id_fkey");
-
-            entity.HasOne(d => d.Book)
-                .WithMany()
-                .HasForeignKey(d => d.BookId)
-                .OnDelete(DeleteBehavior.Cascade)
-                .HasConstraintName("notification_book_id_fkey");
+            entity.HasOne(d => d.User).WithMany().HasForeignKey(d => d.UserId).OnDelete(DeleteBehavior.Cascade).HasConstraintName("notification_user_id_fkey");
+            entity.HasOne(d => d.Book).WithMany().HasForeignKey(d => d.BookId).OnDelete(DeleteBehavior.Cascade).HasConstraintName("notification_book_id_fkey");
         });
 
         // ------------------ SEEDING (Тестові Дані) ------------------
@@ -314,17 +325,14 @@ public partial class AppDbContext : IdentityDbContext<User, Role, int>
             CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc),
         });
 
-        //-------------повідомлення
-        // Тестові сповіщення
-        modelBuilder.Entity<Notification>().HasData(
-            new Notification
-            {
-                Id = 1,
-                UserId = 9, // ID нашого testUser
-                BookId = 1, // ID нашої книги "Чиста Архітектура"
-                Message = "Книга 'Чиста Архітектура' тепер доступна для бронювання!",
-                IsRead = false,
-                CreatedAt = new DateTime(2024, 4, 12, 10, 0, 0, DateTimeKind.Utc),
-            });
+        modelBuilder.Entity<Notification>().HasData(new Notification
+        {
+            Id = 1,
+            UserId = 1,
+            BookId = 1,
+            Message = "Книга 'Чиста Архітектура' тепер доступна для бронювання!",
+            IsRead = false,
+            CreatedAt = new DateTime(2024, 4, 12, 10, 0, 0, DateTimeKind.Utc),
+        });
     }
 }
