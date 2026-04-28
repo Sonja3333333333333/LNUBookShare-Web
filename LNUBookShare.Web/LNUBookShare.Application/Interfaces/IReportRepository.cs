@@ -4,9 +4,9 @@ namespace LNUBookShare.Application.Interfaces
 {
     public interface IReportRepository
     {
-        Task AddAsync(Report report);
+        Task AddAsync(UserReport report);
         Task<bool> ExistsAsync(int senderId, int reportedUserId);
-        Task<IEnumerable<Report>> GetAllWithUsersAsync(); // Щоб адмін бачив імена
-        Task<Report?> GetByIdAsync(int id);
+        Task<IEnumerable<UserReport>> GetAllWithUsersAsync(); // Щоб адмін бачив імена
+        Task<UserReport?> GetByIdAsync(int id);
     }
 }

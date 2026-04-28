@@ -1,4 +1,5 @@
 ﻿@using LNUBookShare.Web.Models
+@using LNUBookShare.Domain.Entities
 @model OtherProfileViewModel
 
 @{
@@ -6,7 +7,7 @@
 }
 
 <div class="container mt-5">
-    @* Блок сповіщень *@
+    @* Блок сповіщень (Toast/Alert) *@
     @if (TempData["SuccessMessage"] != null)
     {
         <div class="alert alert-success alert-dismissible fade show shadow-sm mb-4" role="alert">
@@ -39,7 +40,7 @@
                                 </div>
                             }
                             
-                            @* Кнопка репорту під аватаром *@
+                            @* Кнопка репорту *@
                             <div class="mt-3 px-3">
                                 <button type="button" class="btn btn-outline-danger btn-sm w-100" data-bs-toggle="modal" data-bs-target="#reportModal">
                                     <i class="bi bi-exclamation-octagon"></i> Поскаржитись
@@ -75,9 +76,9 @@
                 <h2 class="fw-bold text-dark">Книги користувача</h2>
             </div>
 
+            @* Форма фільтрації *@
             <form asp-controller="OtherProfile" asp-action="Index" method="get" class="mb-4">
                 <input type="hidden" name="userId" value="@Model.UserId" />
-                
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 pb-3 border-bottom border-secondary-subtle">
                     <div class="d-flex align-items-center gap-2">
                         <span class="text-muted small">Сортувати за:</span>
@@ -94,6 +95,7 @@
                                    checked="@(Model.StatusFilter == "all" || string.IsNullOrEmpty(Model.StatusFilter))" onchange="this.form.submit()">
                             <label class="form-check-label text-muted small" for="statusAll">Всі</label>
                         </div>
+                        @* ... інші радіо-кнопки (available, borrowed, reserved) залишаються без змін ... *@
                         <div class="form-check">
                             <input class="form-check-input" type="radio" name="statusFilter" id="statusAvail" value="available"
                                    checked="@(Model.StatusFilter == "available")" onchange="this.form.submit()">
@@ -118,6 +120,7 @@
                 {
                     @foreach (var book in Model.Books)
                     {
+                        @* ... Картки книг без змін ... *@
                         <div class="card mb-3 shadow-sm border-0 bg-white" style="border-radius: 12px; border: 1px solid #e0e0e0 !important; overflow: hidden;">
                             <div class="row g-0 align-items-center">
                                 <div class="col-md-3 text-center bg-light d-flex align-items-center justify-content-center p-0" style="height: 160px; border-right: 1px solid #e0e0e0; overflow: hidden;">
@@ -130,33 +133,21 @@
                                         <i class="bi bi-image text-secondary" style="font-size: 3rem;"></i>
                                     }
                                 </div>
-                    
                                 <div class="col-md-9 position-relative">
                                     <div class="card-body">
                                         <div class="position-absolute top-0 end-0 mt-2 me-2">
                                             <partial name="_FavoriteButton" model="(book.BookId, Model.FavoritedBookIds.Contains(book.BookId), Context.Request.Path + Context.Request.QueryString)" />
                                         </div>
                                         <h5 class="card-title pe-5 mb-3">
-                                            <a asp-controller="Catalog"
-                                                   asp-action="Details"
-                                                   asp-route-id="@book.BookId"
-                                                   asp-route-returnUrl="@(Context.Request.Path + Context.Request.QueryString)"
-                                                   class="fw-bold link-dark-hover text-decoration-none text-dark" title="Переглянути деталі">
+                                            <a asp-controller="Catalog" asp-action="Details" asp-route-id="@book.BookId" asp-route-returnUrl="@(Context.Request.Path + Context.Request.QueryString)"
+                                                   class="fw-bold link-dark-hover text-decoration-none text-dark">
                                                 @book.Title
                                             </a>
                                         </h5>
-                                        <p class="card-text mb-1 text-muted" style="font-size: 0.9rem;">
-                                            Автор: <span class="text-dark">@book.Author</span>
-                                        </p>
-                                        <p class="card-text mb-1 text-muted" style="font-size: 0.9rem;">
+                                        <p class="card-text mb-1 text-muted">Автор: <span class="text-dark">@book.Author</span></p>
+                                        <p class="card-text mb-1 text-muted">
                                             Статус: <span class="text-dark">
-                                            @(book.Status switch
-                                            {
-                                                "available" => "Доступно",
-                                                "reserved" => "Заброньовано",
-                                                "borrowed" => "Видано",
-                                                _ => book.Status
-                                            })
+                                            @(book.Status switch { "available" => "Доступно", "reserved" => "Заброньовано", "borrowed" => "Видано", _ => book.Status })
                                         </span>
                                     </p>
                                 </div>
@@ -165,21 +156,10 @@
                     </div>
                 }
             }
-                else if (Model.StatusFilter != "all" && !string.IsNullOrEmpty(Model.StatusFilter))
+                else
             {
-                <div class="text-center py-4 text-muted">
-                    <i class="bi bi-search mb-2" style="font-size: 2rem;"></i>
-                    <p>За обраним фільтром книг не знайдено</p>
-                </div>
-            }
-            else
-            {
-                <div class="text-center py-5 bg-light rounded-4 border border-secondary-subtle shadow-sm mt-3">
-                    <div class="mb-3">
-                        <i class="bi bi-journal-x text-secondary-subtle" style="font-size: 5rem;"></i>
-                    </div>
-                    <h4 class="text-secondary fw-bold">У цього користувача ще немає книг</h4>
-                    <p class="text-muted">Як тільки користувач додасть книги до своєї колекції, вони з'являться тут.</p>
+                <div class="text-center py-5 bg-light rounded-4 border border-secondary-subtle">
+                    <h4 class="text-secondary fw-bold">Книг не знайдено</h4>
                 </div>
             }
         </div>
@@ -187,7 +167,7 @@
 </div>
 </div>
 
-@* МОДАЛЬНЕ ВІКНО ДЛЯ РЕПОРТУ *@
+@* ОНОВЛЕНЕ МОДАЛЬНЕ ВІКНО ЗГІДНО З КРИТЕРІЯМИ *@
 <div class="modal fade" id="reportModal" tabindex="-1" aria-labelledby="reportModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content shadow border-0" style="border-radius: 15px;">
@@ -198,14 +178,28 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form asp-controller="OtherProfile" asp-action="Report" method="post">
-                <div class="modal-body p-4">
+                <div class="modal-body p-4 text-dark">
                     <input type="hidden" name="reportedUserId" value="@Model.UserId" />
-                    <p class="text-muted small mb-3">Ваша скарга буде розглянута адміністрацією. Будь ласка, вкажіть причину максимально детально.</p>
+                    
+                    @* Випадаючий список причини *@
+                    <div class="mb-3">
+                        <label for="reason" class="form-label fw-bold mb-2">Причина скарги:</label>
+                        <select id="reason" name="reason" class="form-select border-secondary-subtle shadow-sm" required style="border-radius: 10px;">
+                            <option value="" disabled selected>Оберіть причину...</option>
+                            <option value="Spam">Спам / Фейковий акаунт</option>
+                            <option value="Insults">Нецензурна лексика / Образи</option>
+                            <option value="Fraud">Шахрайство</option>
+                            <option value="BookReturnIssue">Проблеми з поверненням книги</option>
+                            <option value="Other">Інше</option>
+                        </select>
+                    </div>
+
+                    @* Текстове поле деталей *@
                     <div class="mb-0">
-                        <label for="reason" class="form-label fw-bold text-dark mb-2">Причина скарги:</label>
+                        <label for="details" class="form-label fw-bold mb-2">Деталі:</label>
                         <textarea class="form-control border-secondary-subtle shadow-sm"
-                                  id="reason" name="reason" rows="4" required
-                                  placeholder="Наприклад: користувач не відповідає, книга пошкоджена або не відповідає опису..."
+                                  id="details" name="details" rows="4"
+                                  placeholder="Наприклад: користувач відмовляється повертати книгу 'Чиста архітектура' вже другий місяць..."
                                   style="resize: none; border-radius: 10px;"></textarea>
                     </div>
                 </div>
