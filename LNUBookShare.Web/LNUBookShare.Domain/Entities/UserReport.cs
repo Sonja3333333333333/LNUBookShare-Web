@@ -12,5 +12,7 @@ public class UserReport
     public ReportReason Reason { get; set; } // Випадаючий список
     public string Details { get; set; } = string.Empty; // Текстове поле
 
+    public ReportStatus Status { get; set; } = ReportStatus.Pending;
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }
