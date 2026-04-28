@@ -1,0 +1,180 @@
+@using LNUBookShare.Domain.Entities
+@model IEnumerable<BookReview>
+
+    @{
+    ViewData["Title"] = "Керування коментарями";
+    var currentQuery = ViewBag.CurrentQuery as string;
+    var currentSearchBy = ViewBag.CurrentSearchBy as string ?? "comment";
+    }
+
+    <div class="container mt-5">
+        @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show shadow-sm mb-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+        @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+        @if (ViewBag.Error != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>@ViewBag.Error
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+        <form asp-action="AdminSearchReviews" method="get" class="mb-4">
+            <div class="d-flex gap-2">
+                <select name="searchBy"
+                        class="form-select border border-secondary-subtle shadow-sm"
+                        style="width: 160px; border-radius: 8px;">
+                    <option value="comment"
+                            selected="@(currentSearchBy == "comment")">
+                        Текст коментаря
+                    </option>
+                    <option value="author"
+                            selected="@(currentSearchBy == "author")">
+                        Автор
+                    </option>
+                </select>
+
+                <div class="position-relative flex-grow-1" style="min-width: 0;">
+                    <i class="bi bi-search position-absolute top-50 start-0
+                          translate-middle-y ms-3 text-muted"
+                       style="z-index: 5;"></i>
+                    <input type="text"
+                           name="query"
+                           value="@currentQuery"
+                           class="form-control border border-secondary-subtle
+                              ps-5 py-2 shadow-sm"
+                           style="border-radius: 8px; width: 100%;"
+                           placeholder="Введіть текст для пошуку..."
+                           autocomplete="off" />
+                </div>
+
+                <button type="submit" class="d-none"></button>
+                <a asp-action="Reviews"
+                   class="btn btn-outline-secondary px-4 shadow-sm"
+                   style="border-radius: 8px;">
+                    Скинути
+                </a>
+            </div>
+        </form>
+
+        @if (!string.IsNullOrEmpty(currentQuery))
+    {
+        <div class="mb-3">
+            <span class="text-muted small">
+                Знайдено результатів для:
+                <strong>"@currentQuery"</strong>
+            </span>
+        </div>
+    }
+
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="px-4">Текст коментаря</th>
+                                <th>Автор</th>
+                                <th>Дата написання</th>
+                                <th>До якої книги</th>
+                                <th class="text-end px-4">Дії</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center py-5 text-muted">
+                                    <i class="bi bi-chat-left-dots d-block fs-1 mb-2"></i>
+                                    Коментарів не знайдено.
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var review in Model)
+                            {
+                            <tr>
+                                <td class="px-4" style="max-width: 350px;">
+                                    <span>@review.Comment</span>
+                                    <div class="mt-1">
+                                        @for (int i = 1; i <= 5; i++)
+                                            {
+                                        <i class="bi bi-star@(i <= review.Rating
+                                                    ? "-fill" : "") text-warning"
+                                           style="font-size: 0.75rem;"></i>
+                                            }
+                                    </div>
+                                </td>
+                                <td>
+                                    @if (review.Reviewer != null)
+                                        {
+                                    <span>
+                                        @review.Reviewer.FirstName
+                                        @review.Reviewer.LastName
+                                    </span>
+                                        }
+                                        else
+                                        {
+                                    <span class="text-muted">Невідомо</span>
+                                        }
+                                </td>
+                                <td>@review.CreatedAt.ToString("dd.MM.yyyy HH:mm")</td>
+                                <td>
+                                    @if (review.Book != null)
+                                        {
+                                    <a asp-controller="Catalog"
+                                       asp-action="Details"
+                                       asp-route-id="@review.BookId"
+                                       class="text-decoration-none fw-bold">
+                                        @review.Book.Title
+                                    </a>
+                                        }
+                                        else
+                                        {
+                                    <span class="text-muted">—</span>
+                                        }
+                                </td>
+                                <td class="text-end px-4">
+                                    <form asp-controller="Admin"
+                                          asp-action="DeleteReview"
+                                          method="post"
+                                          class="d-inline"
+                                          onsubmit="return confirm(
+                                                'Видалити цей коментар?');">
+                                        <input type="hidden"
+                                               name="reviewId"
+                                               value="@review.ReviewId" />
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit"
+                                                class="btn btn-outline-danger btn-sm"
+                                                title="Видалити">
+                                            <i class="bi bi-trash"></i> Видалити
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            }
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer bg-white text-center py-3">
+                <small class="text-muted">
+                    Всього коментарів: @Model.Count()
+                </small>
+            </div>
+        </div>
+    </div>
