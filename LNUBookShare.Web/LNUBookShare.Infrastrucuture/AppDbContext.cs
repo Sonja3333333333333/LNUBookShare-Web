@@ -48,6 +48,7 @@ public partial class AppDbContext : IdentityDbContext<User, Role, int>
 
             entity.HasOne(d => d.Sender).WithMany().HasForeignKey(d => d.SenderId).OnDelete(DeleteBehavior.Restrict);
             entity.HasOne(d => d.ReportedUser).WithMany().HasForeignKey(d => d.ReportedUserId).OnDelete(DeleteBehavior.Cascade);
+            entity.Property(e => e.Status).HasConversion<string>().HasDefaultValue(ReportStatus.Pending);
         });
 
         // 1. ТАБЛИЦЯ: book
