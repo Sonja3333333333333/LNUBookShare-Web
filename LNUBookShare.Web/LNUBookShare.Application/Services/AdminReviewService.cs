@@ -43,7 +43,6 @@ namespace LNUBookShare.Application.Services
                 };
             }
 
-            // Сортування: Newest first
             reviews = reviews.OrderByDescending(r => r.CreatedAt);
 
             return Result<IEnumerable<BookReview>>.Success(reviews);
