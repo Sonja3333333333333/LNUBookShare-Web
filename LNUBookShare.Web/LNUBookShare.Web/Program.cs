@@ -11,6 +11,7 @@ using LNUBookShare.Infrastructure;
 using LNUBookShare.Infrastructure.Repositories;
 using LNUBookShare.Infrastructure.Services;
 using LNUBookShare.Web.Hubs;
+using LNUBookShare.Web.Middleware; // Namespace для мідлвар
 using LNUBookShare.Web.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -96,6 +97,10 @@ try
     builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
     builder.Services.AddScoped<INotificationService, NotificationService>();
 
+    // Reports (НОВА ФІЧА)
+    builder.Services.AddScoped<IReportRepository, ReportRepository>();
+    builder.Services.AddScoped<IReportService, ReportService>();
+
     // Системні повідомлення (Чат)
     builder.Services.AddScoped<IChatRepository, ChatRepository>();
     builder.Services.AddScoped<IChatService, ChatService>();
@@ -117,9 +122,7 @@ try
     builder.Services.Configure<ChatSettings>(builder.Configuration.GetSection("ChatSettings"));
 
     builder.Services.AddScoped<IAdminUserService, AdminUserService>();
-
     builder.Services.AddScoped<IUserRepository, UserRepository>();
-
     builder.Services.AddScoped<IAdminBookService, AdminBookService>();
 
     builder.Services.AddControllersWithViews();
@@ -149,9 +152,11 @@ try
     app.UseHttpsRedirection();
     app.MapStaticAssets();
     app.UseRouting();
+
     app.UseAuthentication();
     app.UseAuthorization();
 
+    // Мідлвари логування та перевірки статусу
     app.UseMiddleware<LNUBookShare.Web.Middleware.RequestLoggingMiddleware>();
     app.UseMiddleware<UserStatusMiddleware>();
 
