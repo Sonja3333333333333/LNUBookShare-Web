@@ -31,36 +31,23 @@ public partial class AppDbContext : IdentityDbContext<User, Role, int>
     public virtual DbSet<ReservationQueue> ReservationQueues { get; set; }
     public virtual DbSet<UserReview> UserReviews { get; set; }
     public virtual DbSet<Notification> Notifications { get; set; }
-    public virtual DbSet<Report> Reports { get; set; }
+    public virtual DbSet<UserReport> Reports { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
         // --- НОВА ТАБЛИЦЯ: report ---
-        modelBuilder.Entity<Report>(entity =>
+        modelBuilder.Entity<UserReport>(entity =>
         {
-            entity.ToTable("report");
-            entity.HasKey(e => e.Id).HasName("report_pkey");
-            entity.HasIndex(e => new { e.SenderId, e.ReportedUserId }, "report_sender_reported_unique").IsUnique();
+            entity.ToTable("UserReports"); // Як в інструкції
+            entity.HasKey(e => e.Id);
 
-            entity.Property(e => e.Id).HasColumnName("report_id");
-            entity.Property(e => e.SenderId).HasColumnName("sender_id").IsRequired();
-            entity.Property(e => e.ReportedUserId).HasColumnName("reported_user_id").IsRequired();
-            entity.Property(e => e.Context).HasColumnName("context_").IsRequired();
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("now()").HasColumnType("timestamp without time zone").HasColumnName("created_at").IsRequired();
+            entity.Property(e => e.Reason).HasConversion<string>(); // Зберігаємо як рядок для читабельності в БД
+            entity.Property(e => e.Details).HasMaxLength(1000);
 
-            entity.HasOne(d => d.Sender)
-                .WithMany()
-                .HasForeignKey(d => d.SenderId)
-                .OnDelete(DeleteBehavior.Restrict)
-                .HasConstraintName("report_sender_id_fkey");
-
-            entity.HasOne(d => d.ReportedUser)
-                .WithMany()
-                .HasForeignKey(d => d.ReportedUserId)
-                .OnDelete(DeleteBehavior.Cascade)
-                .HasConstraintName("report_reported_user_id_fkey");
+            entity.HasOne(d => d.Sender).WithMany().HasForeignKey(d => d.SenderId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(d => d.ReportedUser).WithMany().HasForeignKey(d => d.ReportedUserId).OnDelete(DeleteBehavior.Cascade);
         });
 
         // 1. ТАБЛИЦЯ: book

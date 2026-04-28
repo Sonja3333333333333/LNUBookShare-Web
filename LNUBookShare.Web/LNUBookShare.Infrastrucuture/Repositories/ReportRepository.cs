@@ -13,7 +13,7 @@ namespace LNUBookShare.Infrastructure.Repositories
             _context = context;
         }
 
-        public async Task AddAsync(Report report)
+        public async Task AddAsync(UserReport report)
         {
             await _context.Reports.AddAsync(report);
             await _context.SaveChangesAsync();
@@ -26,7 +26,7 @@ namespace LNUBookShare.Infrastructure.Repositories
                 .AnyAsync(r => r.SenderId == senderId && r.ReportedUserId == reportedUserId);
         }
 
-        public async Task<IEnumerable<Report>> GetAllWithUsersAsync()
+        public async Task<IEnumerable<UserReport>> GetAllWithUsersAsync()
         {
             return await _context.Reports
                 .Include(r => r.Sender)
@@ -35,7 +35,7 @@ namespace LNUBookShare.Infrastructure.Repositories
                 .ToListAsync();
         }
 
-        public async Task<Report?> GetByIdAsync(int id)
+        public async Task<UserReport?> GetByIdAsync(int id)
         {
             return await _context.Reports
                 .Include(r => r.Sender)

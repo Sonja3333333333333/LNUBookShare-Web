@@ -79,7 +79,7 @@ namespace LNUBookShare.Web.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Report(int reportedUserId, string reason)
+        public async Task<IActionResult> Report(int reportedUserId, ReportReason reason, string details)
         {
             var currentUserId = GetCurrentUserId();
             if (currentUserId == null)
@@ -87,18 +87,14 @@ namespace LNUBookShare.Web.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
-            _logger.LogInformation("\x1b[35m[REPORT] Спроба репорту від {SenderId} на {TargetId}. Причина: {Reason}\x1b[0m", currentUserId, reportedUserId, reason);
-
-            var result = await _reportService.CreateReportAsync(currentUserId.Value, reportedUserId, reason);
+            var result = await _reportService.CreateReportAsync(currentUserId.Value, reportedUserId, reason, details);
 
             if (result.IsSuccess)
             {
-                _logger.LogInformation("\x1b[32m[REPORT SUCCESS] Скарга на {TargetId} успішно збережена в базу.\x1b[0m", reportedUserId);
-                TempData["SuccessMessage"] = "Вашу скаргу надіслано адміністрації.";
+                TempData["SuccessMessage"] = "Скаргу надіслано адміністрації.";
             }
             else
             {
-                _logger.LogWarning("\x1b[31m[REPORT FAILED] Не вдалося створити скаргу: {Error}\x1b[0m", result.Error);
                 TempData["ErrorMessage"] = result.Error;
             }
 
