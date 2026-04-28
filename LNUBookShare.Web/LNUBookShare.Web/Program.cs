@@ -105,6 +105,8 @@ try
     builder.Services.AddScoped<IChatRepository, ChatRepository>();
     builder.Services.AddScoped<IChatService, ChatService>();
 
+    builder.Services.AddScoped<ITopUsersService, TopUsersService>();
+
     // ОСЬ ТУТ: Реєстрація архітектурно-правильного сервісу сповіщень
     builder.Services.AddScoped<IChatNotificationService, ChatNotificationService>();
 
