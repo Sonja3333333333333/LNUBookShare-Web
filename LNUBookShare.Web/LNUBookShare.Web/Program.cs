@@ -126,6 +126,9 @@ try
     builder.Services.AddScoped<IAdminBookService, AdminBookService>();
     builder.Services.AddScoped<IAdminReportService, AdminReportService>();
 
+    builder.Services.AddScoped<IAdminReviewRepository, AdminReviewRepository>();
+    builder.Services.AddScoped<IAdminReviewService, AdminReviewService>();
+
     builder.Services.AddControllersWithViews();
 
     var app = builder.Build();
