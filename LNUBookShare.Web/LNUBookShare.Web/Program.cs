@@ -124,6 +124,7 @@ try
     builder.Services.AddScoped<IAdminUserService, AdminUserService>();
     builder.Services.AddScoped<IUserRepository, UserRepository>();
     builder.Services.AddScoped<IAdminBookService, AdminBookService>();
+    builder.Services.AddScoped<IAdminReportService, AdminReportService>();
 
     builder.Services.AddControllersWithViews();
 
@@ -165,7 +166,7 @@ try
 
     app.MapControllerRoute(
         name: "default",
-        pattern: "{controller=Catalog}/{action=Search}/{id?}")
+        pattern: "{controller=Admin}/{action=Books}/{id?}")
         .WithStaticAssets();
 
     await app.RunAsync();
