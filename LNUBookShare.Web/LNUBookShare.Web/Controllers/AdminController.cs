@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
+[Authorize(Roles = "Admin")]
 public class AdminController : Controller
 {
     private readonly IAdminUserService _adminService;

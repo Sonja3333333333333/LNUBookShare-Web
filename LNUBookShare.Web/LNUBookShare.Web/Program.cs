@@ -166,7 +166,7 @@ try
 
     app.MapControllerRoute(
         name: "default",
-        pattern: "{controller=Admin}/{action=Books}/{id?}")
+        pattern: "{controller=Catalog}/{action=Search}/{id?}")
         .WithStaticAssets();
 
     await app.RunAsync();
