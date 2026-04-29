@@ -2,6 +2,7 @@
 using LNUBookShare.Domain.Entities;
 using LNUBookShare.Domain.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 [Authorize(Roles = "Admin")]
@@ -10,14 +11,13 @@ public class AdminController : Controller
     private readonly IAdminUserService _adminService;
     private readonly IAdminBookService _adminBookService;
     private readonly IAdminReviewService _adminReviewService;
+    private readonly IAdminReportService _adminReportService;
 
-    public AdminController(
-        IAdminUserService adminService,
-        IAdminBookService adminBookService,
-        IAdminReviewService adminReviewService)
+    public AdminController(IAdminUserService adminService, IAdminBookService adminBookService, IAdminReportService adminReportService, IAdminReviewService adminReviewService)
     {
         _adminService = adminService;
         _adminBookService = adminBookService;
+        _adminReportService = adminReportService;
         _adminReviewService = adminReviewService;
     }
 
@@ -43,6 +43,26 @@ public class AdminController : Controller
             ViewBag.Error = result.Error;
             return View(new List<AdminBookDto>());
         }
+
+        return View(result.Value);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Reports(string query, string searchBy = "sender", string sortBy = "date", string statusFilter = "active", string? reasonFilter = null)
+    {
+        var result = await _adminReportService.GetReportsAsync(query, searchBy, sortBy, statusFilter, reasonFilter);
+
+        if (result.IsFailure)
+        {
+            ViewBag.Error = result.Error;
+            return View(new List<UserReport>());
+        }
+
+        ViewBag.CurrentQuery = query;
+        ViewBag.CurrentSearchBy = searchBy;
+        ViewBag.CurrentSortBy = sortBy;
+        ViewBag.CurrentStatusFilter = statusFilter;
+        ViewBag.CurrentReasonFilter = reasonFilter;
 
         return View(result.Value);
     }
@@ -113,7 +133,6 @@ public class AdminController : Controller
         return RedirectToAction(nameof(Users));
     }
 
-
     public async Task<IActionResult> Reviews(
         string? searchBy = null, string? query = null)
     {
@@ -128,7 +147,26 @@ public class AdminController : Controller
             return View(new List<BookReview>());
         }
 
-        return View(result.Value);
+        return View(result.Value);   
+    }
+    
+    [HttpGet]
+    public async Task<IActionResult> SearchReports(string searchBy, string query, string sortBy, string statusFilter, string? reasonFilter)
+    {
+        var result = await _adminReportService.GetReportsAsync(query, searchBy, sortBy, statusFilter, reasonFilter);
+
+        if (result.IsFailure)
+        {
+            return RedirectToAction(nameof(Reports));
+        }
+
+        ViewBag.CurrentQuery = query;
+        ViewBag.CurrentSearchBy = searchBy;
+        ViewBag.CurrentSortBy = sortBy;
+        ViewBag.CurrentStatusFilter = statusFilter;
+        ViewBag.CurrentReasonFilter = reasonFilter;
+
+        return View("Reports", result.Value);
     }
 
     [HttpPost]
@@ -158,5 +196,37 @@ public class AdminController : Controller
             return RedirectToAction(nameof(Reviews));
 
         return View("Reviews", result.Value);
+    public async Task<IActionResult> ResolveReport(int reportId)
+    {
+        var result = await _adminReportService.ResolveReportAsync(reportId);
+
+        if (result.IsSuccess)
+        {
+            TempData["SuccessMessage"] = "Скаргу успішно вирішено.";
+        }
+        else
+        {
+            TempData["ErrorMessage"] = result.Error;
+        }
+
+        return RedirectToAction(nameof(Reports));
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteReport(int reportId)
+    {
+        var result = await _adminReportService.DeleteReportAsync(reportId);
+
+        if (result.IsSuccess)
+        {
+            TempData["SuccessMessage"] = "Скаргу успішно видалено.";
+        }
+        else
+        {
+            TempData["ErrorMessage"] = result.Error;
+        }
+
+        return RedirectToAction(nameof(Reports));
     }
 }

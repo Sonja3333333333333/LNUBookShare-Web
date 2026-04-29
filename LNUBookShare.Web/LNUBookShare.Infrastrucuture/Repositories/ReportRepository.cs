@@ -1,6 +1,7 @@
 ﻿using LNUBookShare.Application.Interfaces;
 using LNUBookShare.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace LNUBookShare.Infrastructure.Repositories
 {
@@ -41,6 +42,91 @@ namespace LNUBookShare.Infrastructure.Repositories
                 .Include(r => r.Sender)
                 .Include(r => r.ReportedUser)
                 .FirstOrDefaultAsync(r => r.Id == id);
+        }
+
+        public async Task DeleteAsync(int id)
+        {
+            var report = await _context.Reports.FindAsync(id);
+            if (report != null)
+            {
+                _context.Reports.Remove(report);
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        public async Task UpdateStatusAsync(int reportId, ReportStatus newStatus)
+        {
+            var report = await _context.Reports.FindAsync(reportId);
+            if (report != null)
+            {
+                report.Status = newStatus;
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        public async Task<IEnumerable<UserReport>> GetFilteredReportsAsync(string searchBy, string query, string sortBy, string statusFilter, string? reasonFilter)
+        {
+            var dbQuery = GetSearchQuery(searchBy, query);
+
+            var finalQuery = ApplyFilteringAndSorting(dbQuery, sortBy, statusFilter, reasonFilter);
+
+            return await finalQuery.ToListAsync();
+        }
+
+        private IQueryable<UserReport> GetReportsBaseQuery()
+        {
+            return _context.Reports
+                .Include(r => r.Sender)
+                .Include(r => r.ReportedUser);
+        }
+
+        private IQueryable<UserReport> GetSearchQuery(string searchBy, string query)
+        {
+            var baseQuery = GetReportsBaseQuery();
+
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                return baseQuery;
+            }
+
+            var lowerQuery = query.ToLower();
+
+            return searchBy?.ToLower() switch
+            {
+                "sender" => baseQuery.Where(r => r.Sender != null &&
+                    (EF.Functions.ILike(r.Sender.FirstName, $"%{lowerQuery}%") ||
+                     EF.Functions.ILike(r.Sender.LastName, $"%{lowerQuery}%"))),
+                "reported" => baseQuery.Where(r => r.ReportedUser != null &&
+                    (EF.Functions.ILike(r.ReportedUser.FirstName, $"%{lowerQuery}%") ||
+                     EF.Functions.ILike(r.ReportedUser.LastName, $"%{lowerQuery}%"))),
+                "details" => baseQuery.Where(r => EF.Functions.ILike(r.Details, $"%{lowerQuery}%")),
+                _ => baseQuery
+            };
+        }
+
+        private IQueryable<UserReport> ApplyFilteringAndSorting(IQueryable<UserReport> query, string sortBy, string statusFilter, string? reasonFilter)
+        {
+            query = statusFilter?.ToLower() switch
+            {
+                "active" => query.Where(r => r.Status == ReportStatus.Pending),
+                "resolved" => query.Where(r => r.Status == ReportStatus.Resolved),
+                "dismissed" => query.Where(r => r.Status == ReportStatus.Dismissed),
+                "all" => query,
+                _ => query
+            };
+
+            if (!string.IsNullOrEmpty(reasonFilter) && Enum.TryParse<ReportReason>(reasonFilter, true, out var parsedReason))
+            {
+                query = query.Where(r => r.Reason == parsedReason);
+            }
+
+            query = sortBy switch
+            {
+                "date" => query.OrderByDescending(r => r.CreatedAt),
+                _ => query.OrderByDescending(r => r.CreatedAt)
+            };
+
+            return query;
         }
     }
 }
