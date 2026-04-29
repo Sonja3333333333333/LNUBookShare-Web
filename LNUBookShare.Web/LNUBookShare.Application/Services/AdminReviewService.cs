@@ -22,8 +22,7 @@ namespace LNUBookShare.Application.Services
             string? searchBy = null, string? query = null)
         {
             _logger.LogInformation(
-                "Адміністратор запитує список коментарів. SearchBy: {SearchBy}, Query: {Query}",
-                searchBy, query);
+                "Адміністратор запитує список коментарів. SearchBy: {SearchBy}, Query: {Query}", searchBy, query);
 
             var reviews = await _reviewRepository.GetAllWithDetailsAsync();
 
@@ -34,7 +33,7 @@ namespace LNUBookShare.Application.Services
                 {
                     "author" => reviews.Where(r =>
                         r.Reviewer != null &&
-                        ($"{r.Reviewer.FirstName} {r.Reviewer.LastName}")
+                        $"{r.Reviewer.FirstName} {r.Reviewer.LastName}"
                             .ToLower().Contains(trimmed)),
                     "comment" => reviews.Where(r =>
                         r.Comment != null &&

@@ -147,9 +147,9 @@ public class AdminController : Controller
             return View(new List<BookReview>());
         }
 
-        return View(result.Value);   
+        return View(result.Value);
     }
-    
+
     [HttpGet]
     public async Task<IActionResult> SearchReports(string searchBy, string query, string sortBy, string statusFilter, string? reasonFilter)
     {
@@ -176,9 +176,13 @@ public class AdminController : Controller
         var result = await _adminReviewService.DeleteReviewAsync(reviewId);
 
         if (result.IsSuccess)
+        {
             TempData["SuccessMessage"] = "Коментар успішно видалено.";
+        }
         else
+        {
             TempData["ErrorMessage"] = result.Error;
+        }
 
         return RedirectToAction(nameof(Reviews));
     }
@@ -193,9 +197,14 @@ public class AdminController : Controller
         ViewBag.CurrentSearchBy = searchBy;
 
         if (result.IsFailure)
+        {
             return RedirectToAction(nameof(Reviews));
+        }
 
         return View("Reviews", result.Value);
+    }
+
+    [HttpPost]
     public async Task<IActionResult> ResolveReport(int reportId)
     {
         var result = await _adminReportService.ResolveReportAsync(reportId);

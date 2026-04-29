@@ -10,4 +10,3 @@ namespace LNUBookShare.Application.Interfaces
         Task<Result> DeleteReviewAsync(int reviewId);
     }
 }
-//12
