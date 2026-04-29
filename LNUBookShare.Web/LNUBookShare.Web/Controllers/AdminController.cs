@@ -134,12 +134,13 @@ public class AdminController : Controller
     }
 
     public async Task<IActionResult> Reviews(
-        string? searchBy = null, string? query = null)
+        string? searchBy = null, string? query = null, int? ratingFilter = null)
     {
-        var result = await _adminReviewService.GetAllReviewsAsync(searchBy, query);
+        var result = await _adminReviewService.GetAllReviewsAsync(searchBy, query, ratingFilter);
 
         ViewBag.CurrentQuery = query;
         ViewBag.CurrentSearchBy = searchBy ?? "comment";
+        ViewBag.CurrentRatingFilter = ratingFilter;
 
         if (result.IsFailure)
         {
@@ -189,12 +190,13 @@ public class AdminController : Controller
 
     [HttpGet]
     public async Task<IActionResult> AdminSearchReviews(
-        string searchBy, string query)
+        string searchBy, string query, int? ratingFilter = null)
     {
-        var result = await _adminReviewService.GetAllReviewsAsync(searchBy, query);
+        var result = await _adminReviewService.GetAllReviewsAsync(searchBy, query, ratingFilter);
 
         ViewBag.CurrentQuery = query;
         ViewBag.CurrentSearchBy = searchBy;
+        ViewBag.CurrentRatingFilter = ratingFilter;
 
         if (result.IsFailure)
         {

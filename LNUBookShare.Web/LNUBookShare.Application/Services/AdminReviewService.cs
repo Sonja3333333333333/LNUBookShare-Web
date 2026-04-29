@@ -18,11 +18,9 @@ namespace LNUBookShare.Application.Services
             _logger = logger;
         }
 
-        public async Task<Result<IEnumerable<BookReview>>> GetAllReviewsAsync(
-            string? searchBy = null, string? query = null)
+        public async Task<Result<IEnumerable<BookReview>>> GetAllReviewsAsync(string? searchBy = null, string? query = null, int? ratingFilter = null)
         {
-            _logger.LogInformation(
-                "Адміністратор запитує список коментарів. SearchBy: {SearchBy}, Query: {Query}", searchBy, query);
+            _logger.LogInformation("Адміністратор запитує список коментарів. SearchBy: {SearchBy}, Query: {Query}, Rating: {Rating}", searchBy, query, ratingFilter);
 
             var reviews = await _reviewRepository.GetAllWithDetailsAsync();
 
@@ -31,15 +29,16 @@ namespace LNUBookShare.Application.Services
                 var trimmed = query.Trim().ToLower();
                 reviews = searchBy.ToLower() switch
                 {
-                    "author" => reviews.Where(r =>
-                        r.Reviewer != null &&
-                        $"{r.Reviewer.FirstName} {r.Reviewer.LastName}"
-                            .ToLower().Contains(trimmed)),
-                    "comment" => reviews.Where(r =>
-                        r.Comment != null &&
-                        r.Comment.ToLower().Contains(trimmed)),
+                    "author" => reviews.Where(r => r.Reviewer != null && $"{r.Reviewer.FirstName} {r.Reviewer.LastName}".ToLower().Contains(trimmed)),
+                    "comment" => reviews.Where(r => r.Comment != null && r.Comment.ToLower().Contains(trimmed)),
+                    "book" => reviews.Where(r => r.Book != null && r.Book.Title.ToLower().Contains(trimmed)),
                     _ => reviews
                 };
+            }
+
+            if (ratingFilter.HasValue)
+            {
+                reviews = reviews.Where(r => r.Rating == ratingFilter.Value);
             }
 
             reviews = reviews.OrderByDescending(r => r.CreatedAt);
