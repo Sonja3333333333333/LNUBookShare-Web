@@ -124,6 +124,7 @@ try
     builder.Services.AddScoped<IAdminUserService, AdminUserService>();
     builder.Services.AddScoped<IUserRepository, UserRepository>();
     builder.Services.AddScoped<IAdminBookService, AdminBookService>();
+    builder.Services.AddScoped<IAdminReportService, AdminReportService>();
 
     builder.Services.AddControllersWithViews();
 
