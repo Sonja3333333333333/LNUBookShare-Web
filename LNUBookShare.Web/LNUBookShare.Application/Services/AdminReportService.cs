@@ -33,13 +33,13 @@ namespace LNUBookShare.Application.Services
             return Result<IEnumerable<UserReport>>.Success(reports);
         }
 
-        public async Task<Result<IEnumerable<UserReport>>> GetReportsAsync(string? query, string searchBy = "sender", string sortBy = "date", string statusFilter = "active")
+        public async Task<Result<IEnumerable<UserReport>>> GetReportsAsync(string? query, string searchBy = "sender", string sortBy = "date", string statusFilter = "active", string? reasonFilter = null)
         {
-            _logger.LogInformation("Запит на отримання скарг: SearchBy={SearchBy}, Status={Status}, Query='{Query}'", searchBy, statusFilter, query);
+            _logger.LogInformation("Запит на отримання скарг: SearchBy={SearchBy}, Status={Status}, Reason={Reason}, Query='{Query}'", searchBy, statusFilter, reasonFilter, query);
 
             var trimmedQuery = string.IsNullOrWhiteSpace(query) ? string.Empty : query.Trim();
 
-            var reports = await _reportRepository.GetFilteredReportsAsync(searchBy, trimmedQuery, sortBy, statusFilter);
+            var reports = await _reportRepository.GetFilteredReportsAsync(searchBy, trimmedQuery, sortBy, statusFilter, reasonFilter);
 
             if (reports == null)
             {

@@ -6,8 +6,8 @@
     ViewData["Title"] = "Керування скаргами";
     var currentQuery = ViewBag.CurrentQuery as string;
     var currentSearchBy = ViewBag.CurrentSearchBy as string ?? "sender";
-    var currentSort = ViewBag.CurrentSortBy as string ?? "date";
     var currentStatus = ViewBag.CurrentStatusFilter as string ?? "active";
+    var currentReason = ViewBag.CurrentReasonFilter as string ?? "";
 }
 
 <div class="container mt-5">
@@ -19,148 +19,179 @@
         </div>
     }
 
-    @* ФОРМА (Пошук зверху, фільтри знизу) *@
     <form asp-action="SearchReports" method="get" class="mb-4">
-        <div class="row g-2 mb-3">
-            <div class="col-md-2">
-                <select name="searchBy" class="form-select border-secondary-subtle shadow-sm" style="border-radius: 8px;" onchange="this.form.submit()">
-                    <option value="sender" selected="@(currentSearchBy == "sender")">Відправник</option>
-                    <option value="reported" selected="@(currentSearchBy == "reported")">Порушник</option>
-                    <option value="details" selected="@(currentSearchBy == "details")">Текст</option>
-                </select>
-            </div>
-            <div class="col-md-10">
-                <div class="position-relative">
-                    <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
-                    <input type="text" name="query" value="@currentQuery" class="form-control border-secondary-subtle ps-5 shadow-sm" style="border-radius: 8px;" placeholder="Введіть текст для пошуку..." />
+        <div class="row">
+            
+            <div class="col-lg-9">
+                <div class="row g-2 mb-4">
+                    <div class="col-md-3">
+                        <select name="searchBy" class="form-select border-secondary-subtle shadow-sm" style="border-radius: 8px;" onchange="this.form.submit()">
+                            <option value="sender" selected="@(currentSearchBy == "sender")">Відправник</option>
+                            <option value="reported" selected="@(currentSearchBy == "reported")">Порушник</option>
+                            <option value="details" selected="@(currentSearchBy == "details")">Текст</option>
+                        </select>
+                    </div>
+                    <div class="col-md-9">
+                        <div class="position-relative">
+                            <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                            <input type="text" name="query" value="@currentQuery" class="form-control border-secondary-subtle ps-5 shadow-sm" style="border-radius: 8px;" placeholder="Введіть текст для пошуку..." autocomplete="off" />
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
 
-        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-            <div class="d-flex align-items-center gap-2">
-                <span class="text-muted small">Сортувати за:</span>
-                <select name="sortBy" class="form-select form-select-sm border-0 bg-light shadow-sm" style="width: 160px;" onchange="this.form.submit()">
-                    <option value="date" selected="@(currentSort == "date")">Дата</option>                    
-                </select>
-            </div>
-
-            <div class="d-flex gap-3 align-items-center">
-                <div class="d-flex gap-3 align-items-center">
-    
-                    <div class="form-check custom-radio">
-                        <input class="form-check-input" type="radio" name="statusFilter" id="statusAll" value="all"
-                               checked="@(currentStatus == "all")" onchange="this.form.submit()">
-                        <label class="form-check-label text-muted" for="statusAll" style="font-size: 0.9rem;">Всі</label>
+                @if (!string.IsNullOrEmpty(currentQuery))
+                {
+                    <div class="mb-3">
+                        <span class="text-muted small">Знайдено результатів для: <strong>"@currentQuery"</strong></span>
                     </div>
+                }
 
-                    <div class="form-check custom-radio">
-                        <input class="form-check-input" type="radio" name="statusFilter" id="statusActive" value="active"
-                               checked="@(currentStatus == "active" || string.IsNullOrEmpty(currentStatus))" onchange="this.form.submit()">
-                        <label class="form-check-label text-muted" for="statusActive" style="font-size: 0.9rem;">Активні</label>
-                    </div>
-
-                    <div class="form-check custom-radio">
-                        <input class="form-check-input" type="radio" name="statusFilter" id="statusResolved" value="resolved"
-                               checked="@(currentStatus == "resolved")" onchange="this.form.submit()">
-                        <label class="form-check-label text-muted" for="statusResolved" style="font-size: 0.9rem;">Вирішені</label>
-                    </div>
-
-                </div>
-                <a asp-action="Reports" class="btn btn-link btn-sm text-muted ms-2">Скинути</a>
-            </div>
-        </div>
-        <button type="submit" class="d-none"></button>
-    </form>
-
-    @if (!string.IsNullOrEmpty(currentQuery))
-    {
-        <div class="mb-3">
-            <span class="text-muted small">Знайдено результатів для: <strong>"@currentQuery"</strong></span>
-        </div>
-    }
-
-    @* Таблиця *@
-    <div class="card shadow-sm border-0">
-        <div class="card-body p-0">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th class="px-4">Дата</th>
-                        <th>Відправник</th>
-                        <th>На кого</th>
-                        <th>Причина</th>
-                        <th>Деталі</th>
-                        <th>Статус</th>
-                        <th class="text-end px-4">Дії</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (!Model.Any())
-                    {
-                        <tr>
-                            <td colspan="7" class="text-center py-5 text-muted">
-                                <i class="bi bi-search d-block fs-1 mb-2"></i>
-                                За вашим запитом нічого не знайдено.
-                            </td>
-                        </tr>
-                    }
-                    else
-                    {
-                        @foreach (var r in Model)
-                        {
-                            <tr>
-                                <td class="px-4 small text-muted">@r.CreatedAt.ToString("g")</td>
-                                <td>@r.Sender.FirstName @r.Sender.LastName</td>
-                                <td class="text-danger">@r.ReportedUser.FirstName @r.ReportedUser.LastName</td>
-
-                                <td>
-                                    @{
-                                        var reasonText = r.Reason switch
-                                        {
-                                            ReportReason.Spam => "Спам / Фейковий акаунт",
-                                            ReportReason.Insults => "Нецензурна лексика / Образи",
-                                            ReportReason.Fraud => "Шахрайство",
-                                            ReportReason.BookReturnIssue => "Проблеми з поверненням книги",
-                                            ReportReason.Other => "Інше",
-                                            _ => r.Reason.ToString()
-                                        };
-                                    }
-                                    <span class="badge bg-light text-dark border shadow-sm" style="border-radius: 6px;">
-                                        @reasonText
-                                    </span>
-                                </td>
-
-                                <td class="small text-wrap" style="max-width: 200px;">@r.Details</td>
-                                <td>
-                                    <span class="badge @(r.Status == ReportStatus.Pending ? "bg-warning text-dark" : "bg-success")">
-                                        @(r.Status == ReportStatus.Pending ? "Нова" : "Вирішена")
-                                    </span>
-                                </td>
-                                <td class="text-end px-4">
-                                    @if (r.Status == ReportStatus.Pending)
+                <div class="card shadow-sm border-0">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="px-4">Дата</th>
+                                        <th>Відправник</th>
+                                        <th>На кого</th>
+                                        <th>Причина</th>
+                                        <th>Деталі</th>
+                                        <th>Статус</th>
+                                        <th class="text-end px-4">Дії</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (!Model.Any())
                                     {
-                                        <form asp-action="ResolveReport" method="post" class="d-inline">
-                                            <input type="hidden" name="reportId" value="@r.Id" />
-                                            <button type="submit" class="btn btn-sm btn-success shadow-sm">Вирішити</button>
-                                        </form>
+                                        <tr>
+                                            <td colspan="7" class="text-center py-5 text-muted">
+                                                <i class="bi bi-search d-block fs-1 mb-2"></i>
+                                                За вашим запитом нічого не знайдено.
+                                            </td>
+                                        </tr>
                                     }
                                     else
                                     {
-                                        <form asp-action="DeleteReport" method="post" class="d-inline" onsubmit="return confirm('Видалити остаточно?');">
-                                            <input type="hidden" name="reportId" value="@r.Id" />
-                                            <button type="submit" class="btn btn-sm btn-outline-danger border-0"><i class="bi bi-trash"></i></button>
-                                        </form>
+                                        @foreach (var r in Model)
+                                        {
+                                            <tr>
+                                                <td class="px-4 small text-muted">@r.CreatedAt.ToString("g")</td>
+                                                <td>@r.Sender.FirstName @r.Sender.LastName</td>
+                                                <td class="text-danger fw-bold">@r.ReportedUser.FirstName @r.ReportedUser.LastName</td>
+
+                                                <td>
+                                                    @{
+                                                        var reasonText = r.Reason switch
+                                                        {
+                                                            ReportReason.Spam => "Спам",
+                                                            ReportReason.Insults => "Образи",
+                                                            ReportReason.Fraud => "Шахрайство",
+                                                            ReportReason.BookReturnIssue => "Повернення книги",
+                                                            ReportReason.Other => "Інше",
+                                                            _ => r.Reason.ToString()
+                                                        };
+                                                    }
+                                                    <span class="badge bg-light text-dark border shadow-sm" style="border-radius: 6px;">
+                                                        @reasonText
+                                                    </span>
+                                                </td>
+
+                                                <td class="small text-wrap" style="max-width: 200px;">@r.Details</td>
+                                                <td>
+                                                    <span class="badge @(r.Status == ReportStatus.Pending ? "bg-warning text-dark" : "bg-success")">
+                                                        @(r.Status == ReportStatus.Pending ? "Нова" : "Вирішена")
+                                                    </span>
+                                                </td>
+                                                <td class="text-end px-4">
+                                                    @if (r.Status == ReportStatus.Pending)
+                                                    {
+                                                        <form asp-action="ResolveReport" method="post" class="d-inline">
+                                                            <input type="hidden" name="reportId" value="@r.Id" />
+                                                            <button type="submit" class="btn btn-sm btn-success shadow-sm">Вирішити</button>
+                                                        </form>
+                                                    }
+                                                    else
+                                                    {
+                                                        <form asp-action="DeleteReport" method="post" class="d-inline" onsubmit="return confirm('Видалити остаточно?');">
+                                                            <input type="hidden" name="reportId" value="@r.Id" />
+                                                            <button type="submit" class="btn btn-sm btn-outline-danger border-0"><i class="bi bi-trash"></i></button>
+                                                        </form>
+                                                    }
+                                                </td>
+                                            </tr>
+                                        }
                                     }
-                                </td>
-                            </tr>
-                        }
-                    }
-                </tbody>
-            </table>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-white text-center py-3">
+                        <small class="text-muted">Всього в списку: @Model.Count()</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3">
+                <div class="card shadow-sm border-0" style="border-radius: 8px;">
+                    <div class="card-header bg-white border-bottom-0 pt-3 pb-0 d-flex justify-content-between align-items-center">
+                        <span class="fw-bold text-dark"><i class="bi bi-funnel me-1 text-muted"></i> Фільтри</span>
+                        <a asp-action="Reports" class="btn btn-link btn-sm text-muted text-decoration-none p-0">Скинути</a>
+                    </div>
+                    
+                    <div class="card-body">
+                        
+                        <h6 class="text-muted small fw-bold text-uppercase mb-3">За статусом</h6>
+                        <div class="mb-4">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="statusFilter" id="statusAll" value="all" checked="@(currentStatus == "all")" onchange="this.form.submit()">
+                                <label class="form-check-label text-dark" for="statusAll">Всі</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="statusFilter" id="statusActive" value="active" checked="@(currentStatus == "active" || string.IsNullOrEmpty(currentStatus))" onchange="this.form.submit()">
+                                <label class="form-check-label text-dark" for="statusActive">Активні (Нові)</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="statusFilter" id="statusResolved" value="resolved" checked="@(currentStatus == "resolved")" onchange="this.form.submit()">
+                                <label class="form-check-label text-dark" for="statusResolved">Вирішені</label>
+                            </div>
+                        </div>
+
+                        <hr class="text-secondary opacity-25" />
+
+                        <h6 class="text-muted small fw-bold text-uppercase mb-3 mt-3">За причиною</h6>
+                        <div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="reasonFilter" id="reasonAll" value="" checked="@(string.IsNullOrEmpty(currentReason))" onchange="this.form.submit()">
+                                <label class="form-check-label text-dark" for="reasonAll">Всі причини</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="reasonFilter" id="reasonSpam" value="Spam" checked="@(currentReason == "Spam")" onchange="this.form.submit()">
+                                <label class="form-check-label text-dark" for="reasonSpam">Спам / Фейк</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="reasonFilter" id="reasonInsults" value="Insults" checked="@(currentReason == "Insults")" onchange="this.form.submit()">
+                                <label class="form-check-label text-dark" for="reasonInsults">Образи</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="reasonFilter" id="reasonFraud" value="Fraud" checked="@(currentReason == "Fraud")" onchange="this.form.submit()">
+                                <label class="form-check-label text-dark" for="reasonFraud">Шахрайство</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="reasonFilter" id="reasonBook" value="BookReturnIssue" checked="@(currentReason == "BookReturnIssue")" onchange="this.form.submit()">
+                                <label class="form-check-label text-dark" for="reasonBook">Повернення книги</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="reasonFilter" id="reasonOther" value="Other" checked="@(currentReason == "Other")" onchange="this.form.submit()">
+                                <label class="form-check-label text-dark" for="reasonOther">Інше</label>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
         </div>
-        <div class="card-footer bg-white text-center py-3">
-            <small class="text-muted">Всього в списку: @Model.Count()</small>
-        </div>
-    </div>
+        <button type="submit" class="d-none"></button>
+    </form>
 </div>
