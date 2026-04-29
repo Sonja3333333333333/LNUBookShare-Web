@@ -46,9 +46,9 @@ public class AdminController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> Reports(string query, string searchBy = "sender", string sortBy = "date", string statusFilter = "active")
+    public async Task<IActionResult> Reports(string query, string searchBy = "sender", string sortBy = "date", string statusFilter = "active", string? reasonFilter = null)
     {
-        var result = await _adminReportService.GetReportsAsync(query, searchBy, sortBy, statusFilter);
+        var result = await _adminReportService.GetReportsAsync(query, searchBy, sortBy, statusFilter, reasonFilter);
 
         if (result.IsFailure)
         {
@@ -60,6 +60,7 @@ public class AdminController : Controller
         ViewBag.CurrentSearchBy = searchBy;
         ViewBag.CurrentSortBy = sortBy;
         ViewBag.CurrentStatusFilter = statusFilter;
+        ViewBag.CurrentReasonFilter = reasonFilter;
 
         return View(result.Value);
     }
@@ -131,9 +132,9 @@ public class AdminController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> SearchReports(string searchBy, string query, string sortBy, string statusFilter)
+    public async Task<IActionResult> SearchReports(string searchBy, string query, string sortBy, string statusFilter, string? reasonFilter)
     {
-        var result = await _adminReportService.GetReportsAsync(query, searchBy, sortBy, statusFilter);
+        var result = await _adminReportService.GetReportsAsync(query, searchBy, sortBy, statusFilter, reasonFilter);
 
         if (result.IsFailure)
         {
@@ -144,6 +145,7 @@ public class AdminController : Controller
         ViewBag.CurrentSearchBy = searchBy;
         ViewBag.CurrentSortBy = sortBy;
         ViewBag.CurrentStatusFilter = statusFilter;
+        ViewBag.CurrentReasonFilter = reasonFilter;
 
         return View("Reports", result.Value);
     }

@@ -64,10 +64,11 @@ namespace LNUBookShare.Infrastructure.Repositories
             }
         }
 
-        public async Task<IEnumerable<UserReport>> GetFilteredReportsAsync(string searchBy, string query, string sortBy, string statusFilter)
+        public async Task<IEnumerable<UserReport>> GetFilteredReportsAsync(string searchBy, string query, string sortBy, string statusFilter, string? reasonFilter)
         {
             var dbQuery = GetSearchQuery(searchBy, query);
-            var finalQuery = ApplyFilteringAndSorting(dbQuery, sortBy, statusFilter);
+
+            var finalQuery = ApplyFilteringAndSorting(dbQuery, sortBy, statusFilter, reasonFilter);
 
             return await finalQuery.ToListAsync();
         }
@@ -103,7 +104,7 @@ namespace LNUBookShare.Infrastructure.Repositories
             };
         }
 
-        private IQueryable<UserReport> ApplyFilteringAndSorting(IQueryable<UserReport> query, string sortBy, string statusFilter)
+        private IQueryable<UserReport> ApplyFilteringAndSorting(IQueryable<UserReport> query, string sortBy, string statusFilter, string? reasonFilter)
         {
             query = statusFilter?.ToLower() switch
             {
@@ -114,10 +115,15 @@ namespace LNUBookShare.Infrastructure.Repositories
                 _ => query
             };
 
+            if (!string.IsNullOrEmpty(reasonFilter) && Enum.TryParse<ReportReason>(reasonFilter, true, out var parsedReason))
+            {
+                query = query.Where(r => r.Reason == parsedReason);
+            }
+
             query = sortBy switch
             {
                 "date" => query.OrderByDescending(r => r.CreatedAt),
-                _ => query
+                _ => query.OrderByDescending(r => r.CreatedAt)
             };
 
             return query;
