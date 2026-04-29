@@ -5,8 +5,7 @@ namespace LNUBookShare.Application.Interfaces
 {
     public interface IAdminReviewService
     {
-        Task<Result<IEnumerable<BookReview>>> GetAllReviewsAsync(
-            string? searchBy = null, string? query = null);
+        Task<Result<IEnumerable<BookReview>>> GetAllReviewsAsync(string? searchBy = null, string? query = null, int? ratingFilter = null);
         Task<Result> DeleteReviewAsync(int reviewId);
     }
 }
