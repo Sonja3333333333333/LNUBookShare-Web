@@ -2,7 +2,9 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 using LNUBookShare.Application.Interfaces;
+using LNUBookShare.Application.Services;
 using LNUBookShare.Domain.Entities;
+using LNUBookShare.Domain.Models;
 using LNUBookShare.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -19,6 +21,7 @@ namespace LNUBookShare.Web.Controllers
         private readonly IBookDetailsService _bookDetailsService;
         private readonly IReviewService _reviewService;
         private readonly IReservationService _reservationService;
+        private readonly ITopUsersService _topUsersService;
 
         public CatalogController(
             IBookSearchService searchService,
@@ -27,7 +30,8 @@ namespace LNUBookShare.Web.Controllers
             IFavoriteService favoriteService,
             IBookDetailsService bookDetailsService,
             IReviewService reviewService,
-            IReservationService reservationService)
+            IReservationService reservationService,
+            ITopUsersService topUsersService)
             : base(userManager)
         {
             _searchService = searchService;
@@ -36,6 +40,7 @@ namespace LNUBookShare.Web.Controllers
             _bookDetailsService = bookDetailsService;
             _reviewService = reviewService;
             _reservationService = reservationService;
+            _topUsersService = topUsersService;
         }
 
         [HttpGet]
@@ -63,6 +68,9 @@ namespace LNUBookShare.Web.Controllers
                     results = searchResult.IsSuccess ? searchResult.Value : Enumerable.Empty<Book>();
                 }
             }
+
+            var topUsersResult = await _topUsersService.GetTopUsersOfMonthAsync();
+            ViewBag.TopUsers = topUsersResult.IsSuccess ? topUsersResult.Value : Enumerable.Empty<TopUserDto>();
 
             var model = new BookSearchViewModel
             {
@@ -131,7 +139,7 @@ namespace LNUBookShare.Web.Controllers
                 AverageRating = avgRating,
                 IsInQueue = isInQueue,
                 QueuePosition = queuePosition,
-                HasUserReviewed = hasReviewed, // Передаємо у модель
+                HasUserReviewed = hasReviewed,
                 FavoritedBookIds = await GetUserFavoriteIdsAsync(),
             };
 

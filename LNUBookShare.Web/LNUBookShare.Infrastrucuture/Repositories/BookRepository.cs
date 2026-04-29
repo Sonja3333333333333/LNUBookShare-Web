@@ -43,6 +43,7 @@ namespace LNUBookShare.Infrastructure.Repositories
         {
             return await _context.Books
                 .Include(b => b.Owner)
+                .ThenInclude(o => o.Avatar)
                 .AsNoTracking()
                 .ToListAsync();
         }
