@@ -1,0 +1,97 @@
+﻿@model List<LNUBookShare.Application.DTOs.GlobalBookDto>
+
+@{
+    ViewData["Title"] = "Глобальний пошук книг";
+}
+
+<div class="container mt-5">
+    <div class="text-center mb-5">
+        <h1 class="fw-bold text-dark">Глобальний пошук</h1>
+        <p class="text-muted">Не знайшли книгу в ЛНУ? Спробуйте знайти її цифрову версію у світовій бібліотеці.</p>
+    </div>
+
+    @* Форма пошуку *@
+    <div class="row justify-content-center mb-5">
+        <div class="col-md-8">
+            <form asp-controller="GlobalSearch" asp-action="Index" method="get" class="d-flex gap-2">
+                <div class="input-group input-group-lg shadow-sm">
+                    <span class="input-group-text bg-white border-end-0">
+                        <i class="bi bi-search text-muted"></i>
+                    </span>
+                    <input type="text" name="query" class="form-control border-start-0 ps-0"
+                           placeholder="Введіть назву книги або автора..." aria-label="Пошук" required>
+                    <button class="btn btn-primary px-4" type="submit">Знайти</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @* Результати пошуку *@
+    <div class="row">
+        @if (Model != null && Model.Any())
+        {
+            foreach (var book in Model)
+            {
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 shadow-sm border-0" style="border-radius: 12px; overflow: hidden; border: 1px solid #eee !important;">
+                        <div class="row g-0 h-100">
+                            <div class="col-4 bg-light d-flex align-items-center justify-content-center" style="min-height: 150px;">
+                                @if (!string.IsNullOrEmpty(book.CoverUrl))
+                                {
+                                    <img src="@book.CoverUrl" alt="Обкладинка" class="img-fluid h-100 w-100" style="object-fit: cover;">
+                                }
+                                else
+                                {
+                                    <i class="bi bi-journal-text text-secondary" style="font-size: 3rem;"></i>
+                                }
+                            </div>
+                            <div class="col-8">
+                                <div class="card-body d-flex flex-column h-100">
+                                    <h6 class="card-title fw-bold text-dark mb-1 text-truncate-2" title="@book.Title">
+                                        @book.Title
+                                    </h6>
+                                    <p class="text-muted small mb-3">@book.Author</p>
+                                    
+                                    <div class="mt-auto d-grid gap-2">
+                                        @if (book.HasFullText)
+                                        {
+                                            <a href="@book.OpenLibraryUrl" target="_blank" class="btn btn-success btn-sm shadow-sm">
+                                                <i class="bi bi-book-half me-1"></i> Читати онлайн
+                                            </a>
+                                        }
+                                        <a href="@book.OpenLibraryUrl" target="_blank" class="btn btn-outline-secondary btn-sm">
+                                            <i class="bi bi-info-circle me-1"></i> Деталі на Open Library
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else if (Context.Request.Query.ContainsKey("query"))
+        {
+            <div class="text-center py-5">
+                <div class="mb-3">
+                    <i class="bi bi-cloud-slash text-secondary-subtle" style="font-size: 5rem;"></i>
+                </div>
+                <h4 class="text-secondary fw-bold">Нічого не знайдено</h4>
+                <p class="text-muted">Спробуйте змінити запит або перевірити правопис.</p>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .text-truncate-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    .btn-primary {
+        background-color: #004a99;
+        border-color: #004a99;
+    }
+</style>
