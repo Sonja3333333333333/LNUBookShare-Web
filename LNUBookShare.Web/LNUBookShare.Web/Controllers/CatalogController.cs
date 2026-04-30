@@ -5,6 +5,7 @@ using LNUBookShare.Application.Interfaces;
 using LNUBookShare.Application.Services;
 using LNUBookShare.Domain.Entities;
 using LNUBookShare.Domain.Models;
+using LNUBookShare.Web.Filters;
 using LNUBookShare.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -44,6 +45,7 @@ namespace LNUBookShare.Web.Controllers
         }
 
         [HttpGet]
+        [IpRateLimit(10)]
         public async Task<IActionResult> Search(string query, string searchBy = "title", string sortBy = "title", string statusFilter = "all")
         {
             IEnumerable<Book> results;

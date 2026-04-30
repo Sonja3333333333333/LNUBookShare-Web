@@ -1,6 +1,7 @@
 ﻿using LNUBookShare.Application.Common;
 using LNUBookShare.Application.Interfaces;
 using LNUBookShare.Domain.Entities;
+using LNUBookShare.Web.Filters;
 using LNUBookShare.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -79,6 +80,7 @@ namespace LNUBookShare.Web.Controllers
         }
 
         [HttpPost]
+        [IpRateLimit(3)]
         public async Task<IActionResult> Report(int reportedUserId, ReportReason reason, string details)
         {
             var currentUserId = GetCurrentUserId();
