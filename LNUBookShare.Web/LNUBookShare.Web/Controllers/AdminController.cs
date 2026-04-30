@@ -12,13 +12,15 @@ public class AdminController : Controller
     private readonly IAdminBookService _adminBookService;
     private readonly IAdminReviewService _adminReviewService;
     private readonly IAdminReportService _adminReportService;
+    private readonly IAdminTransactionService _adminTransactionService;
 
-    public AdminController(IAdminUserService adminService, IAdminBookService adminBookService, IAdminReportService adminReportService, IAdminReviewService adminReviewService)
+    public AdminController(IAdminUserService adminService, IAdminBookService adminBookService, IAdminReportService adminReportService, IAdminReviewService adminReviewService, IAdminTransactionService adminTransactionService)
     {
         _adminService = adminService;
         _adminBookService = adminBookService;
         _adminReportService = adminReportService;
         _adminReviewService = adminReviewService;
+        _adminTransactionService = adminTransactionService;
     }
 
     public async Task<IActionResult> Users()
@@ -42,6 +44,25 @@ public class AdminController : Controller
         {
             ViewBag.Error = result.Error;
             return View(new List<AdminBookDto>());
+        }
+
+        return View(result.Value);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Transactions(string? searchBy = "book", string? query = null, string? sortBy = "date_desc", string? statusFilter = "active")
+    {
+        var result = await _adminTransactionService.GetTransactionsAsync(searchBy, query, sortBy, statusFilter);
+
+        ViewBag.CurrentSearchBy = searchBy;
+        ViewBag.CurrentQuery = query;
+        ViewBag.CurrentSortBy = sortBy;
+        ViewBag.CurrentStatusFilter = statusFilter;
+
+        if (result.IsFailure)
+        {
+            ViewBag.Error = result.Error;
+            return View(new List<RentalTransaction>());
         }
 
         return View(result.Value);

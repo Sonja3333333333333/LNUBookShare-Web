@@ -1,10 +1,7 @@
-﻿using LNUBookShare.Application.Common;
-using LNUBookShare.Application.Interfaces;
+﻿using LNUBookShare.Application.Interfaces;
 using LNUBookShare.Application.Services;
-using LNUBookShare.Domain.Entities;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Xunit;
 
 namespace LNUBookShare.UnitTests.AdminReportService_tests
 {
@@ -26,11 +23,17 @@ namespace LNUBookShare.UnitTests.AdminReportService_tests
         {
             // Arrange
             var reports = new List<UserReport> { new UserReport { Id = 1 } };
-            _reportRepoMock.Setup(r => r.GetFilteredReportsAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+
+            _reportRepoMock.Setup(r => r.GetFilteredReportsAsync(
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<string?>())) 
                 .ReturnsAsync(reports);
 
             // Act
-            var result = await _service.GetReportsAsync("some query", "sender", "date", "active");
+            var result = await _service.GetReportsAsync("some query", "sender", "date", "active", null);
 
             // Assert
             Assert.True(result.IsSuccess);
@@ -40,14 +43,25 @@ namespace LNUBookShare.UnitTests.AdminReportService_tests
         public async Task GetReportsAsync_ShouldHandleEmptyQuery_ByTrimmingToEmptyString()
         {
             // Arrange
-            _reportRepoMock.Setup(r => r.GetFilteredReportsAsync(It.IsAny<string>(), string.Empty, It.IsAny<string>(), It.IsAny<string>()))
+            _reportRepoMock.Setup(r => r.GetFilteredReportsAsync(
+                It.IsAny<string>(),
+                string.Empty,
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<string?>()))
                 .ReturnsAsync(new List<UserReport>());
 
             // Act
-            var result = await _service.GetReportsAsync("   ", "sender", "date", "active");
+            var result = await _service.GetReportsAsync("   ", "sender", "date", "active", null);
 
             // Assert
-            _reportRepoMock.Verify(r => r.GetFilteredReportsAsync(It.IsAny<string>(), string.Empty, It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+            _reportRepoMock.Verify(r => r.GetFilteredReportsAsync(
+                It.IsAny<string>(),
+                string.Empty,
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<string?>()), Times.Once);
+
             Assert.True(result.IsSuccess);
         }
 
@@ -55,7 +69,12 @@ namespace LNUBookShare.UnitTests.AdminReportService_tests
         public async Task GetReportsAsync_ShouldReturnFailure_WhenRepositoryReturnsNull()
         {
             // Arrange
-            _reportRepoMock.Setup(r => r.GetFilteredReportsAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+            _reportRepoMock.Setup(r => r.GetFilteredReportsAsync(
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<string?>()))
                 .ReturnsAsync((IEnumerable<UserReport>)null!);
 
             // Act

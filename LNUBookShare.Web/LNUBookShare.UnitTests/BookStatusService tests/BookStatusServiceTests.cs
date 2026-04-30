@@ -14,6 +14,7 @@ namespace LNUBookShare.UnitTests.Services
         private readonly Mock<IProfileService> _profileServiceMock;
         private readonly Mock<IReservationService> _reservationServiceMock;
         private readonly Mock<INotificationService> _notificationServiceMock;
+        private readonly Mock<IRentalTransactionRepository> _transactionRepoMock;
         private readonly Mock<ILogger<BookStatusService>> _loggerMock;
         private readonly BookStatusService _service;
 
@@ -22,13 +23,15 @@ namespace LNUBookShare.UnitTests.Services
             _profileServiceMock = new Mock<IProfileService>();
             _reservationServiceMock = new Mock<IReservationService>();
             _notificationServiceMock = new Mock<INotificationService>();
+            _transactionRepoMock = new Mock<IRentalTransactionRepository>();
             _loggerMock = new Mock<ILogger<BookStatusService>>();
 
             _service = new BookStatusService(
-                _profileServiceMock.Object,
-                _reservationServiceMock.Object,
-                _notificationServiceMock.Object,
-                _loggerMock.Object);
+              _profileServiceMock.Object,
+              _reservationServiceMock.Object,
+              _notificationServiceMock.Object,
+              _loggerMock.Object,            
+              _transactionRepoMock.Object);
         }
 
         [Fact]
@@ -58,6 +61,10 @@ namespace LNUBookShare.UnitTests.Services
             _profileServiceMock.Setup(s => s.GetUserBooksAsync(ownerId))
                 .ReturnsAsync(Result<List<Book>>.Success(new List<Book> { book }));
 
+            var queue = new List<User> { new User { Id = 100, FirstName = "Студент" } };
+            _reservationServiceMock.Setup(s => s.GetQueueUsersAsync(bookId))
+                .ReturnsAsync(Result<List<User>>.Success(queue));
+
             // Act
             var result = await _service.IssueBookAsync(bookId, ownerId);
 
@@ -65,6 +72,7 @@ namespace LNUBookShare.UnitTests.Services
             Assert.True(result.IsSuccess);
             Assert.Equal("borrowed", book.Status);
             _profileServiceMock.Verify(s => s.UpdateBookAsync(book), Times.Once);
+            _transactionRepoMock.Verify(r => r.AddAsync(It.IsAny<RentalTransaction>()), Times.Once);
         }
 
         [Fact]
@@ -98,6 +106,10 @@ namespace LNUBookShare.UnitTests.Services
             _reservationServiceMock.Setup(s => s.GetQueueUsersAsync(bookId))
                 .ReturnsAsync(Result<List<User>>.Success(new List<User>()));
 
+            var activeTransaction = new RentalTransaction { Id = 1, BookId = bookId, Status = "active" };
+            _transactionRepoMock.Setup(r => r.GetActiveByBookIdAsync(bookId))
+                .ReturnsAsync(activeTransaction);
+
             // Act
             var result = await _service.ConfirmReturnAsync(bookId, ownerId);
 
@@ -106,6 +118,9 @@ namespace LNUBookShare.UnitTests.Services
             Assert.Equal("available", book.Status);
             _profileServiceMock.Verify(s => s.UpdateBookAsync(book), Times.Once);
             _notificationServiceMock.Verify(s => s.CreateNotificationAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<int>()), Times.Never);
+
+            _transactionRepoMock.Verify(r => r.UpdateAsync(activeTransaction), Times.Once);
+            Assert.Equal("returned", activeTransaction.Status);
         }
 
         [Fact]
@@ -126,6 +141,10 @@ namespace LNUBookShare.UnitTests.Services
             _reservationServiceMock.Setup(s => s.GetQueueUsersAsync(bookId))
                 .ReturnsAsync(Result<List<User>>.Success(queue));
 
+            var activeTransaction = new RentalTransaction { Id = 2, BookId = bookId, Status = "active" };
+            _transactionRepoMock.Setup(r => r.GetActiveByBookIdAsync(bookId))
+                .ReturnsAsync(activeTransaction);
+
             // Act
             var result = await _service.ConfirmReturnAsync(bookId, ownerId);
 
@@ -141,6 +160,9 @@ namespace LNUBookShare.UnitTests.Services
                 bookId), Times.Once);
 
             _profileServiceMock.Verify(s => s.UpdateBookAsync(book), Times.Once);
+
+            _transactionRepoMock.Verify(r => r.UpdateAsync(activeTransaction), Times.Once);
+            Assert.Equal("returned", activeTransaction.Status);
         }
     }
 }

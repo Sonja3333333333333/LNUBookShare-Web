@@ -133,6 +133,9 @@ try
     builder.Services.AddScoped<IAdminReviewRepository, AdminReviewRepository>();
     builder.Services.AddScoped<IAdminReviewService, AdminReviewService>();
 
+    builder.Services.AddScoped<IRentalTransactionRepository, RentalTransactionRepository>();
+    builder.Services.AddScoped<IAdminTransactionService, AdminTransactionService>();
+
     builder.Services.AddControllersWithViews();
 
     var app = builder.Build();

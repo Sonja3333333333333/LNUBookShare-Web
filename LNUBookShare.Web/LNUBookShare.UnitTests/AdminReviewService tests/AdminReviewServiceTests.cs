@@ -47,7 +47,7 @@ namespace LNUBookShare.UnitTests.AdminReviewService_tests
             var result = await _service.GetAllReviewsAsync();
 
             Assert.True(result.IsSuccess);
-            Assert.Equal(2, result.Value.ReviewId);  // Нова — перша
+            Assert.Equal(2, result.Value.First().ReviewId);
         }
 
         [Fact]

@@ -11,17 +11,20 @@ namespace LNUBookShare.Application.Services
         private readonly IReservationService _reservationService;
         private readonly INotificationService _notificationService;
         private readonly ILogger<BookStatusService> _logger;
+        private readonly IRentalTransactionRepository _transactionRepository;
 
         public BookStatusService(
             IProfileService profileService,
             IReservationService reservationService,
             INotificationService notificationService,
-            ILogger<BookStatusService> logger)
+            ILogger<BookStatusService> logger,
+            IRentalTransactionRepository transactionRepository)
         {
             _profileService = profileService;
             _reservationService = reservationService;
             _notificationService = notificationService;
             _logger = logger;
+            _transactionRepository = transactionRepository;
         }
 
         public async Task<Result> IssueBookAsync(int bookId, int ownerId)
@@ -36,6 +39,29 @@ namespace LNUBookShare.Application.Services
                 _logger.LogWarning("Помилка видачі: Книгу {BookId} не знайдено серед списку книг користувача {OwnerId}", bookId, ownerId);
                 return Result.Failure("Книгу не знайдено.");
             }
+
+            var queueResult = await _reservationService.GetQueueUsersAsync(bookId);
+            var queueUsers = queueResult.IsSuccess ? queueResult.Value.ToList() : new List<User>();
+            var borrower = queueUsers.FirstOrDefault();
+
+            if (borrower == null)
+            {
+                return Result.Failure("Немає користувачів у черзі, кому можна видати книгу.");
+            }
+
+            // Створюємо транзакцію
+            var transaction = new RentalTransaction
+            {
+                BookId = bookId,
+                OwnerId = ownerId,
+                BorrowerId = borrower.Id,
+                IssueDate = DateTime.UtcNow,
+                ExpectedReturnDate = DateTime.UtcNow.AddDays(14),
+                Status = TransactionStatuses.Active,
+            };
+
+            await _transactionRepository.AddAsync(transaction);
+            _logger.LogInformation("Створено транзакцію оренди для книги {BookId}. Орендар: {BorrowerId}", bookId, borrower.Id);
 
             book.Status = "borrowed";
             await _profileService.UpdateBookAsync(book);
@@ -54,6 +80,16 @@ namespace LNUBookShare.Application.Services
             {
                 _logger.LogWarning("Помилка повернення: Книгу {BookId} не знайдено серед списку книг користувача {OwnerId}", bookId, ownerId);
                 return Result.Failure("Книгу не знайдено.");
+            }
+
+            var activeTransaction = await _transactionRepository.GetActiveByBookIdAsync(bookId);
+            if (activeTransaction != null)
+            {
+                activeTransaction.ActualReturnDate = DateTime.UtcNow;
+                activeTransaction.Status = TransactionStatuses.Returned;
+                await _transactionRepository.UpdateAsync(activeTransaction);
+
+                _logger.LogInformation("Транзакцію для книги {BookId} успішно закрито.", bookId);
             }
 
             var queueResult = await _reservationService.GetQueueUsersAsync(bookId);

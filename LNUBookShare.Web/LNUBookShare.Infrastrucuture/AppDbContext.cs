@@ -33,6 +33,8 @@ public partial class AppDbContext : IdentityDbContext<User, Role, int>
     public virtual DbSet<Notification> Notifications { get; set; }
     public virtual DbSet<UserReport> Reports { get; set; }
 
+    public virtual DbSet<RentalTransaction> RentalTransactions { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -271,6 +273,40 @@ public partial class AppDbContext : IdentityDbContext<User, Role, int>
 
             entity.HasOne(d => d.User).WithMany().HasForeignKey(d => d.UserId).OnDelete(DeleteBehavior.Cascade).HasConstraintName("notification_user_id_fkey");
             entity.HasOne(d => d.Book).WithMany().HasForeignKey(d => d.BookId).OnDelete(DeleteBehavior.Cascade).HasConstraintName("notification_book_id_fkey");
+        });
+
+        modelBuilder.Entity<RentalTransaction>(entity =>
+        {
+            entity.ToTable("rental_transaction");
+            entity.HasKey(e => e.Id).HasName("rental_transaction_pkey");
+
+            entity.Property(e => e.Id).HasColumnName("transaction_id");
+            entity.Property(e => e.BookId).HasColumnName("book_id").IsRequired();
+            entity.Property(e => e.OwnerId).HasColumnName("owner_id").IsRequired();
+            entity.Property(e => e.BorrowerId).HasColumnName("borrower_id").IsRequired();
+            entity.Property(e => e.IssueDate).HasColumnType("timestamp without time zone").HasColumnName("issue_date").IsRequired();
+            entity.Property(e => e.ExpectedReturnDate).HasColumnType("timestamp without time zone").HasColumnName("expected_return_date").IsRequired();
+            entity.Property(e => e.ActualReturnDate).HasColumnType("timestamp without time zone").HasColumnName("actual_return_date");
+            entity.Property(e => e.Status).HasMaxLength(20).HasDefaultValueSql($"'{TransactionStatuses.Active}'::character varying").HasColumnName("status").IsRequired();
+
+            // Налаштування зв'язків
+            entity.HasOne(d => d.Book)
+                  .WithMany()
+                  .HasForeignKey(d => d.BookId)
+                  .OnDelete(DeleteBehavior.Cascade)
+                  .HasConstraintName("rental_transaction_book_id_fkey");
+
+            entity.HasOne(d => d.Owner)
+                  .WithMany()
+                  .HasForeignKey(d => d.OwnerId)
+                  .OnDelete(DeleteBehavior.Restrict) // Важливо: Restrict, щоб уникнути конфліктів множинних каскадних шляхів
+                  .HasConstraintName("rental_transaction_owner_id_fkey");
+
+            entity.HasOne(d => d.Borrower)
+                  .WithMany()
+                  .HasForeignKey(d => d.BorrowerId)
+                  .OnDelete(DeleteBehavior.Restrict) // Важливо: Restrict
+                  .HasConstraintName("rental_transaction_borrower_id_fkey");
         });
 
         // ------------------ SEEDING (Тестові Дані) ------------------
