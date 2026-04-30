@@ -18,6 +18,13 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Catalog" asp-action="Search">Головна</a>
                         </li>
+                        @* --- ОСЬ ТУТ ДОДАНО ГЛОБАЛЬНИЙ ПОШУК --- *@
+                        <li class="nav-item">
+                            <a class="nav-link text-primary fw-bold" asp-controller="GlobalSearch" asp-action="Index">
+                                <i class="bi bi-globe-americas me-1"></i> Глобальний пошук
+                            </a>
+                        </li>
+                        @* ------------------------------------- *@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-controller="Profile" asp-action="Index">Кабінет</a>
                         </li>
@@ -34,28 +41,28 @@
                         </li>
                         @if (User.IsInRole("Admin"))
                         {
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Admin" asp-action="Users">
-                                Керування користувачами
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Admin" asp-action="Books">
-                                Керування книгами
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark"
-                               asp-controller="Admin"
-                               asp-action="Reviews">
-                                Коментарі
-                            </a>
-                        </li>                    
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Admin" asp-action="Reports">
-                                Скарги
-                            </a>
-                        </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Admin" asp-action="Users">
+                                    Керування користувачами
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Admin" asp-action="Books">
+                                    Керування книгами
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark"
+                                   asp-controller="Admin"
+                                   asp-action="Reviews">
+                                    Коментарі
+                                </a>
+                            </li>                    
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Admin" asp-action="Reports">
+                                    Скарги
+                                </a>
+                            </li>
                         }
                     </ul>
 

@@ -8,6 +8,7 @@ using LNUBookShare.Application.Services;
 using LNUBookShare.Domain.Entities;
 using LNUBookShare.Domain.Models;
 using LNUBookShare.Infrastructure;
+using LNUBookShare.Infrastructure.ExternalServices;
 using LNUBookShare.Infrastructure.Repositories;
 using LNUBookShare.Infrastructure.Services;
 using LNUBookShare.Web.Hubs;
@@ -68,6 +69,7 @@ try
     builder.Services.AddScoped<IFacultyService, FacultyService>();
     builder.Services.AddTransient<IEmailService, EmailService>();
     builder.Services.AddScoped<IPhotoService, PhotoService>();
+    builder.Services.AddHttpClient<OpenLibraryService>();
 
     // Books logic
     builder.Services.AddScoped<IBookRepository, BookRepository>();
