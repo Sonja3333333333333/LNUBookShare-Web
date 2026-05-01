@@ -94,6 +94,39 @@ namespace LNUBookShare.Infrastructure.Repositories
             return await ApplySortingAndFiltering(dbQuery, sortBy, statusFilter).ToListAsync();
         }
 
+        public async Task<IEnumerable<(User User, int BooksCount)>> GetTopActiveUsersWithRecentBooksAsync(System.DateTime sinceDate, int takeCount)
+        {
+            var topStats = await _context.Books
+                .Where(b => b.CreatedAt >= sinceDate && b.Owner != null && b.Owner.IsActive)
+                .GroupBy(b => b.OwnerId)
+                .Select(g => new
+                {
+                    UserId = g.Key,
+                    Count = g.Count(),
+                })
+                .OrderByDescending(x => x.Count)
+                .Take(takeCount)
+                .ToListAsync();
+
+            if (!topStats.Any())
+            {
+                return new List<(User, int)>();
+            }
+
+            var topUserIds = topStats.Select(s => s.UserId).ToList();
+
+            var users = await _context.Users
+                .Include(u => u.Avatar)
+                .Where(u => topUserIds.Contains(u.Id))
+                .ToListAsync();
+
+            return topStats.Select(stat =>
+            {
+                var user = users.First(u => u.Id == stat.UserId);
+                return (user, stat.Count);
+            });
+        }
+
         private IQueryable<Book> GetBooksBaseQuery()
         {
             return _context.Books

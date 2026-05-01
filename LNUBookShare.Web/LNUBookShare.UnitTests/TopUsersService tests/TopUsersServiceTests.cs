@@ -21,23 +21,20 @@ namespace LNUBookShare.UnitTests.TopUsersService_tests
         }
 
         [Fact]
-        public async Task GetTopUsersOfMonthAsync_ShouldReturnTop5ActiveUsers_WithRecentBooks()
+        public async Task GetTopUsersOfMonthAsync_ShouldReturnTopUsers_MappedCorrectly()
         {
             // Arrange
-            var activeUser1 = new User { Id = 1, FirstName = "Іван", LastName = "Іванов", IsActive = true };
-            var activeUser2 = new User { Id = 2, FirstName = "Петро", LastName = "Петров", IsActive = true };
-            var blockedUser = new User { Id = 3, FirstName = "Злий", LastName = "Хакер", IsActive = false };
+            var user1 = new User { Id = 1, FirstName = "Іван", LastName = "Іванов" };
+            var user2 = new User { Id = 2, FirstName = "Петро", LastName = "Петров" };
 
-            var books = new List<Book>
+            var mockData = new List<(User User, int BooksCount)>
             {
-                new Book { BookId = 1, Owner = activeUser1, CreatedAt = DateTime.UtcNow.AddDays(-5) },
-                new Book { BookId = 2, Owner = activeUser1, CreatedAt = DateTime.UtcNow.AddDays(-10) },
-                new Book { BookId = 3, Owner = activeUser2, CreatedAt = DateTime.UtcNow.AddDays(-2) },
-                new Book { BookId = 4, Owner = blockedUser, CreatedAt = DateTime.UtcNow.AddDays(-1) }, 
-                new Book { BookId = 5, Owner = activeUser1, CreatedAt = DateTime.UtcNow.AddDays(-40) }
+                (user1, 3),
+                (user2, 1)
             };
 
-            _bookRepoMock.Setup(r => r.GetAllBooksWithOwnersAsync()).ReturnsAsync(books);
+            _bookRepoMock.Setup(r => r.GetTopActiveUsersWithRecentBooksAsync(It.IsAny<DateTime>(), 5))
+                         .ReturnsAsync(mockData);
 
             // Act
             var result = await _topUsersService.GetTopUsersOfMonthAsync();
@@ -46,25 +43,18 @@ namespace LNUBookShare.UnitTests.TopUsersService_tests
             Assert.True(result.IsSuccess);
             var topUsers = result.Value.ToList();
 
-            Assert.Equal(2, topUsers.Count); 
-
+            Assert.Equal(2, topUsers.Count);
             Assert.Equal(1, topUsers[0].UserId);
-            Assert.Equal(2, topUsers[0].AddedBooksCount); 
-
-            Assert.Equal(2, topUsers[1].UserId);
-            Assert.Equal(1, topUsers[1].AddedBooksCount);
+            Assert.Equal(3, topUsers[0].AddedBooksCount);
         }
 
         [Fact]
-        public async Task GetTopUsersOfMonthAsync_WhenNoRecentBooks_ShouldReturnEmptyList()
+        public async Task GetTopUsersOfMonthAsync_WhenNoUsers_ShouldReturnEmptyList()
         {
             // Arrange
-            var books = new List<Book>
-            {
-                new Book { BookId = 1, Owner = new User { IsActive = true }, CreatedAt = DateTime.UtcNow.AddDays(-40) }
-            };
-
-            _bookRepoMock.Setup(r => r.GetAllBooksWithOwnersAsync()).ReturnsAsync(books);
+            var emptyData = new List<(User User, int BooksCount)>();
+            _bookRepoMock.Setup(r => r.GetTopActiveUsersWithRecentBooksAsync(It.IsAny<DateTime>(), 5))
+                         .ReturnsAsync(emptyData);
 
             // Act
             var result = await _topUsersService.GetTopUsersOfMonthAsync();

@@ -21,22 +21,17 @@ namespace LNUBookShare.Application.Services
             try
             {
                 var thirtyDaysAgo = DateTime.UtcNow.AddDays(-30);
-                var allBooks = await _bookRepo.GetAllBooksWithOwnersAsync();
 
-                var topUsers = allBooks
-                    .Where(b => b.CreatedAt >= thirtyDaysAgo && b.Owner != null && b.Owner.IsActive)
-                    .GroupBy(b => b.Owner)
-                    .Select(g => new TopUserDto
-                    {
-                        UserId = g.Key.Id,
-                        FullName = $"{g.Key.FirstName} {g.Key.LastName}",
-                        AvatarId = g.Key.AvatarId,
-                        AvatarPath = g.Key.Avatar != null ? g.Key.Avatar.ImagePath : null,
-                        AddedBooksCount = g.Count(),
-                    })
-                    .OrderByDescending(u => u.AddedBooksCount)
-                    .Take(5)
-                    .ToList();
+                var topUsersData = await _bookRepo.GetTopActiveUsersWithRecentBooksAsync(thirtyDaysAgo, 5);
+
+                var topUsers = topUsersData.Select(data => new TopUserDto
+                {
+                    UserId = data.User.Id,
+                    FullName = $"{data.User.FirstName} {data.User.LastName}",
+                    AvatarId = data.User.AvatarId,
+                    AvatarPath = data.User.Avatar?.ImagePath,
+                    AddedBooksCount = data.BooksCount,
+                }).ToList();
 
                 _logger.LogInformation("Успішно сформовано рейтинг користувачів місяця. Знайдено: {Count}", topUsers.Count);
 
