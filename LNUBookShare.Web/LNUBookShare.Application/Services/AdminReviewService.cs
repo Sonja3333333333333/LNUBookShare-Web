@@ -24,34 +24,9 @@ namespace LNUBookShare.Application.Services
             int? ratingFilter = null)
         {
             _logger.LogInformation(
-                "Адмін запитує список відгуків. SearchBy={SearchBy}, Query={Query}, Rating={Rating}",
-                searchBy, query, ratingFilter);
+                "Адмін запитує список відгуків. SearchBy={SearchBy}, Query={Query}, Rating={Rating}", searchBy, query, ratingFilter);
 
-            var reviews = await _reviewRepository.GetAllWithDetailsAsync();
-
-            if (!string.IsNullOrWhiteSpace(query))
-            {
-                var lowerQuery = query.Trim().ToLower();
-                reviews = searchBy?.ToLower() switch
-                {
-                    "comment" => reviews.Where(r =>
-                        r.Comment != null &&
-                        r.Comment.ToLower().Contains(lowerQuery)),
-                    "reviewer" => reviews.Where(r =>
-                        r.Reviewer != null &&
-                        ($"{r.Reviewer.FirstName} {r.Reviewer.LastName}")
-                            .ToLower().Contains(lowerQuery)),
-                    "book" => reviews.Where(r =>
-                        r.Book != null &&
-                        r.Book.Title.ToLower().Contains(lowerQuery)),
-                    _ => reviews
-                };
-            }
-
-            if (ratingFilter.HasValue)
-            {
-                reviews = reviews.Where(r => r.Rating == ratingFilter.Value);
-            }
+            var reviews = await _reviewRepository.GetAllWithDetailsAsync(searchBy, query, ratingFilter);
 
             _logger.LogInformation("Знайдено {Count} відгуків.", reviews.Count());
             return Result<IEnumerable<BookReview>>.Success(reviews);

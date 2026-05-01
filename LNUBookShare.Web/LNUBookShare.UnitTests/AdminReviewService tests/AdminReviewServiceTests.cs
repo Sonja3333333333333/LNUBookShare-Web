@@ -1,3 +1,4 @@
+using LNUBookShare.Application.Common;
 using LNUBookShare.Application.Interfaces;
 using LNUBookShare.Application.Services;
 using LNUBookShare.Domain.Entities;
@@ -21,91 +22,25 @@ namespace LNUBookShare.UnitTests.AdminReviewService_tests
         }
 
         [Fact]
-        public async Task GetAllReviewsAsync_NoFilter_ReturnsSortedByDateDesc()
+        public async Task GetAllReviewsAsync_ShouldPassParametersToRepositoryAndReturnSuccess()
         {
-            var reviews = new List<BookReview>
-            {
-                new BookReview
-                {
-                    ReviewId = 1,
-                    Comment = "Стара",
-                    CreatedAt = DateTime.UtcNow.AddDays(-5),
-                    Reviewer = new User { FirstName = "Іван", LastName = "Мазепа" },
-                    Book = new Book { Title = "Кобзар" }
-                },
-                new BookReview
-                {
-                    ReviewId = 2,
-                    Comment = "Нова",
-                    CreatedAt = DateTime.UtcNow,
-                    Reviewer = new User { FirstName = "Тарас", LastName = "Франко" },
-                    Book = new Book { Title = "Лісова Пісня" }
-                }
-            };
-            _repoMock.Setup(r => r.GetAllWithDetailsAsync()).ReturnsAsync(reviews);
+            // Arrange
+            var expectedReviews = new List<BookReview> { new BookReview { ReviewId = 1 } };
 
-            var result = await _service.GetAllReviewsAsync();
+            _repoMock.Setup(r => r.GetAllWithDetailsAsync(
+                It.IsAny<string?>(),
+                It.IsAny<string?>(),
+                It.IsAny<int?>()))
+                .ReturnsAsync(expectedReviews);
 
-            Assert.True(result.IsSuccess);
-            Assert.Equal(2, result.Value.First().ReviewId);
-        }
+            // Act
+            var result = await _service.GetAllReviewsAsync("comment", "спам", 5);
 
-        [Fact]
-        public async Task GetAllReviewsAsync_SearchByComment_ReturnsFiltered()
-        {
-            var reviews = new List<BookReview>
-            {
-                new BookReview
-                {
-                    ReviewId = 1, Comment = "спам тут",
-                    CreatedAt = DateTime.UtcNow,
-                    Reviewer = new User { FirstName = "А", LastName = "Б" },
-                    Book = new Book { Title = "Книга" }
-                },
-                new BookReview
-                {
-                    ReviewId = 2, Comment = "чудова книга",
-                    CreatedAt = DateTime.UtcNow,
-                    Reviewer = new User { FirstName = "В", LastName = "Г" },
-                    Book = new Book { Title = "Книга 2" }
-                }
-            };
-            _repoMock.Setup(r => r.GetAllWithDetailsAsync()).ReturnsAsync(reviews);
-
-            var result = await _service.GetAllReviewsAsync("comment", "спам");
-
+            // Assert
             Assert.True(result.IsSuccess);
             Assert.Single(result.Value);
-            Assert.Equal(1, result.Value.First().ReviewId);
-        }
 
-        [Fact]
-        public async Task GetAllReviewsAsync_SearchByAuthor_ReturnsFiltered()
-        {
-            var reviews = new List<BookReview>
-            {
-                new BookReview
-                {
-                    ReviewId = 1, Comment = "ок",
-                    CreatedAt = DateTime.UtcNow,
-                    Reviewer = new User { FirstName = "Іван", LastName = "Мазепа" },
-                    Book = new Book { Title = "Книга" }
-                },
-                new BookReview
-                {
-                    ReviewId = 2, Comment = "добре",
-                    CreatedAt = DateTime.UtcNow,
-                    Reviewer = new User { FirstName = "Петро", LastName = "Сагайдачний" },
-                    Book = new Book { Title = "Книга 2" }
-                }
-            };
-            _repoMock.Setup(r => r.GetAllWithDetailsAsync()).ReturnsAsync(reviews);
-
-            var result = await _service.GetAllReviewsAsync("author", "Мазепа");
-
-            Assert.True(result.IsSuccess);
-            Assert.Single(result.Value);
-            Assert.Equal(1, result.Value.First().ReviewId);
+            _repoMock.Verify(r => r.GetAllWithDetailsAsync("comment", "спам", 5), Times.Once);
         }
 
         [Fact]
@@ -117,7 +52,7 @@ namespace LNUBookShare.UnitTests.AdminReviewService_tests
             var result = await _service.DeleteReviewAsync(99);
 
             Assert.True(result.IsFailure);
-            Assert.Equal("Коментар не знайдено.", result.Error);
+            Assert.Equal("Відгук не знайдено.", result.Error);
             _repoMock.Verify(r => r.DeleteAsync(It.IsAny<BookReview>()), Times.Never);
         }
 
