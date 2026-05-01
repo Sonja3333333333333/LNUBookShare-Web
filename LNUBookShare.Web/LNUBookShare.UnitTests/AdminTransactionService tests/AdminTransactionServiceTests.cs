@@ -36,11 +36,12 @@ namespace LNUBookShare.UnitTests.AdminTransactionService_tests
                 It.IsAny<string?>(),
                 It.IsAny<string?>(),
                 It.IsAny<string?>(),
+                It.IsAny<string?>(),
                 It.IsAny<string?>()))
                 .ReturnsAsync(transactions);
 
             // Act
-            var result = await _service.GetTransactionsAsync("book", "Шевченко", "date_desc", "active");
+            var result = await _service.GetTransactionsAsync("book", "Шевченко", "date_desc", "active", "all");
 
             // Assert
             Assert.True(result.IsSuccess);
@@ -55,15 +56,16 @@ namespace LNUBookShare.UnitTests.AdminTransactionService_tests
             var expectedQuery = "Іван";
             var expectedSortBy = "created";
             var expectedStatus = "all";
+            var expectedTerm = "overdue";
 
-            _repoMock.Setup(r => r.GetAllWithDetailsAsync(expectedSearchBy, expectedQuery, expectedSortBy, expectedStatus))
+            _repoMock.Setup(r => r.GetAllWithDetailsAsync(expectedSearchBy, expectedQuery, expectedSortBy, expectedStatus, expectedTerm))
                 .ReturnsAsync(new List<RentalTransaction>());
 
             // Act
-            await _service.GetTransactionsAsync(expectedSearchBy, expectedQuery, expectedSortBy, expectedStatus);
+            await _service.GetTransactionsAsync(expectedSearchBy, expectedQuery, expectedSortBy, expectedStatus, expectedTerm);
 
             // Assert
-            _repoMock.Verify(r => r.GetAllWithDetailsAsync(expectedSearchBy, expectedQuery, expectedSortBy, expectedStatus), Times.Once);
+            _repoMock.Verify(r => r.GetAllWithDetailsAsync(expectedSearchBy, expectedQuery, expectedSortBy, expectedStatus, expectedTerm), Times.Once);
         }
 
         [Fact]
@@ -74,11 +76,12 @@ namespace LNUBookShare.UnitTests.AdminTransactionService_tests
                 It.IsAny<string?>(),
                 It.IsAny<string?>(),
                 It.IsAny<string?>(),
+                It.IsAny<string?>(),
                 It.IsAny<string?>()))
                 .ThrowsAsync(new Exception("Критична помилка бази даних"));
 
             // Act
-            var result = await _service.GetTransactionsAsync("book", null, null, null);
+            var result = await _service.GetTransactionsAsync("book", null, null, null, null);
 
             // Assert
             Assert.True(result.IsFailure);
