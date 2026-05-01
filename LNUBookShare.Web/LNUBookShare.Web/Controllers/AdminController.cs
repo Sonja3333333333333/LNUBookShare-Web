@@ -50,14 +50,15 @@ public class AdminController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> Transactions(string? searchBy = "book", string? query = null, string? sortBy = "date_desc", string? statusFilter = "active")
+    public async Task<IActionResult> Transactions(string? searchBy = "book", string? query = null, string? sortBy = "date_desc", string? statusFilter = "active", string? termFilter = "all")
     {
-        var result = await _adminTransactionService.GetTransactionsAsync(searchBy, query, sortBy, statusFilter);
+        var result = await _adminTransactionService.GetTransactionsAsync(searchBy, query, sortBy, statusFilter, termFilter);
 
         ViewBag.CurrentSearchBy = searchBy;
         ViewBag.CurrentQuery = query;
         ViewBag.CurrentSortBy = sortBy;
         ViewBag.CurrentStatusFilter = statusFilter;
+        ViewBag.CurrentTermFilter = termFilter;
 
         if (result.IsFailure)
         {

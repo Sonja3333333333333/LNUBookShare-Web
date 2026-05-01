@@ -97,7 +97,9 @@
                                                 <td>
                                                     @if (review.Reviewer != null)
                                                     {
-                                                        <span>@review.Reviewer.FirstName @review.Reviewer.LastName</span>
+                                                        <a asp-controller="OtherProfile" asp-action="Index" asp-route-userId="@review.Reviewer.Id" class="text-decoration-none fw-bold" title="Перейти на профіль">
+                                                            @review.Reviewer.FirstName @review.Reviewer.LastName
+                                                        </a>
                                                     }
                                                     else
                                                     {

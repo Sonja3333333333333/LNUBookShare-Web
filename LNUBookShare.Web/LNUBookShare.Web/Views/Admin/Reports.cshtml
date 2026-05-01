@@ -77,8 +77,14 @@
                                         {
                                             <tr>
                                                 <td class="px-4 small text-muted">@r.CreatedAt.ToString("g")</td>
-                                                <td>@r.Sender.FirstName @r.Sender.LastName</td>
-                                                <td class="text-danger fw-bold">@r.ReportedUser.FirstName @r.ReportedUser.LastName</td>
+                                                <a asp-controller="OtherProfile" asp-action="Index" asp-route-userId="@r.Sender.Id" class="text-decoration-none fw-bold" title="Перейти на профіль відправника">
+                                                    @r.Sender.FirstName @r.Sender.LastName
+                                                </a>
+                                                <td>
+                                                    <a asp-controller="OtherProfile" asp-action="Index" asp-route-userId="@r.ReportedUser.Id" class="text-decoration-none fw-bold" title="Перейти на профіль порушника">
+                                                        @r.ReportedUser.FirstName @r.ReportedUser.LastName
+                                                    </a>
+                                                </td>
 
                                                 <td>
                                                     @{

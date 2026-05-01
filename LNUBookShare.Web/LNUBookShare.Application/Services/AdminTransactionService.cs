@@ -18,13 +18,13 @@ namespace LNUBookShare.Application.Services
             _logger = logger;
         }
 
-        public async Task<Result<IEnumerable<RentalTransaction>>> GetTransactionsAsync(string? searchBy, string? searchQuery, string? sortBy, string? statusFilter)
+        public async Task<Result<IEnumerable<RentalTransaction>>> GetTransactionsAsync(string? searchBy, string? searchQuery, string? sortBy, string? statusFilter, string? termFilter)
         {
             _logger.LogInformation("Адміністратор запитує список транзакцій. Пошук: {SearchQuery}", searchQuery);
 
             try
             {
-                var transactions = await _transactionRepository.GetAllWithDetailsAsync(searchBy, searchQuery, sortBy, statusFilter);
+                var transactions = await _transactionRepository.GetAllWithDetailsAsync(searchBy, searchQuery, sortBy, statusFilter, termFilter);
 
                 return Result<IEnumerable<RentalTransaction>>.Success(transactions);
             }

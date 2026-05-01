@@ -32,7 +32,7 @@ namespace LNUBookShare.Infrastructure.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<RentalTransaction>> GetAllWithDetailsAsync(string? searchBy, string? searchQuery, string? sortBy, string? statusFilter)
+        public async Task<IEnumerable<RentalTransaction>> GetAllWithDetailsAsync(string? searchBy, string? searchQuery, string? sortBy, string? statusFilter, string? termFilter)
         {
             var query = _context.RentalTransactions
                 .Include(t => t.Book)
@@ -65,6 +65,12 @@ namespace LNUBookShare.Infrastructure.Repositories
 
                     _ => query.Where(t => t.Book.Title.ToLower().Contains(searchLower)) // За замовчуванням - книга
                 };
+            }
+
+            if (termFilter == "overdue")
+            {
+                var currentDate = DateTime.UtcNow;
+                query = query.Where(t => t.Status == "active" && t.ExpectedReturnDate < currentDate);
             }
 
             query = sortBy switch
