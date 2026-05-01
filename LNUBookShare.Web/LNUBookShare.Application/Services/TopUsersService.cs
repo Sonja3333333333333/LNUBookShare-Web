@@ -22,18 +22,9 @@ namespace LNUBookShare.Application.Services
             {
                 var thirtyDaysAgo = DateTime.UtcNow.AddDays(-30);
 
-                var topUsersData = await _bookRepo.GetTopActiveUsersWithRecentBooksAsync(thirtyDaysAgo, 5);
+                var topUsers = await _bookRepo.GetTopActiveUsersWithRecentBooksAsync(thirtyDaysAgo, 5);
 
-                var topUsers = topUsersData.Select(data => new TopUserDto
-                {
-                    UserId = data.User.Id,
-                    FullName = $"{data.User.FirstName} {data.User.LastName}",
-                    AvatarId = data.User.AvatarId,
-                    AvatarPath = data.User.Avatar?.ImagePath,
-                    AddedBooksCount = data.BooksCount,
-                }).ToList();
-
-                _logger.LogInformation("Успішно сформовано рейтинг користувачів місяця. Знайдено: {Count}", topUsers.Count);
+                _logger.LogInformation("Успішно сформовано рейтинг користувачів місяця. Знайдено: {Count}", topUsers.Count());
 
                 return Result<IEnumerable<TopUserDto>>.Success(topUsers);
             }

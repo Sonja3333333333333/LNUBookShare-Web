@@ -1,9 +1,9 @@
 ﻿using LNUBookShare.Application.Services;
 using LNUBookShare.Application.Interfaces;
 using LNUBookShare.Domain.Entities;
+using LNUBookShare.Domain.Models;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Xunit;
 
 namespace LNUBookShare.UnitTests.TopUsersService_tests
 {
@@ -24,13 +24,10 @@ namespace LNUBookShare.UnitTests.TopUsersService_tests
         public async Task GetTopUsersOfMonthAsync_ShouldReturnTopUsers_MappedCorrectly()
         {
             // Arrange
-            var user1 = new User { Id = 1, FirstName = "Іван", LastName = "Іванов" };
-            var user2 = new User { Id = 2, FirstName = "Петро", LastName = "Петров" };
-
-            var mockData = new List<(User User, int BooksCount)>
+            var mockData = new List<TopUserDto>
             {
-                (user1, 3),
-                (user2, 1)
+                new TopUserDto { UserId = 1, FullName = "Іван Іванов", AddedBooksCount = 3 },
+                new TopUserDto { UserId = 2, FullName = "Петро Петров", AddedBooksCount = 1 }
             };
 
             _bookRepoMock.Setup(r => r.GetTopActiveUsersWithRecentBooksAsync(It.IsAny<DateTime>(), 5))
@@ -45,6 +42,7 @@ namespace LNUBookShare.UnitTests.TopUsersService_tests
 
             Assert.Equal(2, topUsers.Count);
             Assert.Equal(1, topUsers[0].UserId);
+            Assert.Equal("Іван Іванов", topUsers[0].FullName); // Можемо перевірити й ім'я
             Assert.Equal(3, topUsers[0].AddedBooksCount);
         }
 
@@ -52,7 +50,8 @@ namespace LNUBookShare.UnitTests.TopUsersService_tests
         public async Task GetTopUsersOfMonthAsync_WhenNoUsers_ShouldReturnEmptyList()
         {
             // Arrange
-            var emptyData = new List<(User User, int BooksCount)>();
+            var emptyData = new List<TopUserDto>();
+
             _bookRepoMock.Setup(r => r.GetTopActiveUsersWithRecentBooksAsync(It.IsAny<DateTime>(), 5))
                          .ReturnsAsync(emptyData);
 

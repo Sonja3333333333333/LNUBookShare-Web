@@ -3,6 +3,7 @@
 // </copyright>
 
 using LNUBookShare.Domain.Entities;
+using LNUBookShare.Domain.Models;
 
 namespace LNUBookShare.Application.Interfaces
 {
@@ -14,7 +15,7 @@ namespace LNUBookShare.Application.Interfaces
         Task AddAsync(Book book); // Create
         Task UpdateAsync(Book book); // Update
         Task DeleteAsync(Book book); // Delete
-        Task<IEnumerable<(User User, int BooksCount)>> GetTopActiveUsersWithRecentBooksAsync(DateTime sinceDate, int takeCount);
+        Task<IEnumerable<TopUserDto>> GetTopActiveUsersWithRecentBooksAsync(DateTime since, int count);
 
         Task<IEnumerable<Book>> GetAllBooksWithOwnersAsync();
 

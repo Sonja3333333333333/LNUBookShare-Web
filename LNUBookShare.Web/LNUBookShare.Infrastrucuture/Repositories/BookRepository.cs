@@ -1,12 +1,9 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using CloudinaryDotNet;
+﻿using CloudinaryDotNet;
 using LNUBookShare.Application.Interfaces;
 using LNUBookShare.Domain.Entities;
+using LNUBookShare.Domain.Models;
 using LNUBookShare.Infrastructure;
 using Microsoft.EntityFrameworkCore;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace LNUBookShare.Infrastructure.Repositories
 {
@@ -94,37 +91,29 @@ namespace LNUBookShare.Infrastructure.Repositories
             return await ApplySortingAndFiltering(dbQuery, sortBy, statusFilter).ToListAsync();
         }
 
-        public async Task<IEnumerable<(User User, int BooksCount)>> GetTopActiveUsersWithRecentBooksAsync(System.DateTime sinceDate, int takeCount)
+        public async Task<IEnumerable<TopUserDto>> GetTopActiveUsersWithRecentBooksAsync(System.DateTime sinceDate, int takeCount)
         {
-            var topStats = await _context.Books
-                .Where(b => b.CreatedAt >= sinceDate && b.Owner != null && b.Owner.IsActive)
-                .GroupBy(b => b.OwnerId)
-                .Select(g => new
+            var topUsers = await _context.Users
+                .Where(u => u.IsActive)
+                .Select(u => new
                 {
-                    UserId = g.Key,
-                    Count = g.Count(),
+                    User = u,
+                    RecentBooksCount = u.Books.Count(b => b.CreatedAt >= sinceDate),
                 })
-                .OrderByDescending(x => x.Count)
+                .Where(x => x.RecentBooksCount > 0)
+                .OrderByDescending(x => x.RecentBooksCount)
                 .Take(takeCount)
+                .Select(x => new TopUserDto
+                {
+                    UserId = x.User.Id,
+                    FullName = x.User.FirstName + " " + x.User.LastName,
+                    AvatarId = x.User.AvatarId,
+                    AvatarPath = x.User.Avatar != null ? x.User.Avatar.ImagePath : null,
+                    AddedBooksCount = x.RecentBooksCount,
+                })
                 .ToListAsync();
 
-            if (!topStats.Any())
-            {
-                return new List<(User, int)>();
-            }
-
-            var topUserIds = topStats.Select(s => s.UserId).ToList();
-
-            var users = await _context.Users
-                .Include(u => u.Avatar)
-                .Where(u => topUserIds.Contains(u.Id))
-                .ToListAsync();
-
-            return topStats.Select(stat =>
-            {
-                var user = users.First(u => u.Id == stat.UserId);
-                return (user, stat.Count);
-            });
+            return topUsers;
         }
 
         private IQueryable<Book> GetBooksBaseQuery()
