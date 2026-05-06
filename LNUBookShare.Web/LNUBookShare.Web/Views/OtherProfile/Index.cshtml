@@ -6,6 +6,12 @@
     ViewData["Title"] = "Профіль користувача";
 }
 
+@section Styles {
+    
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/modules/bookCard.css" asp-append-version="true" />
+}
+
 <div class="container mt-5">
     @* Блок сповіщень (Toast/Alert) *@
     @if (TempData["SuccessMessage"] != null)

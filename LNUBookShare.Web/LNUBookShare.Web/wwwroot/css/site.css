@@ -1,22 +1,81 @@
 :root {
-    /* Наша нова палітра */
-    --primary-lnu: #1d4ed8; /* Глибокий синій */
+    --primary-lnu: #3a7bd5;
     --primary-hover: #173eb1;
-    --accent-orange: #f59e0b; /* Акцент для кнопок */
+    --accent-orange: #f59e0b;
     --bg-light: #f8fafc;
     --white: #ffffff;
     --text-main: #1e293b;
     --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
 }
 
-/* Оновлюємо базові стилі */
+/* --- БАЗОВІ СТИЛІ --- */
 body {
     background-color: var(--bg-light);
     color: var(--text-main);
-    margin-bottom: 60px; /* залишаємо як було */
+    margin-bottom: 60px;
 }
 
-/* Оновлюємо фокус, щоб він відповідав нашому синьому */
-.btn:focus, .form-control:focus {
-    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem var(--primary-lnu);
+/* Усі заголовки автоматично сині */
+h1, h2, h3, h4, h5, h6, .fw-bold {
+    color: var(--primary-lnu) !important;
 }
+
+/* Посилання */
+a {
+    color: var(--primary-lnu);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+    a:hover {
+        color: var(--primary-hover);
+        text-decoration: underline;
+    }
+
+/* --- ГЛОБАЛЬНІ ФОРМИ ТА ПОШУК --- */
+
+/* Поля вводу та селектори */
+.form-control, .form-select {
+    border: 1px solid var(--primary-lnu) !important;
+    border-radius: 8px !important;
+    background-color: var(--white);
+    color: var(--text-main);
+}
+
+/* Синя іконка пошуку всюди */
+.bi-search {
+    color: var(--primary-lnu) !important;
+}
+
+/* Плейсхолдери */
+::placeholder, .form-control::placeholder {
+    color: var(--primary-lnu) !important;
+    opacity: 0.7;
+    font-style: italic;
+}
+
+/* Фокус для форм */
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary-hover) !important;
+    box-shadow: 0 0 0 0.25rem rgba(58, 123, 213, 0.15) !important;
+    outline: none;
+}
+
+/* Стиль для випадаючих списків (hover ефект) */
+/* Примітка: для стандартних <option> стилізація hover обмежена браузерами,
+   тому додаємо accent-color для системних елементів */
+:root {
+    accent-color: var(--primary-lnu);
+}
+
+.form-select option:hover,
+.form-select option:focus,
+.form-select option:active,
+.form-select option:checked {
+    background-color: #e0eeff !important; /* Блідо-синій */
+}
+
+
+
+
+
