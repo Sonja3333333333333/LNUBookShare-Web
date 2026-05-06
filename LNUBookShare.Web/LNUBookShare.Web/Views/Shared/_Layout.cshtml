@@ -6,14 +6,23 @@
     <title>LnuBookShare</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/modules/components.css" asp-append-version="true" />
+
+    @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
     <header>
         <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom mb-3">
             <div class="container-fluid">
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                
+                <a class="brand-logo me-4" asp-controller="Catalog" asp-action="Search">
+                    <i class="bi bi-book-half"></i> LNU<span>BookShare</span>
+                </a>
+
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">              
+
+
                     <ul class="navbar-nav nav-main flex-grow-1 px-4 gap-2">
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Catalog" asp-action="Search">Головна</a>
@@ -101,6 +110,10 @@
     <main role="main">
         @RenderBody()
     </main>
+    
+    <div id="global-loader" class="d-none position-fixed top-50 start-50 translate-middle" style="z-index: 9999;">
+        <div class="loader-spinner" style="border-top-color: var(--primary-lnu); width: 3rem; height: 3rem;"></div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
