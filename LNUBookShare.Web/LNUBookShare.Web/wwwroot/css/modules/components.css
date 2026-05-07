@@ -1,5 +1,4 @@
-﻿/* Логотип */
-.brand-logo {
+﻿.brand-logo {
     font-weight: 800;
     color: var(--primary-lnu);
     display: flex;
@@ -14,9 +13,7 @@
         color: var(--text-main);
     }
 
-/* Додайте це в components.css */
 
-/* Уніфіковані посилання */
 a.link-custom {
     color: var(--primary-lnu);
     text-decoration: none;
@@ -28,20 +25,18 @@ a.link-custom {
         text-decoration: underline;
     }
 
-/* Оновлена картка (вже з вашого коду) */
 .book-details-card {
     border: none;
-    border-radius: 16px; /* Трохи менше закруглення для професійного вигляду */
+    border-radius: 16px;
     padding: 25px;
     background-color: var(--white);
     box-shadow: var(--shadow-sm);
 }
 
-/* Ваші утиліти (залишаємо тут) */
 .alert-pill {
     border-radius: 50px;
     border: none;
-    padding: 5px 15px; /* Додайте падінги, щоб текст не прилипав */
+    padding: 5px 15px;
 }
 
 .text-truncate-2 {
