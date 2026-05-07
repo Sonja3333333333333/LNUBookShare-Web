@@ -10,25 +10,30 @@
     string currentStatus = queryParams.Status?.ToLower() ?? "";
 }
 
+@section Styles {
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/modules/bookCard.css" asp-append-version="true" />
+}
+
 <div class="container mt-4">
     <div class="row justify-content-center">
         <div class="col-12">
 
-            @* Виведення помилки для негативного сценарію *@
             @if (TempData["ErrorMessage"] != null)
             {
-                <div class="alert alert-danger shadow-sm mb-4" style="border-radius: 8px;">
+                <div class="alert alert-danger shadow-sm mb-4 custom-alert">
                     <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["ErrorMessage"]
                 </div>
             }
 
-            @* ФОРМА СОРТУВАННЯ ТА ФІЛЬТРАЦІЇ (Від напарника 1) *@
+            @* --- ФОРМА СОРТУВАННЯ ТА ФІЛЬТРАЦІЇ --- *@
             <form asp-controller="Favorite" asp-action="Index" method="get" class="mb-4">
                 <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary-subtle">
                     
                     <div class="d-flex align-items-center gap-2">
-                        <span class="text-muted" style="font-size: 0.9rem;">Сортувати за:</span>
-                        <select name="SortBy" class="form-select form-select-sm border-0 bg-light fw-medium" style="width: 130px; cursor: pointer;" onchange="this.form.submit()">
+                        <span class="text-muted small">Сортувати за:</span>
+                        @* Додано клас .sort-dropdown *@
+                        <select name="SortBy" class="form-select form-select-sm sort-dropdown fw-medium" onchange="this.form.submit()">
                             <option value="title" selected="@(currentSort == "title")">Назва</option>
                             <option value="author" selected="@(currentSort == "author")">Автор</option>
                             <option value="year" selected="@(currentSort == "year")">Рік видання</option>
@@ -36,42 +41,33 @@
                     </div>
 
                     <div class="d-flex gap-3 align-items-center">
-                        <div class="form-check custom-radio">
-                            <input class="form-check-input" type="radio" name="Status" id="statusAll" value="" checked="@(string.IsNullOrEmpty(currentStatus))" onchange="this.form.submit()">
-                            <label class="form-check-label text-muted" for="statusAll" style="font-size: 0.9rem;">Всі</label>
-                        </div>
-                        <div class="form-check custom-radio">
-                            <input class="form-check-input" type="radio" name="Status" id="statusAvail" value="available" checked="@(currentStatus == "available")" onchange="this.form.submit()">
-                            <label class="form-check-label text-muted" for="statusAvail" style="font-size: 0.9rem;">Доступно</label>
-                        </div>
-                        <div class="form-check custom-radio">
-                            <input class="form-check-input" type="radio" name="Status" id="statusBorrowed" value="borrowed" checked="@(currentStatus == "borrowed")" onchange="this.form.submit()">
-                            <label class="form-check-label text-muted" for="statusBorrowed" style="font-size: 0.9rem;">Видано</label>
-                        </div>
-                        <div class="form-check custom-radio">
-                            <input class="form-check-input" type="radio" name="Status" id="statusReserved" value="reserved" checked="@(currentStatus == "reserved")" onchange="this.form.submit()">
-                            <label class="form-check-label text-muted" for="statusReserved" style="font-size: 0.9rem;">Заброньовано</label>
-                        </div>
+                        @foreach (var status in new[] { ("", "Всі"), ("available", "Доступно"), ("borrowed", "Видано"), ("reserved", "Заброньовано") })
+                        {
+                            <div class="form-check custom-radio">
+                                <input class="form-check-input" type="radio" name="Status" id="status_@status.Item1"
+                                       value="@status.Item1" checked="@(currentStatus == status.Item1)" onchange="this.form.submit()">
+                                <label class="form-check-label text-muted small" for="status_@status.Item1">@status.Item2</label>
+                            </div>
+                        }
                     </div>
-
                 </div>
             </form>
 
-            @* СПИСОК КНИГ ТА КАРТКИ (Твоя частина) *@
+            @* --- СПИСОК КНИГ --- *@
             <div class="book-list">
                 @if (Model != null && Model.Any())
                 {
                     @foreach (var book in Model)
                     {
-                        <div class="card mb-3 shadow-sm border-0 bg-white" style="border-radius: 12px; border: 1px solid #e0e0e0 !important; overflow: hidden;">
+                        <div class="card mb-3 shadow-sm book-item-card">
                             <div class="row g-0 align-items-center">
 
-                                <div class="col-md-3 text-center bg-light d-flex align-items-center justify-content-center p-0" style="height: 160px; border-right: 1px solid #e0e0e0; overflow: hidden;">
+                                @* Додано клас .book-img-container *@
+                                <div class="col-md-3 book-img-container">
                                     @if (book.Cover != null && !string.IsNullOrEmpty(book.Cover.ImagePath))
                                     {
-                                        <img src="@book.Cover.ImagePath"
-                                             alt="Обкладинка"
-                                             style="height: 100%; width: 100%; object-fit: cover; object-position: center;" />
+                                        @* Додано клас .book-main-img *@
+                                        <img src="@book.Cover.ImagePath" alt="Обкладинка" class="book-main-img" />
                                     }
                                     else
                                     {
@@ -82,7 +78,8 @@
                                 <div class="col-md-9 position-relative">
                                     <div class="card-body">
 
-                                        <form asp-controller="Favorite" asp-action="Toggle" method="post" class="position-absolute top-0 end-0 mt-2 me-2">
+                                        @* Додано клас .fav-btn-pos для позиціонування кнопки-сердечка *@
+                                        <form asp-controller="Favorite" asp-action="Toggle" method="post" class="fav-btn-pos">
                                             <input type="hidden" name="bookId" value="@book.BookId" />
                                             <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
 
@@ -91,90 +88,87 @@
                                             </button>
                                         </form>
 
-                                        <h5 class="card-title pe-5 mb-3">
-                                            <a asp-controller="Catalog"
-                                                   asp-action="Details"
-                                                   asp-route-id="@book.BookId"
-                                                   asp-route-returnUrl="@(Context.Request.Path + Context.Request.QueryString)"
-                                                   class="fw-bold link-dark-hover text-decoration-none text-dark" title="Переглянути деталі">
+                                        <h5 class="card-title">
+                                            @* Додано клас .book-link *@
+                                            <a asp-controller="Catalog" asp-action="Details" asp-route-id="@book.BookId"
+                                               class="book-link">
                                                 @book.Title
                                             </a>
                                         </h5>
 
-                                        <p class="card-text mb-1 text-muted" style="font-size: 0.9rem;">
+                                        <p class="card-text mb-1 text-muted small">
                                             Автор: <span class="text-dark">@book.Author</span>
                                         </p>
 
-                                        <p class="card-text mb-1 text-muted" style="font-size: 0.9rem;">
+                                        <p class="card-text mb-1 text-muted small">
                                             Власник:
-                                            <a asp-controller="OtherProfile"
-                                                   asp-action="Index"
-                                                   asp-route-userId="@book.Owner?.Id"
-                                                   class="text-primary link-dark-hover text-decoration-none fw-medium"
-                                                   style="font-size: 0.9rem;"
-                                                   title="Переглянути профіль">
+                                            @* Додано клас .owner-link *@
+                                            <a asp-controller="OtherProfile" asp-action="Index" asp-route-userId="@book.Owner?.Id"
+                                               class="owner-link">
                                                 @(book.Owner?.FirstName ?? "Невідомо") @(book.Owner?.LastName ?? "")
                                             </a>
                                         </p>
 
-                                        <p class="card-text mb-1 text-muted" style="font-size: 0.9rem;">
-                                            Статус: <span class="text-dark">
-                                            @(book.Status switch
-                                            {
-                                                "available" => "Доступно",
-                                                "reserved" => "Заброньовано",
-                                                "borrowed" => "Видано",
-                                                _ => book.Status
-                                            })
-                                        </span>
-                                    </p>
-
+                                        <p class="card-text mb-1 text-muted small">
+                                            Статус: 
+                                            @* Додано класи .status-label та кольорові статуси *@
+                                            <span class="status-label @(book.Status switch {
+                                                "available" => "status-available",
+                                                "reserved" => "status-reserved",
+                                                "borrowed" => "status-borrowed",
+                                                _ => ""
+                                            })">
+                                                @(book.Status switch
+                                                {
+                                                    "available" => "Доступно",
+                                                    "reserved" => "Заброньовано",
+                                                    "borrowed" => "Видано",
+                                                    _ => book.Status
+                                                })
+                                            </span>
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
+                    }
+
+                    <div class="mt-4 text-center">
+                        <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#clearModal">
+                            Очистити вподобане
+                        </button>
                     </div>
                 }
-
-                @* КНОПКА ОЧИЩЕННЯ (Від напарника 2) відображається тільки якщо є книги *@
-                <div class="mt-4 text-center">
-                    <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#clearModal">
-                        Очистити вподобане
-                    </button>
-                </div>
-            }
                 else
-            {
-                @* Блок, якщо список порожній (або через фільтр, або взагалі немає книг) *@
-                <div class="text-center text-muted mt-5">
-                    <i class="bi bi-journal-x" style="font-size: 4rem; color: #ccc;"></i>
-                    <h5 class="mt-3">Упс, тут поки порожньо!</h5>
-                    <p>Спробуйте змінити фільтри або додайте нові книги з каталогу.</p>
-                    <a asp-controller="Catalog" asp-action="Search" class="btn btn-outline-primary mt-2">Перейти до каталогу</a>
-                </div>
-            }
+                {
+                    <div class="empty-state text-center mt-5">
+                        <i class="bi bi-journal-x"></i>
+                        <h5 class="mt-3">Упс, тут поки порожньо!</h5>
+                        <p>Спробуйте змінити фільтри або додайте нові книги з каталогу.</p>
+                        <a asp-controller="Catalog" asp-action="Search" class="btn btn-primary mt-2">Перейти до каталогу</a>
+                    </div>
+                }
+            </div>
         </div>
-
     </div>
 </div>
-</div>
 
-@* МОДАЛЬНЕ ВІКНО ПІДТВЕРДЖЕННЯ ОЧИЩЕННЯ (Від напарника 2) *@
+@* МОДАЛЬНЕ ВІКНО *@
 <div class="modal fade" id="clearModal" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title">Підтвердження</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold">Очистити список?</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body text-center p-4">
-                <i class="bi bi-exclamation-circle text-danger mb-3 d-block" style="font-size: 3rem;"></i>
-                <p class="fs-5 mb-0">Ви впевнені, що хочете видалити всі книги зі списку уподобань?</p>
-                <p class="text-muted small">Цю дію неможливо скасувати.</p>
+                <i class="bi bi-trash3 text-danger mb-3 d-block" style="font-size: 2.5rem;"></i>
+                <p>Ви впевнені, що хочете видалити всі книги зі списку уподобань?</p>
             </div>
-            <div class="modal-footer justify-content-center border-0">
-                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Скасувати</button>
+            <div class="modal-footer border-0 justify-content-center pb-4">
+                <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Скасувати</button>
                 <form asp-controller="Favorite" asp-action="ClearAll" method="post">
-                    <button type="submit" class="btn btn-danger px-4">Так, очистити</button>
+                    <button type="submit" class="btn btn-danger px-4 shadow-sm">Так, очистити</button>
                 </form>
             </div>
         </div>
