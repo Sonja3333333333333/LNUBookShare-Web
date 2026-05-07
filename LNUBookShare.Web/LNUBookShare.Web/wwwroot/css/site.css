@@ -117,3 +117,16 @@ h1, h2, h3, h4, h5, h6 {
     border-radius: 8px !important;
     font-size: 0.875rem !important;
 }
+
+.toast-container {
+    padding-bottom: 2rem !important;
+}
+
+.toast {
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.toast-header {
+    border-bottom: none;
+}
