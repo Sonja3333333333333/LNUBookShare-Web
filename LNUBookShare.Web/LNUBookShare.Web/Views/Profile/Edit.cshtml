@@ -46,8 +46,7 @@
                                        id="AvatarFile"
                                        name="AvatarFile"
                                        accept="image/*"
-                                       class="d-none"
-                                       onchange="previewAvatar(event)" />
+                                       class="d-none" />
                             </div>
                         </div>
 
@@ -94,27 +93,4 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-    <script>
-        function previewAvatar(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                let preview = document.getElementById('avatarPreview');
-                const placeholder = document.getElementById('avatarPlaceholder');
-
-                if (!preview) {
-                    preview = document.createElement('img');
-                    preview.id = 'avatarPreview';
-                    preview.className = 'rounded-circle border shadow-sm';
-                    preview.style = 'width: 120px; height: 120px; object-fit: cover;';
-                    if (placeholder) placeholder.replaceWith(preview);
-                }
-
-                preview.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
-        }
-    </script>
 }
