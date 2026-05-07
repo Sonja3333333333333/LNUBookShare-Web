@@ -1,131 +1,79 @@
-﻿.main-search-field {
-    border-radius: 8px;
-    border: 1px solid var(--primary-lnu) !important;
-}
-
-.filter-select {
-    width: 120px; /* Фіксована ширина, щоб не розтягувалось */
-
-    flex: none; /* Забороняємо flex-контейнеру змінювати розмір */
-
-    border: 1px solid var(--primary-lnu) !important;
-    border-radius: 8px; /* Заокруглення тільки зліва для з'єднання з пошуком */
-}
-
-.search-icon {
-    left: 1rem;
-    color: var(--primary-lnu);
-}
-
-.sort-dropdown {
-    width: 130px;
-    background-color: var(--white);
-    border: 1px solid var(--border-color);
-    font-weight: 500;
-}
-/* Картка книги */
-
+﻿/* --- КАРТКА КНИГИ --- */
 .book-item-card {
-    background-color: var(--white) !important;
-    overflow: hidden;
+    border: 1px solid #eaeaea;
+    border-radius: 12px;
+    background-color: var(--white);
+    /* Анімацію та тінь при наведенні видалено */
 }
 
 .book-img-container {
-    height: 160px;
-    background-color: #ffffff;
-    border-right: 1px solid var(--bg-light);
-    overflow: hidden;
+    padding: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 180px;
+    background-color: #f8f9fa;
+    border-radius: 12px 0 0 12px;
 }
 
 .book-main-img {
-    height: 100%;
-    width: 100%;
-    object-fit: cover;
-    padding: 0;
+    max-width: 100%;
+    max-height: 180px;
+    object-fit: contain;
+    border-radius: 4px;
+    box-shadow: var(--shadow-sm);
 }
 
 .book-link {
     color: var(--text-main);
+    text-decoration: none;
+    font-weight: 700;
     transition: color 0.2s;
 }
 
-
-
     .book-link:hover {
-        color: var(--primary-lnu) !important;
+        color: var(--primary-lnu);
+        text-decoration: underline;
     }
 
 .owner-link {
-    color: var(--text-main);
-    font-weight: 500;
-}
-    .owner-link:hover {
-        color: var(--primary-lnu) !important;
-    }
-/* Статуси */
-
-.status-label {
-    font-size: 0.75rem;
-    padding: 2px 10px;
-    border-radius: 20px;
+    color: var(--primary-lnu);
+    text-decoration: none;
     font-weight: 600;
-    text-transform: uppercase;
 }
 
-.status-available {
-    background: #dcfce7;
-    color: #166534;
-}
-
-.status-reserved {
-    background: #fef9c3;
-    color: #854d0e;
-}
-
-.status-borrowed {
-    background: #fee2e2;
-    color: #991b1b;
-}
-/* Користувачі місяця */
-
-.leaderboard-card {
-    border: 1px solid var(--primary-lnu) !important;
-}
-
-.user-mini-avatar {
-    width: 42px;
-    height: 42px;
-    border-radius: 50%;
-    overflow: hidden;
-    background: var(--white);
-    border: 2px solid var(--bg-light);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-
-
-    .user-mini-avatar img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
+    .owner-link:hover {
+        text-decoration: underline;
     }
-
-.bg-lnu {
-    background-color: var(--primary-lnu) !important;
-    font-weight: 400;
-}
-
-.user-leader-link {
-    font-weight: 700;
-    font-size: 0.95rem;
-    display: block;
-    color: var(--text-main);
-}
 
 .fav-btn-pos {
     position: absolute;
-    top: 10px;
-    right: 10px;
+    top: 15px;
+    right: 15px;
+    z-index: 10;
+}
+
+/* --- СТАТУСИ (Кольорові плашки) --- */
+.status-label {
+    padding: 5px 12px;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-available {
+    background-color: #e6f4ea;
+    color: #1e8e3e;
+}
+
+.status-reserved {
+    background-color: #fef7e0;
+    color: #f29900;
+}
+
+.status-borrowed {
+    background-color: #fce8e6;
+    color: #d93025;
 }
