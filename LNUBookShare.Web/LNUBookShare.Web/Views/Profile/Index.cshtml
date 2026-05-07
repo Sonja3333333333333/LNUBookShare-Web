@@ -332,38 +332,4 @@
         </div>
     </div>
 </div>
-
-@section Scripts {
-    <script>
-        document.querySelectorAll('.edit-book-btn').forEach(button => {
-            button.addEventListener('click', function() {
-                const id = this.dataset.id;
-                const title = this.dataset.title;
-                const author = this.dataset.author;
-                const publisher = this.dataset.publisher;
-                const year = this.dataset.year;
-                const category = this.dataset.category;
-                const isbn = this.dataset.isbn; 
-                const language = this.dataset.language; 
-                document.getElementById('edit-id').value = id;
-                document.getElementById('edit-title').value = title;
-                document.getElementById('edit-author').value = author;
-                document.getElementById('edit-publisher').value = publisher;
-                document.getElementById('edit-isbn').value = isbn;
-                document.getElementById('edit-year').value = year;
-                document.getElementById('edit-category').value = category;
-                document.getElementById('edit-language').value = language; 
-                
-                document.getElementById('editBookForm').action = '/Profile/EditBook/' + id;
-            });
-        });
-
-        document.querySelectorAll('.delete-book-btn').forEach(button => {
-            button.addEventListener('click', function() {
-                const id = this.dataset.id;
-                document.getElementById('deleteBookForm').action = '/Profile/DeleteBook/' + id;
-            });
-        });
-    </script>
-}
 }
