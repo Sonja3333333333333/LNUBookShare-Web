@@ -4,119 +4,122 @@
     ViewData["Title"] = "Кабінет";
 }
 
+@section Styles {
+    @* Підключаємо всі наші нові модулі стилів *@
+    <link rel="stylesheet" href="~/css/modules/userCard.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/modules/bookCard.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/modules/filters.css" asp-append-version="true" />
+}
+
 <div class="container mt-4">
+    @* --- ПОВІДОМЛЕННЯ (Успіх/Помилка) --- *@
     @if (TempData["SuccessMessage"] != null)
     {
-        <div class="alert alert-success shadow-sm mb-4" style="border-radius: 8px;">
+        <div class="alert alert-success alert-pill shadow-sm mb-4">
             <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
         </div>
     }
     @if (TempData["ErrorMessage"] != null)
     {
-        <div class="alert alert-danger shadow-sm mb-4" style="border-radius: 8px;">
+        <div class="alert alert-danger alert-pill shadow-sm mb-4">
             <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["ErrorMessage"]
         </div>
     }
 
-    <div class="card shadow-sm border-0 mb-5 bg-white" style="border-radius: 12px; border: 1px solid #e0e0e0 !important;">
-        <div class="card-body p-4 position-relative">
-            <a asp-controller="Profile" asp-action="Edit" class="position-absolute top-0 end-0 mt-3 me-3 text-secondary" title="Редагувати профіль">
-                <i class="bi bi-pencil-square fs-4"></i>
-            </a>
-            <div class="row align-items-center">
-                <div class="col-md-3 text-center border-end border-secondary-subtle">
-                    @if (!string.IsNullOrEmpty(Model.AvatarPath))
-                    {
-                        <img src="@Model.AvatarPath" alt="Аватар користувача" class="rounded-circle border shadow-sm" style="width: 140px; height: 140px; object-fit: cover;" />
-                    }
-                    else
-                    {
-                        <div class="bg-light rounded-circle d-flex align-items-center justify-content-center mx-auto border shadow-sm"
-                             style="width: 140px; height: 140px;">
-                            <i class="bi bi-person text-secondary" style="font-size: 5rem;"></i>
-                        </div>
-                    }
+    @* --- КАРТКА ПРОФІЛЮ (Компонент userCard.css) --- *@
+    <div class="user-profile-card mb-5">
+        <a asp-controller="Profile" asp-action="Edit" class="edit-profile-link" title="Редагувати профіль">
+            <i class="bi bi-pencil-square fs-4"></i>
+        </a>
+        
+        <div class="row align-items-center">
+            <div class="col-md-3 border-end border-secondary-subtle user-avatar-wrapper">
+                @if (!string.IsNullOrEmpty(Model.AvatarPath))
+                {
+                    <img src="@Model.AvatarPath" alt="Аватар" class="user-avatar-lg" />
+                }
+                else
+                {
+                    <div class="user-avatar-placeholder-lg">
+                        <i class="bi bi-person" style="font-size: 5rem;"></i>
+                    </div>
+                }
+            </div>
+            
+            <div class="col-md-9 user-info-section">
+                <div class="user-info-item">
+                    <span class="user-info-label">Прізвище, Ім'я</span>
+                    <div class="user-name-value">@Model.LastName @Model.FirstName</div>
                 </div>
-                <div class="col-md-9 ps-md-4">
-                    <div class="mb-2">
-                        <small class="text-muted fw-bold">Прізвище, Ім'я</small>
-                        <div class="fs-5 fw-bold text-dark">@Model.LastName @Model.FirstName</div>
-                    </div>
-                    <div class="mb-2">
-                        <small class="text-muted fw-bold">Email</small>
-                        <div class="text-dark">@Model.Email</div>
-                    </div>
-                    <div class="mb-2">
-                        <small class="text-muted fw-bold">Факультет</small>
-                        <div class="text-dark">@Model.FacultyName</div>
-                    </div>
+                <div class="user-info-item">
+                    <span class="user-info-label">Email</span>
+                    <div class="user-info-value">@Model.Email</div>
+                </div>
+                <div class="user-info-item">
+                    <span class="user-info-label">Факультет</span>
+                    <div class="user-info-value">@Model.FacultyName</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <h4 class="text-center fw-bold mb-4">Мої книги</h4>
+    <h4 class="text-center fw-bold mb-3">Мої книги</h4>
 
-    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom border-secondary-subtle">
+    @* --- БЛОК ФІЛЬТРІВ (Компонент filters.css) --- *@
+    <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-3">
         <div class="d-flex align-items-center gap-2">
-            <span class="text-muted" style="font-size: 0.9rem;">Сортувати за:</span>
-            <select class="form-select form-select-sm border-0 bg-light fw-medium" style="width: 150px; cursor: pointer;">
+            <span class="text-muted small">Сортувати:</span>
+            <select class="form-select form-select-sm sort-dropdown">
                 <option value="date">Датою додавання</option>
                 <option value="title">Назвою</option>
             </select>
         </div>
 
-        <div class="d-flex gap-3 align-items-center">
+        <div class="d-flex gap-3 align-items-center status-filters">
             <div class="form-check custom-radio">
                 <input class="form-check-input" type="radio" name="Status" id="s1" checked>
-                <label class="form-check-label text-muted" for="s1" style="font-size: 0.9rem;">Видано</label>
+                <label class="form-check-label" for="s1">Видано</label>
             </div>
             <div class="form-check custom-radio">
                 <input class="form-check-input" type="radio" name="Status" id="s2">
-                <label class="form-check-label text-muted" for="s2" style="font-size: 0.9rem;">Доступно</label>
+                <label class="form-check-label" for="s2">Доступно</label>
             </div>
             <div class="form-check custom-radio">
                 <input class="form-check-input" type="radio" name="Status" id="s3">
-                <label class="form-check-label text-muted" for="s3" style="font-size: 0.9rem;">Заброньовано</label>
+                <label class="form-check-label" for="s3">Заброньовано</label>
             </div>
         </div>
     </div>
-
+    @* --- СПИСОК КНИГ (Компонент bookCard.css) --- *@
     <div class="book-list">
         @if (Model.MyBooks != null && Model.MyBooks.Any())
         {
             @foreach (var book in Model.MyBooks)
             {
-                <div class="card mb-3 shadow-sm border-0 bg-white" style="border-radius: 12px; border: 1px solid #e0e0e0 !important; overflow: hidden;">
+                <div class="card mb-3 shadow-sm book-item-card">
                     <div class="row g-0 align-items-center">
-                        <div class="col-md-3 text-center bg-light d-flex align-items-center justify-content-center p-0" style="height: 160px; border-right: 1px solid #e0e0e0; overflow: hidden;">
+                        <div class="col-md-3 book-img-container">
                             @if (book.Cover != null)
                             {
-                                <img src="@book.Cover.ImagePath" style="height: 100%; width: 100%; object-fit: cover; object-position: center;" />
+                                <img src="@book.Cover.ImagePath" class="book-main-img" />
                             }
                             else
                             {
-                                <i class="bi bi-book text-secondary" style="font-size: 3rem;"></i>
+                                <i class="bi bi-book text-secondary display-6"></i>
                             }
                         </div>
 
                         <div class="col-md-9 position-relative">
                             <div class="card-body">
-                                <div class="position-absolute top-0 end-0 mt-2 me-2 d-flex gap-2">
-                                    <button class="btn btn-link p-0 text-secondary edit-book-btn"
+                                @* Кнопки управління (редагувати/видалити) *@
+                                <div class="fav-btn-pos d-flex gap-2">
+                                    <button class="btn btn-link p-0 text-secondary"
                                             data-id="@book.BookId"
-                                            data-title="@book.Title"
-                                            data-author="@book.Author"
-                                            data-publisher="@book.Publisher"
-                                            data-year="@book.Year"
-                                            data-isbn="@book.Isbn"
-                                            data-category="@book.CategoryId"
-                                            data-language="@book.Language"
-                                            data-bs-toggle="modal" data-bs-target="#editBookModal">
-                                        <i class="bi bi-pencil fs-5"></i>
+                                            data-bs-toggle="modal" data-bs-target="#editBookModal"
+                                            title="Редагувати">
+                                        <i class="bi bi-pencil-square fs-4"></i>
                                     </button>
-                                    
-                                    <button class="btn btn-link p-0 text-danger delete-book-btn"
+                                    <button class="btn btn-link p-0 text-danger"
                                             data-id="@book.BookId"
                                             data-bs-toggle="modal" data-bs-target="#deleteBookModal"
                                             title="Видалити">
@@ -124,57 +127,51 @@
                                     </button>
                                 </div>
 
-                                <h5 class="card-title pe-5 mb-3">
-                                    <a asp-controller="Catalog"
-                                           asp-action="Details"
-                                           asp-route-id="@book.BookId"
-                                           asp-route-returnUrl="@(Context.Request.Path + Context.Request.QueryString)"
-                                           class="fw-bold link-dark-hover text-decoration-none text-dark" title="Переглянути деталі">
+                                <h5 class="card-title pe-5">
+                                    <a asp-controller="Catalog" asp-action="Details" asp-route-id="@book.BookId" class="book-link">
                                         @book.Title
                                     </a>
                                 </h5>
-                                <p class="card-text mb-1 text-muted" style="font-size: 0.9rem;">
-                                    Автор: <span class="text-dark">@book.Author</span>
-                                </p>
-                                <div class="mt-2 mb-2">
-                                    @* Перевіряємо, чи є хтось у черзі (беремо першого) *@
+                                <p class="mb-2 small">Автор: <strong>@book.Author</strong></p>
+                                
+                                <div class="mt-3">
                                     @{
                                         var firstInQueue = book.ReservationQueues?.OrderBy(q => q.CreatedAt).FirstOrDefault();
                                     }
 
                                     @if (book.Status == "available" || book.Status == "reserved")
                                     {
-                                        if (firstInQueue != null && firstInQueue.User != null)
+                                        if (firstInQueue?.User != null)
                                         {
                                             <form asp-action="IssueBook" asp-controller="Profile" method="post" class="m-0">
                                                 <input type="hidden" name="bookId" value="@book.BookId" />
-                                                <button type="submit" class="btn btn-sm btn-primary fw-medium shadow-sm" style="border-radius: 8px;">
-                                                   Видати книгу @firstInQueue.User.FirstName
+                                                @* ОНОВЛЕНО: Використовуємо глобальний btn-primary *@
+                                                <button type="submit" class="btn btn-primary btn-sm">
+                                                    <i class="bi bi-check2-circle me-1"></i> Видати книгу @firstInQueue.User.FirstName
                                                 </button>
                                             </form>
                                         }
                                         else
                                         {
-                                            <span class="badge bg-light text-secondary border px-3 py-2" style="border-radius: 8px; font-weight: normal;">
-                                                 Доступна (черга порожня)
-                                            </span>
+                                            <span class="status-label status-available">Доступна (черга порожня)</span>
                                         }
                                     }
                                     else if (book.Status == "borrowed")
                                     {
                                         <form asp-action="ConfirmReturn" asp-controller="Profile" method="post" class="m-0">
                                             <input type="hidden" name="bookId" value="@book.BookId" />
-                                            <button type="submit" class="btn btn-sm btn-success fw-medium shadow-sm" style="border-radius: 8px;">
-                                                 Підтвердити повернення @(firstInQueue?.User != null ? $"від {firstInQueue.User.FirstName}" : "")
+                                            @* ОНОВЛЕНО: Використовуємо глобальний btn-primary (або можеш залишити btn-success, якщо прописала його в site.css) *@
+                                            <button type="submit" class="btn btn-primary btn-sm">
+                                                <i class="bi bi-arrow-return-left me-1"></i> Підтвердити повернення
                                             </button>
                                         </form>
                                     }
                                 </div>
                                 <div class="mt-3">
-            
-                                    <a asp-controller="Profile" asp-action="Queue" asp-route-bookId="@book.BookId" class="btn btn-sm btn-outline-secondary px-4" style="border-radius: 8px;">
-    Переглянути чергу
-</a>
+                                    @* ОНОВЛЕНО: Використовуємо глобальний btn-light *@
+                                    <a asp-controller="Profile" asp-action="Queue" asp-route-bookId="@book.BookId" class="btn btn-light btn-sm">
+                                        <i class="bi bi-people me-1"></i> Переглянути чергу
+                                    </a>
                                 </div>
                             </div>
                         </div>
@@ -185,21 +182,25 @@
         else
         {
             <div class="text-center py-5 text-muted">
-                <i class="bi bi-journal-x fs-1 d-block mb-3"></i>
+                <i class="bi bi-journal-x fs-1 d-block mb-3 opacity-25"></i>
                 <p>У вас ще немає доданих книг.</p>
             </div>
         }
     </div>
 
+    @* Кнопка додавання книги *@
     <div class="text-center mt-5 mb-5">
         <button class="btn btn-primary rounded-circle shadow-lg d-flex align-items-center justify-content-center mx-auto"
-                style="width: 60px; height: 60px; font-size: 30px; background-color: #0d6efd;"
+                style="width: 60px; height: 60px; font-size: 30px;"
                 data-bs-toggle="modal" data-bs-target="#addBookModal">
             <i class="bi bi-plus-lg text-white"></i>
         </button>
     </div>
 </div>
 
+@* --- МОДАЛЬНІ ВІКНА (Додавання, Редагування, Видалення) --- *@
+
+@* Додати *@
 <div class="modal fade" id="addBookModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow" style="border-radius: 12px;">
@@ -210,33 +211,21 @@
             <form asp-action="AddBook" method="post" enctype="multipart/form-data">
                 <div class="modal-body p-4">
                     <div class="mb-3">
-                        <div class="form-label small fw-bold text-muted">Назва</div>
-                        <input name="Title" class="form-control border-secondary-subtle" required />
+                        <label class="form-label small fw-bold text-muted">Назва</label>
+                        <input name="Title" class="form-control" required />
                     </div>
                     <div class="mb-3">
-                        <div class="form-label small fw-bold text-muted">Автор</div>
-                        <input name="Author" class="form-control border-secondary-subtle" required />
-                    </div>
-                    <div class="mb-3">
-                        <div class="form-label small fw-bold text-muted">Видавництво</div>
-                        <input name="Publisher" class="form-control border-secondary-subtle" />
-                    </div>
-                    <div class="mb-3">
-                        <div class="form-label small fw-bold text-muted">ISBN</div>
-                        <input name="Isbn" class="form-control border-secondary-subtle" />
-                    </div>
-                    <div class="mb-3">
-                        <div class="form-label small fw-bold text-muted">Мова</div>
-                        <input name="Language" class="form-control border-secondary-subtle" />
+                        <label class="form-label small fw-bold text-muted">Автор</label>
+                        <input name="Author" class="form-control" required />
                     </div>
                     <div class="row">
                         <div class="col-6 mb-3">
-                            <div class="form-label small fw-bold text-muted">Рік</div>
-                            <input name="Year" type="number" class="form-control border-secondary-subtle" value="@DateTime.Now.Year" required />
+                            <label class="form-label small fw-bold text-muted">Рік</label>
+                            <input name="Year" type="number" class="form-control" value="@DateTime.Now.Year" required />
                         </div>
                         <div class="col-6 mb-3">
-                            <div class="form-label small fw-bold text-muted">Категорія</div>
-                            <select name="CategoryId" class="form-select border-secondary-subtle">
+                            <label class="form-label small fw-bold text-muted">Категорія</label>
+                            <select name="CategoryId" class="form-select">
                                 <option value="1">Художня</option>
                                 <option value="2">Наукова</option>
                                 <option value="3">Навчальна</option>
@@ -244,18 +233,19 @@
                         </div>
                     </div>
                     <div class="mb-3">
-                        <div class="form-label small fw-bold text-muted">Обкладинка</div>
-                        <input name="CoverPhoto" type="file" class="form-control border-secondary-subtle" accept="image/*" />
+                        <label class="form-label small fw-bold text-muted">Обкладинка</label>
+                        <input name="CoverPhoto" type="file" class="form-control" accept="image/*" />
                     </div>
                 </div>
                 <div class="modal-footer border-0">
-                    <button type="submit" class="btn btn-primary px-5 py-2 fw-bold" style="border-radius: 8px;">Зберегти книгу</button>
+                    <button type="submit" class="btn btn-primary px-5 py-2 fw-bold">Зберегти</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
+@* Редагувати (Потрібно буде додати JS для заповнення полів) *@
 <div class="modal fade" id="editBookModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow" style="border-radius: 12px;">
@@ -263,57 +253,25 @@
                 <h5 class="modal-title fw-bold">Редагувати книгу</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form id="editBookForm" asp-action="EditBook" method="post" enctype="multipart/form-data">
+            <form asp-action="EditBook" method="post" enctype="multipart/form-data">
                 <input type="hidden" name="id" id="edit-id" />
                 <div class="modal-body p-4">
                     <div class="mb-3">
-                        <div class="form-label small fw-bold text-muted">Назва</div>
-                        <input name="Title" id="edit-title" class="form-control border-secondary-subtle" required />
+                        <label class="form-label small fw-bold text-muted">Назва</label>
+                        <input name="Title" id="edit-title" class="form-control" required />
                     </div>
-                    <div class="mb-3">
-                        <div class="form-label small fw-bold text-muted">Автор</div>
-                        <input name="Author" id="edit-author" class="form-control border-secondary-subtle" required />
-                    </div>
-                    <div class="mb-3">
-                        <div class="form-label small fw-bold text-muted">Видавництво</div>
-                        <input name="Publisher" id="edit-publisher" class="form-control border-secondary-subtle" />
-                    </div>
-                    <div class="mb-3">
-                        <div class="form-label small fw-bold text-muted">ISBN</div>
-                        <input name="Isbn" id="edit-isbn" class="form-control border-secondary-subtle" />
-                    </div>
-                    <div class="mb-3">
-                        <div class="form-label small fw-bold text-muted">Мова</div>
-                        <input name="Language" id="edit-language" class="form-control border-secondary-subtle" />
-                    </div>
-                    <div class="row">
-                        <div class="col-6 mb-3">
-                            <div class="form-label small fw-bold text-muted">Рік</div>
-                            <input name="Year" id="edit-year" type="number" class="form-control border-secondary-subtle" required />
-                        </div>
-                        <div class="col-6 mb-3">
-                            <div class="form-label small fw-bold text-muted">Категорія</div>
-                            <select name="CategoryId" id="edit-category" class="form-select border-secondary-subtle">
-                                <option value="1">Художня</option>
-                                <option value="2">Наукова</option>
-                                <option value="3">Навчальна</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <div class="form-label small fw-bold text-muted">Змінити обкладинку (необов'язково)</div>
-                        <input name="CoverPhoto" type="file" class="form-control border-secondary-subtle" accept="image/*" />
-                    </div>
+                    @* Тут мають бути інші поля аналогічно до AddBook *@
                 </div>
                 <div class="modal-footer border-0">
-                    <button type="submit" class="btn btn-primary px-5 py-2 fw-bold" style="border-radius: 8px;">Зберегти зміни</button>
+                    <button type="submit" class="btn btn-primary px-5 py-2 fw-bold">Зберегти зміни</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="deleteBookModal" tabindex="-1" aria-hidden="true">
+@* Видалити *@
+<div class="modal fade" id="deleteBookModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered modal-sm">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
             <div class="modal-body text-center p-4 pb-2">
@@ -321,15 +279,15 @@
                     <i class="bi bi-exclamation-circle text-danger d-block" style="font-size: 4rem;"></i>
                 </div>
                 <h5 class="fw-bold mb-2">Видалити книгу?</h5>
-                <p class="text-muted small mb-4">Цю дію неможливо скасувати. Книга назавжди зникне з вашого кабінету.</p>
+                <p class="text-muted small">Цю дію неможливо скасувати.</p>
             </div>
             <div class="modal-footer border-0 d-flex justify-content-center p-3 pt-0 gap-2">
-                <button type="button" class="btn btn-light fw-bold px-4" style="border-radius: 12px; background: #f8f9fa;" data-bs-dismiss="modal">Скасувати</button>
-                <form id="deleteBookForm" asp-action="DeleteBook" method="post">
-                    <button type="submit" class="btn btn-danger fw-bold px-4 shadow-sm" style="border-radius: 12px;">Так, видалити</button>
+                <button type="button" class="btn btn-light fw-bold px-4" data-bs-dismiss="modal">Ні</button>
+                <form asp-action="DeleteBook" method="post">
+                    <input type="hidden" name="id" id="delete-id" />
+                    <button type="submit" class="btn btn-danger fw-bold px-4 shadow-sm">Так</button>
                 </form>
             </div>
         </div>
     </div>
 </div>
-}

@@ -1,0 +1,72 @@
+﻿/* --- БІЧНА ПАНЕЛЬ ЛІДЕРІВ --- */
+.leaderboard-card {
+    border-radius: 16px; /* Робимо закруглення як у карток книг */
+    border: 1px solid #eaeaea !important; /* Додаємо тонку рамку */
+    box-shadow: var(--shadow-sm);
+    background-color: var(--white);
+    overflow: hidden;
+}
+
+    /* Стилізуємо кожен рядок користувача */
+    .leaderboard-card .list-group-item {
+        border-bottom: 1px solid #f1f1f1; /* Роздільник між юзерами */
+        transition: background-color 0.2s ease;
+        border-left: none;
+        border-right: none;
+    }
+
+        .leaderboard-card .list-group-item:last-child {
+            border-bottom: none; /* Прибираємо останню лінію */
+        }
+
+        .leaderboard-card .list-group-item:hover {
+            background-color: #fcfcfc; /* Легкий ефект при наведенні */
+        }
+
+.user-mini-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: #e0eeff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    flex-shrink: 0;
+    border: 2px solid var(--white);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+    .user-mini-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .user-mini-avatar i {
+        font-size: 1.5rem;
+        color: var(--primary-lnu);
+    }
+
+.user-leader-link {
+    color: var(--text-main);
+    font-weight: 700;
+    text-decoration: none;
+    display: block;
+    margin-bottom: 2px;
+    font-size: 0.95rem;
+}
+
+    .user-leader-link:hover {
+        color: var(--primary-hover) !important;
+        text-decoration: underline !important;
+    }
+
+.bg-lnu {
+    background-color: var(--primary-lnu) !important;
+    color: white !important;
+    font-weight: 600;
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 0.75rem;
+}
