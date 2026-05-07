@@ -9,7 +9,6 @@
     
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/modules/components.css" asp-append-version="true" />
-    
     <link rel="stylesheet" href="~/css/modules/bookCard.css" asp-append-version="true" />
     @await RenderSectionAsync("Styles", required: false)
 </head>
@@ -21,63 +20,67 @@
                     <i class="bi bi-book-half"></i> LNU<span>BookShare</span>
                 </a>
 
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">              
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
 
-
-                    <ul class="navbar-nav nav-main flex-grow-1 px-4 gap-2">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Catalog" asp-action="Search">Головна</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="GlobalSearch" asp-action="Index">
-                                Глобальний пошук
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Profile" asp-action="Index">Кабінет</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Notification" asp-action="Index">Сповіщення</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Chat" asp-action="Index">Чат</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Favorite" asp-action="Index">
-                                Уподобання
-                            </a>
-                        </li>
-                        @if (User.IsInRole("Admin"))
-                        {
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <ul class="navbar-nav nav-main flex-grow-1 px-4 gap-2">
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Admin" asp-action="Users">
-                                   Користувачі
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Catalog" asp-action="Search">Головна</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="GlobalSearch" asp-action="Index">
+                                    Глобальний пошук
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Admin" asp-action="Books">
-                                   Книги
-                                </a>
+                                <a class="nav-link text-dark" asp-controller="Profile" asp-action="Index">Кабінет</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark"
-                                   asp-controller="Admin"
-                                   asp-action="Reviews">
-                                    Коментарі
-                                </a>
-                            </li>                    
+                                <a class="nav-link text-dark" asp-controller="Notification" asp-action="Index">Сповіщення</a>
+                            </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Admin" asp-action="Reports">
-                                    Скарги
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Chat" asp-action="Index">Чат</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Favorite" asp-action="Index">
+                                    Уподобання
                                 </a>
                             </li>
-                            <li>
-                                <a class="nav-link text-dark" asp-controller="Admin" asp-action="Transactions">
-                                    Транзакції
-                                </a>
-                            </li>
-                        }
-                    </ul>
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Admin" asp-action="Users">
+                                        Користувачі
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Admin" asp-action="Books">
+                                        Книги
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Admin" asp-action="Reviews">
+                                        Коментарі
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Admin" asp-action="Reports">
+                                        Скарги
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-link text-dark" asp-controller="Admin" asp-action="Transactions">
+                                        Транзакції
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <div class="flex-grow-1"></div>
+                    }
 
                     <ul class="navbar-nav ms-auto px-4 gap-2 align-items-center">
                         @if (User.Identity?.IsAuthenticated == true)

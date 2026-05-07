@@ -14,7 +14,7 @@ public class GlobalSearchController : Controller
     }
 
     [HttpGet]
-    [IpRateLimit(5)] // Наш кастомний фільтр: макс. 5 пошуків на хвилину
+    [IpRateLimit(100)] // Наш кастомний фільтр: макс. 5 пошуків на хвилину
     public async Task<IActionResult> Index(string query)
     {
         // Якщо запит порожній — просто показуємо порожню сторінку пошуку

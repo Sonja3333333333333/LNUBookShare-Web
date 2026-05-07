@@ -45,7 +45,7 @@ namespace LNUBookShare.Web.Controllers
         }
 
         [HttpGet]
-        [IpRateLimit(10)]
+        [IpRateLimit(100)]
         public async Task<IActionResult> Search(string query, string searchBy = "title", string sortBy = "title", string statusFilter = "all")
         {
             IEnumerable<Book> results;
