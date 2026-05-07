@@ -11,6 +11,7 @@ using LNUBookShare.Infrastructure;
 using LNUBookShare.Infrastructure.ExternalServices;
 using LNUBookShare.Infrastructure.Repositories;
 using LNUBookShare.Infrastructure.Services;
+using LNUBookShare.Web.BackgroundServices;
 using LNUBookShare.Web.Hubs;
 using LNUBookShare.Web.Middleware; // Namespace для мідлвар
 using LNUBookShare.Web.Services;
@@ -102,6 +103,8 @@ try
     // Reports (НОВА ФІЧА)
     builder.Services.AddScoped<IReportRepository, ReportRepository>();
     builder.Services.AddScoped<IReportService, ReportService>();
+    builder.Services.AddScoped<IRealTimeNotificationSender, SignalRNotificationSender>();
+    builder.Services.AddHostedService<NotificationWorker>();
 
     // Системні повідомлення (Чат)
     builder.Services.AddScoped<IChatRepository, ChatRepository>();
@@ -173,6 +176,7 @@ try
 
     // --- SIGNALR ENDPOINTS ---
     app.MapHub<ChatHub>("/chatHub");
+    app.MapHub<NotificationHub>("/notificationHub");
 
     app.MapControllerRoute(
         name: "default",

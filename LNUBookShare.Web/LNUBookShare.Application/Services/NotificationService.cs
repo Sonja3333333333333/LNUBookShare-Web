@@ -1,4 +1,7 @@
-﻿using LNUBookShare.Application.Common;
+﻿using System.Collections.Generic; // ДЛЯ IEnumerable
+using System.Linq;
+using System.Threading.Tasks;    // ДЛЯ Task
+using LNUBookShare.Application.Common;
 using LNUBookShare.Application.Interfaces;
 using LNUBookShare.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
@@ -11,11 +14,16 @@ namespace LNUBookShare.Application.Services
     {
         private readonly INotificationRepository _notificationRepository;
         private readonly ILogger<NotificationService> _logger;
+        private readonly IRealTimeNotificationSender _realTimeSender;
 
-        public NotificationService(INotificationRepository notificationRepository, ILogger<NotificationService> logger)
+        public NotificationService(
+            INotificationRepository notificationRepository,
+            ILogger<NotificationService> logger,
+            IRealTimeNotificationSender realTimeSender)
         {
             _notificationRepository = notificationRepository;
             _logger = logger;
+            _realTimeSender = realTimeSender;
         }
 
         public async Task<Result> CreateNotificationAsync(int userId, string message, int? bookId = null)
@@ -30,8 +38,11 @@ namespace LNUBookShare.Application.Services
             };
 
             await _notificationRepository.AddAsync(notification);
-            _logger.LogInformation("Створено сповіщення для користувача {UserId}: {Message}", userId, message);
 
+            // Відправляємо миттєвий пуш через міст
+            await _realTimeSender.SendToUserAsync(userId, message);
+
+            _logger.LogInformation("Створено сповіщення для користувача {UserId}: {Message}", userId, message);
             return Result.Success();
         }
 
@@ -47,21 +58,12 @@ namespace LNUBookShare.Application.Services
         {
             var notification = await _notificationRepository.GetByIdAsync(notificationId);
 
-            if (notification == null)
+            if (notification == null || notification.UserId != userId)
             {
-                _logger.LogWarning("Спроба видалити неіснуюче сповіщення {NotificationId} користувачем {UserId}.", notificationId, userId);
-                return Result.Failure("Сповіщення не знайдено.");
-            }
-
-            if (notification.UserId != userId)
-            {
-                _logger.LogWarning("Користувач {UserId} намагався отримати доступ до чужого сповіщення {NotificationId}, яке належить користувачу {OwnerId}.", userId, notificationId, notification.UserId);
-                return Result.Failure("Немає доступу до цього сповіщення.");
+                return Result.Failure("Сповіщення не знайдено або немає доступу.");
             }
 
             await _notificationRepository.DeleteAsync(notification);
-            _logger.LogInformation("Користувач {UserId} успішно видалив сповіщення {NotificationId}.", userId, notificationId);
-
             return Result.Success();
         }
     }
