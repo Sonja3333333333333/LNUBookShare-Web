@@ -10,5 +10,8 @@ namespace LNUBookShare.Application.Interfaces
         Task UpdateAsync(Notification notification);
 
         Task DeleteAsync(Notification notification);
+        Task<List<Notification>> GetStaleNotificationsAsync(DateTime threshold, CancellationToken ct);
+        Task<bool> ExistsTodayAsync(int userId, int? bookId, string messagePart);
+        Task<List<int>> GetUserIdsWithPendingNotificationsAsync(DateTime threshold);
     }
 }

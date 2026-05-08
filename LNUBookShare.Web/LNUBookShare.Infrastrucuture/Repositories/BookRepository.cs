@@ -102,6 +102,7 @@ namespace LNUBookShare.Infrastructure.Repositories
                 })
                 .Where(x => x.RecentBooksCount > 0)
                 .OrderByDescending(x => x.RecentBooksCount)
+                .ThenByDescending(x => x.User.Id)
                 .Take(takeCount)
                 .Select(x => new TopUserDto
                 {

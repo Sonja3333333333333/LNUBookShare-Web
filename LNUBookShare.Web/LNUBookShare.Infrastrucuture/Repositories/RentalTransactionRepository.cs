@@ -82,5 +82,15 @@ namespace LNUBookShare.Infrastructure.Repositories
 
             return await query.ToListAsync();
         }
+
+        public async Task<List<RentalTransaction>> GetExpiringRentalsAsync(DateTime date, CancellationToken ct)
+        {
+            // Кверю перенесли сюди — тепер вона вдома
+            return await _context.RentalTransactions
+                .Include(r => r.Book)
+                .Where(r => r.ExpectedReturnDate.Date == date.Date
+                            && r.Status == TransactionStatuses.Active)
+                .ToListAsync(ct);
+        }
     }
 }

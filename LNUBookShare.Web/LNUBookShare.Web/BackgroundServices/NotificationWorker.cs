@@ -1,18 +1,13 @@
 ﻿using LNUBookShare.Application.Interfaces;
-using LNUBookShare.Domain.Entities;
-using LNUBookShare.Infrastructure;
-using LNUBookShare.Infrastructure.Data;
 using LNUBookShare.Web.Hubs;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging; // Додано для логера
 
 namespace LNUBookShare.Web.BackgroundServices;
 
 public class NotificationWorker : BackgroundService
 {
     private readonly IServiceScopeFactory _scopeFactory;
-    private readonly ILogger<NotificationWorker> _logger; // Поле для логера
+    private readonly ILogger<NotificationWorker> _logger;
 
     public NotificationWorker(IServiceScopeFactory scopeFactory, ILogger<NotificationWorker> logger)
     {
@@ -24,36 +19,64 @@ public class NotificationWorker : BackgroundService
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            // ЧЕРВОНЕ ПОВІДОМЛЕННЯ: Виводиться щохвилини перед початком перевірки
             _logger.LogError("!!! [WORKER CHECK] Поточний час: {Time} !!!", DateTime.Now.ToString("HH:mm:ss"));
 
             using (var scope = _scopeFactory.CreateScope())
             {
-                var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                var rentalRepo = scope.ServiceProvider.GetRequiredService<IRentalTransactionRepository>();
+                var notificationRepo = scope.ServiceProvider.GetRequiredService<INotificationRepository>();
                 var notificationService = scope.ServiceProvider.GetRequiredService<INotificationService>();
+                var bookRepo = scope.ServiceProvider.GetRequiredService<IBookRepository>();
                 var hubContext = scope.ServiceProvider.GetRequiredService<IHubContext<NotificationHub>>();
 
-                var tomorrow = DateTime.UtcNow.AddDays(1).Date;
+                // --- ПОДІЯ №1: Нагадування про дедлайн (1 раз на добу) ---
+                var tomorrow = DateTime.UtcNow.AddDays(-330).Date;
+                var expiring = await rentalRepo.GetExpiringRentalsAsync(tomorrow, stoppingToken);
 
-                // Шукаємо тих, хто має повернути книгу завтра
-                var expiringRentals = await dbContext.RentalTransactions
-                    .Include(r => r.Book)
-                    .Where(r => r.ExpectedReturnDate.Date == tomorrow && r.Status == TransactionStatuses.Active)
-                    .ToListAsync(stoppingToken);
-
-                foreach (var rental in expiringRentals)
+                foreach (var r in expiring)
                 {
-                    string msg = $"Нагадування: завтра необхідно повернути книгу '{rental.Book.Title}'.";
+                    string checkMsgPart = $"повернути книгу '{r.Book.Title}'";
+                    bool alreadySentToday = await notificationRepo.ExistsTodayAsync(r.BorrowerId, r.BookId, checkMsgPart);
 
-                    // 1. Зберігаємо в базу
-                    await notificationService.CreateNotificationAsync(rental.BorrowerId, msg, rental.BookId);
+                    if (!alreadySentToday)
+                    {
+                        await notificationService.CreateNotificationAsync(
+                            r.BorrowerId,
+                            $"Нагадування: завтра необхідно {checkMsgPart}.",
+                            r.BookId);
+                    }
+                }
 
-                    // 2. Шлемо пуш через SignalR
-                    await hubContext.Clients.Group(rental.BorrowerId.ToString()).SendAsync("ReceiveNotification", msg);
+                // --- ПОДІЯ №2: "спам"  ---
+                var staleThreshold = DateTime.UtcNow.AddSeconds(-1);
+                var usersToNotify = await notificationRepo.GetUserIdsWithPendingNotificationsAsync(staleThreshold);
+
+                foreach (var userId in usersToNotify)
+                {
+                    await hubContext.Clients.Group(userId.ToString()).SendAsync(
+                        "ReceiveNotification",
+                        "У вас є непрочитані сповіщення. Будь ласка, перегляньте їх у вкладці 'Сповіщення'.");
+                }
+
+                // --- ПОДІЯ №3: (Топ-1 користувач місяця) ---
+                var monthAgo = DateTime.UtcNow.AddDays(-30);
+                var topList = await bookRepo.GetTopActiveUsersWithRecentBooksAsync(monthAgo, 1);
+                var leader = topList.FirstOrDefault();
+
+                if (leader != null)
+                {
+                    string winMsg = "Вітаємо! Ви стали користувачем №1 цього місяця за кількістю доданих книг! 🏆";
+
+                    bool alreadyWonToday = await notificationRepo.ExistsTodayAsync(leader.UserId, null, "користувачем №1");
+
+                    if (!alreadyWonToday)
+                    {
+                        await notificationService.CreateNotificationAsync(leader.UserId, winMsg, null);
+                        _logger.LogInformation("Юзер {UserId} отримав титул ТОП-1 місяця", leader.UserId);
+                    }
                 }
             }
 
-            // Затримка на 1 хвилину
             await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
         }
     }
