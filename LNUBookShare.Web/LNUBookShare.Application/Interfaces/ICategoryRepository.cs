@@ -12,5 +12,6 @@ namespace LNUBookShare.Application.Interfaces
         Task AddAsync(Category category);
 
         Task ClearAllAsync();
+        Task<IEnumerable<Category>> GetAllAsync();
     }
 }

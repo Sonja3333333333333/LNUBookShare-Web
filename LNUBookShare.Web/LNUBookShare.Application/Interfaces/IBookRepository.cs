@@ -17,6 +17,8 @@ namespace LNUBookShare.Application.Interfaces
         Task DeleteAsync(Book book); // Delete
         Task<IEnumerable<TopUserDto>> GetTopActiveUsersWithRecentBooksAsync(DateTime since, int count);
 
+        Task<IEnumerable<Book>> GetUserBooksFilteredAndSortedAsync(int userId, string sortBy, string statusFilter);
+
         Task<IEnumerable<Book>> GetAllBooksWithOwnersAsync();
 
         Task ClearAllAsync();

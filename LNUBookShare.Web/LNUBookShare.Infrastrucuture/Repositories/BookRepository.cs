@@ -116,6 +116,30 @@ namespace LNUBookShare.Infrastructure.Repositories
             return topUsers;
         }
 
+        public async Task<IEnumerable<Book>> GetUserBooksFilteredAndSortedAsync(int userId, string sortBy, string statusFilter)
+        {
+            var query = _context.Books
+                .Include(b => b.Cover)
+                .Include(b => b.ReservationQueues)
+                    .ThenInclude(q => q.User)
+                .Where(b => b.OwnerId == userId)
+                .AsQueryable();
+
+            if (!string.IsNullOrEmpty(statusFilter) && statusFilter.ToLower() != "all")
+            {
+                query = query.Where(b => b.Status == statusFilter);
+            }
+
+            query = sortBy?.ToLower() switch
+            {
+                "title" => query.OrderBy(b => b.Title),
+                "date" => query.OrderByDescending(b => b.CreatedAt),
+                _ => query.OrderByDescending(b => b.CreatedAt) // За замовчуванням
+            };
+
+            return await query.ToListAsync();
+        }
+
         private IQueryable<Book> GetBooksBaseQuery()
         {
             return _context.Books

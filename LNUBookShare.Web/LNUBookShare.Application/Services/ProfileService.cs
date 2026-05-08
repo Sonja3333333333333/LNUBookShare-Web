@@ -73,16 +73,37 @@ namespace LNUBookShare.Application.Services
             return userBooks;
         }
 
-        public async Task<Result> UpdateBookAsync(Book book)
+        public async Task<Result> UpdateBookAsync(int bookId, int ownerId, string title, string author, int year, string? publisher, string? language, string? isbn, int categoryId, Image? newCover)
         {
+            var book = await _bookRepository.GetByIdAsync(bookId);
+
             if (book == null)
             {
-                return Result.Failure("Дані для оновлення відсутні.");
+                return Result.Failure("Книгу не знайдено.");
+            }
+
+            if (book.OwnerId != ownerId)
+            {
+                _logger.LogWarning("Користувач {UserId} намагався відредагувати чужу книгу {BookId}", ownerId, bookId);
+                return Result.Failure("У вас немає прав для редагування цієї книги.");
+            }
+
+            book.Title = title;
+            book.Author = author;
+            book.Year = year;
+            book.Publisher = publisher;
+            book.Language = language;
+            book.Isbn = isbn;
+            book.CategoryId = categoryId;
+
+            if (newCover != null)
+            {
+                book.Cover = newCover;
             }
 
             await _bookRepository.UpdateAsync(book);
 
-            _logger.LogInformation("Книгу з ID {BookId} оновлено", book.BookId);
+            _logger.LogInformation("Книгу з ID {BookId} успішно оновлено користувачем {UserId}", bookId, ownerId);
             return Result.Success();
         }
 
@@ -125,6 +146,13 @@ namespace LNUBookShare.Application.Services
             await _profileRepository.UpdateUserAsync(user);
 
             return Result.Success();
+        }
+
+        public async Task<Result<List<Book>>> GetUserBooksAsync(int userId, string sortBy = "date", string statusFilter = "all")
+        {
+            var userBooks = await _bookRepository.GetUserBooksFilteredAndSortedAsync(userId, sortBy, statusFilter);
+
+            return userBooks.ToList();
         }
     }
 }
