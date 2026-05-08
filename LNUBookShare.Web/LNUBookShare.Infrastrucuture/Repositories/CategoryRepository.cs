@@ -32,5 +32,12 @@ namespace LNUBookShare.Infrastructure.Repositories
         {
             await _context.Categories.ExecuteDeleteAsync();
         }
+
+        public async Task<IEnumerable<Category>> GetAllAsync()
+        {
+            return await _context.Categories
+                .AsNoTracking()
+                .ToListAsync();
+        }
     }
 }

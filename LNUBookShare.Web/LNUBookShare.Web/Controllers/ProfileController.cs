@@ -15,23 +15,26 @@ namespace LNUBookShare.Web.Controllers
         private readonly IFacultyService _facultyService;
         private readonly IPhotoService _photoService;
         private readonly IBookStatusService bookStatusService;
+        private readonly ICategoryService _categoryService;
 
         public ProfileController(
             UserManager<User> userManager,
             IProfileService profileService,
             IFacultyService facultyService,
             IPhotoService photoService,
-            IBookStatusService bookStatusService)
+            IBookStatusService bookStatusService,
+            ICategoryService categoryService)
             : base(userManager)
         {
             _profileService = profileService;
             _facultyService = facultyService;
             _photoService = photoService;
             this.bookStatusService = bookStatusService;
+            _categoryService = categoryService;
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string sortBy = "date", string statusFilter = "all")
         {
             var user = await GetCurrentUserAsync();
             if (user == null)
@@ -46,6 +49,15 @@ namespace LNUBookShare.Web.Controllers
             }
 
             var dto = result.Value;
+
+            var booksResult = await _profileService.GetUserBooksAsync(user.Id, sortBy, statusFilter);
+            var myBooks = booksResult.IsSuccess ? booksResult.Value : new List<Book>();
+
+            ViewBag.CurrentSort = sortBy;
+            ViewBag.CurrentStatus = statusFilter;
+
+            await LoadCategoriesToViewBag();
+
             var model = new UserProfileViewModel
             {
                 UserId = dto.UserId,
@@ -54,7 +66,7 @@ namespace LNUBookShare.Web.Controllers
                 Email = dto.Email,
                 FacultyName = dto.FacultyName,
                 AvatarPath = dto.AvatarPath,
-                MyBooks = (await _profileService.GetUserBooksAsync(user.Id)).Value,
+                MyBooks = myBooks,
             };
 
             return View(model);
@@ -159,7 +171,7 @@ namespace LNUBookShare.Web.Controllers
                 Title = model.Title,
                 Author = model.Author,
                 Year = model.Year,
-                Isbn = model.Isbn,
+                Isbn = model.Isbn, // Тепер зберігаємо ці поля
                 Publisher = model.Publisher,
                 Language = model.Language,
                 CategoryId = model.CategoryId,
@@ -202,29 +214,23 @@ namespace LNUBookShare.Web.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
-            var booksResult = await _profileService.GetUserBooksAsync(userId.Value);
-            var books = booksResult.IsSuccess ? booksResult.Value : new List<Book>();
-            var book = books.Find(b => b.BookId == id);
-
-            if (book == null)
-            {
-                return NotFound();
-            }
-
-            book.Title = model.Title;
-            book.Author = model.Author;
-            book.Publisher = model.Publisher;
-            book.Year = model.Year;
-            book.Isbn = model.Isbn;
-            book.Language = model.Language;
-            book.CategoryId = model.CategoryId;
-
+            Image? newCover = null;
             if (model.CoverPhoto != null && model.CoverPhoto.Length > 0)
             {
-                book.Cover = await SaveImageAsync(model.CoverPhoto);
+                newCover = await SaveImageAsync(model.CoverPhoto);
             }
 
-            var result = await _profileService.UpdateBookAsync(book);
+            var result = await _profileService.UpdateBookAsync(
+                id,
+                userId.Value,
+                model.Title,
+                model.Author,
+                model.Year,
+                model.Publisher,
+                model.Language,
+                model.Isbn,
+                model.CategoryId,
+                newCover);
 
             if (result.IsSuccess)
             {
@@ -345,6 +351,13 @@ namespace LNUBookShare.Web.Controllers
             var facultiesResult = await _facultyService.GetAllFacultiesAsync();
             var faculties = facultiesResult.IsSuccess ? facultiesResult.Value : new List<Faculty>();
             ViewBag.Faculties = new SelectList(faculties, "FacultyId", "FacultyName");
+        }
+
+        private async Task LoadCategoriesToViewBag()
+        {
+            var categoriesResult = await _categoryService.GetAllCategoriesAsync();
+            var categories = categoriesResult.IsSuccess ? categoriesResult.Value : new List<Category>();
+            ViewBag.Categories = new SelectList(categories, "CategoryId", "CategoryName");
         }
 
         private async Task<LNUBookShare.Domain.Entities.Image> SaveImageAsync(Microsoft.AspNetCore.Http.IFormFile file)

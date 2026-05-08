@@ -139,6 +139,9 @@ try
     builder.Services.AddScoped<IRentalTransactionRepository, RentalTransactionRepository>();
     builder.Services.AddScoped<IAdminTransactionService, AdminTransactionService>();
 
+    builder.Services.AddScoped<ICategoryService, CategoryService>();
+    builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+
     builder.Services.AddControllersWithViews();
 
     var app = builder.Build();

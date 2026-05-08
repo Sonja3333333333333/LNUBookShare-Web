@@ -12,19 +12,22 @@ namespace LNUBookShare.Application.Services
         private readonly INotificationService _notificationService;
         private readonly ILogger<BookStatusService> _logger;
         private readonly IRentalTransactionRepository _transactionRepository;
+        private readonly IBookRepository _bookRepository;
 
         public BookStatusService(
             IProfileService profileService,
             IReservationService reservationService,
             INotificationService notificationService,
             ILogger<BookStatusService> logger,
-            IRentalTransactionRepository transactionRepository)
+            IRentalTransactionRepository transactionRepository,
+            IBookRepository bookRepository)
         {
             _profileService = profileService;
             _reservationService = reservationService;
             _notificationService = notificationService;
             _logger = logger;
             _transactionRepository = transactionRepository;
+            _bookRepository = bookRepository;
         }
 
         public async Task<Result> IssueBookAsync(int bookId, int ownerId)
@@ -64,7 +67,7 @@ namespace LNUBookShare.Application.Services
             _logger.LogInformation("Створено транзакцію оренди для книги {BookId}. Орендар: {BorrowerId}", bookId, borrower.Id);
 
             book.Status = "borrowed";
-            await _profileService.UpdateBookAsync(book);
+            await _bookRepository.UpdateAsync(book);
 
             _logger.LogInformation("Книгу {BookId} успішно видано (статус змінено на 'borrowed')", bookId);
             return Result.Success();
@@ -122,7 +125,7 @@ namespace LNUBookShare.Application.Services
                 _logger.LogInformation("Черга порожня. Статус книги {BookId} змінено на 'available'", bookId);
             }
 
-            await _profileService.UpdateBookAsync(book);
+            await _bookRepository.UpdateAsync(book);
 
             _logger.LogInformation("Процес повернення книги {BookId} успішно завершено", bookId);
             return Result.Success();
