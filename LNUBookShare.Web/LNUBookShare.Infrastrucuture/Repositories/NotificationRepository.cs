@@ -44,5 +44,33 @@ namespace LNUBookShare.Infrastructure.Repositories // Перевір свій н
             _context.Notifications.Remove(notification);
             await _context.SaveChangesAsync();
         }
+
+        public async Task<List<Notification>> GetStaleNotificationsAsync(DateTime threshold, CancellationToken ct)
+        {
+            return await _context.Notifications
+                .Where(n => n.CreatedAt < threshold)
+                .ToListAsync(ct);
+        }
+
+        public async Task<bool> ExistsTodayAsync(int userId, int? bookId, string messagePart)
+        {
+            var today = DateTime.UtcNow.Date;
+
+            return await _context.Notifications
+                .AnyAsync(n => n.UserId == userId
+                            && n.BookId == bookId
+                            && n.Message.Contains(messagePart)
+                            && n.CreatedAt.Date == today);
+        }
+
+        public async Task<List<int>> GetUserIdsWithPendingNotificationsAsync(DateTime threshold)
+        {
+            // Тепер цей метод реально фільтрує по часу
+            return await _context.Notifications
+               .Where(n => n.CreatedAt < threshold)
+               .Select(n => n.UserId)
+               .Distinct()
+               .ToListAsync();
+        }
     }
 }

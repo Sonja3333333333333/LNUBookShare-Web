@@ -9,5 +9,7 @@ namespace LNUBookShare.Application.Interfaces
         Task UpdateAsync(RentalTransaction transaction);
 
         Task<IEnumerable<RentalTransaction>> GetAllWithDetailsAsync(string? searchBy, string? searchQuery, string? sortBy, string? statusFilter, string? termFilter);
+
+        Task<List<RentalTransaction>> GetExpiringRentalsAsync(DateTime date, CancellationToken ct);
     }
 }
