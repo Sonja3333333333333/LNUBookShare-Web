@@ -4,7 +4,9 @@
     "inputFiles": [
       "wwwroot/js/site.js",
       "wwwroot/js/chat.js",
-      "wwwroot/js/profile.js"
+      "wwwroot/js/profile.js",
+      "wwwroot/js/notifications.js",
+      "wwwroot/js/autoHideAlerts.js"
     ],
     "minify": {
       "enabled": true,
@@ -15,13 +17,18 @@
   {
     "outputFileName": "wwwroot/css/site.min.css",
     "inputFiles": [
-      "wwwroot/css/site.css"
-    ]
-  },
-  {
-    "outputFileName": "wwwroot/css/chat.min.css",
-    "inputFiles": [
-      "wwwroot/css/chat.css"
-    ]
+      "wwwroot/css/site.css",
+      "wwwroot/css/modules/components.css",
+      "wwwroot/css/modules/userCard.css",
+      "wwwroot/css/modules/bookCard.css",
+      "wwwroot/css/modules/filters.css",
+      "wwwroot/css/modules/auth.css",
+      "wwwroot/css/modules/leaderboard.css",
+      "wwwroot/css/modules/chat.css",
+      "wwwroot/css/modules/admin.css"
+    ],
+    "minify": {
+      "enabled": true
+    }
   }
 ]

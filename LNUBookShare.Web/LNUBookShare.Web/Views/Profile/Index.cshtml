@@ -8,9 +8,11 @@
 }
 
 @section Styles {
-    <link rel="stylesheet" href="~/css/modules/userCard.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/modules/bookCard.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/modules/filters.css" asp-append-version="true" />
+    <environment include="Development">
+        <link rel="stylesheet" href="~/css/modules/userCard.css" asp-append-version="true" />
+        <link rel="stylesheet" href="~/css/modules/bookCard.css" asp-append-version="true" />
+        <link rel="stylesheet" href="~/css/modules/filters.css" asp-append-version="true" />
+    </environment>
 }
 
 <div class="container mt-4">
