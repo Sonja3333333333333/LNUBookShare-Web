@@ -6,32 +6,29 @@
     var currentSearchBy = ViewBag.CurrentSearchBy as string ?? "title";
 }
 
+@section Styles {
+    <environment include="Development">
+        <link rel="stylesheet" href="~/css/modules/admin.css" asp-append-version="true" />
+    </environment>
+}
+
 <div class="container mt-5">
     @if (TempData["SuccessMessage"] != null)
     {
-        <div class="alert alert-success alert-dismissible fade show shadow-sm mb-4" role="alert">
-            <i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
+        <div class="alert alert-success alert-pill mb-4"><i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]</div>
     }
     @if (TempData["ErrorMessage"] != null)
     {
-        <div class="alert alert-danger alert-dismissible fade show shadow-sm mb-4" role="alert">
-            <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["ErrorMessage"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
+        <div class="alert alert-danger alert-pill mb-4"><i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["ErrorMessage"]</div>
     }
     @if (ViewBag.Error != null)
     {
-        <div class="alert alert-danger alert-dismissible fade show shadow-sm mb-4" role="alert">
-            <i class="bi bi-exclamation-triangle-fill me-2"></i>@ViewBag.Error
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
+        <div class="alert alert-danger alert-pill mb-4"><i class="bi bi-exclamation-triangle-fill me-2"></i>@ViewBag.Error</div>
     }
 
     <form asp-action="AdminSearchBooks" method="get" class="mb-4">
         <div class="d-flex gap-2">
-            <select name="searchBy" class="form-select border border-secondary-subtle shadow-sm" style="width: 140px; border-radius: 8px;">
+            <select name="searchBy" class="form-select border-secondary-subtle admin-search-select">
                 <option value="title" selected="@(currentSearchBy == "title")">Назва книги</option>
                 <option value="author" selected="@(currentSearchBy == "author")">Автор</option>
                 <option value="isbn" selected="@(currentSearchBy == "isbn")">ISBN</option>
@@ -39,29 +36,21 @@
             </select>
 
             <div class="position-relative flex-grow-1" style="min-width: 0;">
-                <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted" style="z-index: 5;"></i>
-                <input type="text"
-                       name="query"
-                       value="@currentQuery"
-                       class="form-control border border-secondary-subtle ps-5 py-2 shadow-sm"
-                       style="border-radius: 8px; width: 100%;"
-                       placeholder="Введіть текст для пошуку..."
-                       autocomplete="off" />
+                <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted search-icon-pos"></i>
+                <input type="text" name="query" value="@currentQuery" class="form-control border-secondary-subtle ps-5 py-2 admin-search-input" placeholder="Введіть текст для пошуку..." autocomplete="off" />
             </div>
 
             <button type="submit" class="d-none"></button>
-            <a asp-action="Books" class="btn btn-outline-secondary px-4 shadow-sm" style="border-radius: 8px;">Скинути</a>
+            <a asp-action="Books" class="btn btn-light px-4">Скинути</a>
         </div>
     </form>
 
     @if (!string.IsNullOrEmpty(currentQuery))
     {
-        <div class="mb-3">
-            <span class="text-muted small">Знайдено результатів для: <strong>"@currentQuery"</strong></span>
-        </div>
+        <div class="mb-3"><span class="text-muted small">Знайдено результатів для: <strong>"@currentQuery"</strong></span></div>
     }
 
-    <div class="card shadow-sm border-0">
+    <div class="card admin-table-card">
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
@@ -79,12 +68,7 @@
                     <tbody>
                         @if (!Model.Any())
                         {
-                            <tr>
-                                <td colspan="7" class="text-center py-5 text-muted">
-                                    <i class="bi bi-search d-block fs-1 mb-2"></i>
-                                    За вашим запитом нічого не знайдено.
-                                </td>
-                            </tr>
+                            <tr><td colspan="7" class="text-center py-5 text-muted"><i class="bi bi-search d-block fs-1 mb-2"></i>Нічого не знайдено.</td></tr>
                         }
                         else
                         {
@@ -97,19 +81,13 @@
                                     <td>@book.Isbn</td>
                                     <td>@book.OwnerEmail</td>
                                     <td>
-                                        @{
-                                            var badgeClass = book.Status?.ToLower() == "available" ? "bg-success" : "bg-secondary";
-                                        }
-                                        <span class="badge @badgeClass">@book.Status</span>
+                                        <span class="badge @(book.Status?.ToLower() == "available" ? "bg-success" : "bg-secondary")">@book.Status</span>
                                     </td>
                                     <td class="text-end px-4">
-                                        <form asp-controller="Admin" asp-action="DeleteBook" method="post" class="d-inline"
-                                              onsubmit="return confirm('Видалити оголошення «@book.Title»?');">
+                                        <form asp-controller="Admin" asp-action="DeleteBook" method="post" class="d-inline" onsubmit="return confirm('Видалити оголошення «@book.Title»?');">
                                             <input type="hidden" name="bookId" value="@book.Id" />
                                             @Html.AntiForgeryToken()
-                                            <button type="submit" class="btn btn-outline-danger btn-sm" title="Видалити">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
+                                            <button type="submit" class="btn btn-danger btn-sm" title="Видалити"><i class="bi bi-trash"></i></button>
                                         </form>
                                     </td>
                                 </tr>
@@ -119,8 +97,6 @@
                 </table>
             </div>
         </div>
-        <div class="card-footer bg-white text-center py-3">
-            <small class="text-muted">Всього в списку: @Model.Count()</small>
-        </div>
+        <div class="card-footer bg-white text-center py-3"><small class="text-muted">Всього в списку: @Model.Count()</small></div>
     </div>
 </div>

@@ -59,19 +59,14 @@ h1, h2, h3, h4, h5, h6 {
     text-align: start;
 }
 
-/* =========================================
-   СТАНДАРТИЗАЦІЯ КНОПОК (UI KIT)
-   ========================================= */
 
-/* Загальна база для всіх кнопок */
 .btn {
-    font-weight: 600 !important; /* Усі кнопки трохи жирніші */
-    border-radius: 10px !important; /* Єдине красиве заокруглення */
-    padding: 0.5rem 1.25rem; /* Комфортні відступи всередині */
+    font-weight: 600 !important; 
+    border-radius: 10px !important; 
+    padding: 0.5rem 1.25rem; 
     transition: all 0.2s ease-in-out;
 }
 
-/* 🟢 ПОЗИТИВНІ КНОПКИ (Зберегти, Додати, Видати) */
 .btn-primary {
     background-color: var(--primary-lnu) !important;
     border-color: var(--primary-lnu) !important;
@@ -129,4 +124,37 @@ h1, h2, h3, h4, h5, h6 {
 
 .toast-header {
     border-bottom: none;
+}
+
+.navbar-nav .nav-item .nav-link {
+    position: relative;
+    transition: color 0.3s ease;
+    font-weight: 500;
+}
+
+    .navbar-nav .nav-item .nav-link:not(.dropdown-toggle)::after {
+        content: '';
+        position: absolute;
+        width: 0;
+        height: 2px;
+        bottom: 0;
+        left: 50%;
+        background-color: var(--bs-primary, #0d6efd);
+        transition: all 0.3s ease;
+        transform: translateX(-50%);
+    }
+
+    .navbar-nav .nav-item .nav-link:not(.dropdown-toggle):hover::after,
+    .navbar-nav .nav-item .nav-link:not(.dropdown-toggle).active::after {
+        width: 100%;
+    }
+
+    .navbar-nav .nav-item .nav-link.active {
+        color: var(--bs-primary, #0d6efd) !important;
+    }
+
+.site-footer {
+    background-color: #f8f9fa;
+    border-top: 1px solid #e9ecef;
+    padding: 1.5rem 0;
 }

@@ -5,7 +5,9 @@
 }
 
 @section Styles {
-    <link rel="stylesheet" href="~/css/modules/auth.css" asp-append-version="true" />
+    <environment include="Development">
+        <link rel="stylesheet" href="~/css/modules/auth.css" asp-append-version="true" />
+    </environment>
 }
 
 <div class="auth-container mt-5">   

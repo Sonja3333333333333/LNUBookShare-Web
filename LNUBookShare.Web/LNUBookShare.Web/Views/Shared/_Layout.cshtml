@@ -1,16 +1,26 @@
 ﻿<!DOCTYPE html>
 <html lang="uk">
+@{
+    var currentController = ViewContext.RouteData.Values["Controller"]?.ToString();
+}
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>LnuBookShare</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
-    
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+
+    <environment include="Development">
+        <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    </environment>
+
+    <environment exclude="Development">
+        <link rel="stylesheet" href="~/css/site.min.css" asp-append-version="true" />
+    </environment>
+
     @await RenderSectionAsync("Styles", required: false)
 </head>
-<body>
+<body class="d-flex flex-column min-vh-100">
     <header>
         <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom mb-3">
             <div class="container-fluid">
@@ -22,55 +32,72 @@
 
                     @if (User.Identity?.IsAuthenticated == true)
                     {
+
                         <ul class="navbar-nav nav-main flex-grow-1 px-4 gap-2">
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Catalog" asp-action="Search">Головна</a>
+                                <a class="nav-link text-dark @(currentController == "Catalog" ? "active" : "")" asp-area="" asp-controller="Catalog" asp-action="Search">
+                                    Головна
+                                </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="GlobalSearch" asp-action="Index">
+                                <a class="nav-link text-dark @(currentController == "GlobalSearch" ? "active" : "")" asp-controller="GlobalSearch" asp-action="Index">
                                     Глобальний пошук
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Profile" asp-action="Index">Кабінет</a>
+                                <a class="nav-link text-dark @(currentController == "Profile" ? "active" : "")" asp-controller="Profile" asp-action="Index">
+                                    Кабінет
+                                </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Notification" asp-action="Index">Сповіщення</a>
+                                <a class="nav-link text-dark @(currentController == "Notification" ? "active" : "")" asp-controller="Notification" asp-action="Index">
+                                    Сповіщення
+                                </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Chat" asp-action="Index">Чат</a>
+                                <a class="nav-link text-dark @(currentController == "Chat" ? "active" : "")" asp-area="" asp-controller="Chat" asp-action="Index">
+                                    Чат
+                                </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Favorite" asp-action="Index">
+                                <a class="nav-link text-dark @(currentController == "Favorite" ? "active" : "")" asp-controller="Favorite" asp-action="Index">
                                     Уподобання
                                 </a>
                             </li>
-                            @if (User.IsInRole("Admin"))
+    
+                            @if (User.Identity?.Name == "superadmin@lnu.edu.ua" || User.IsInRole("Admin"))
                             {
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-controller="Admin" asp-action="Users">
-                                        Користувачі
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-controller="Admin" asp-action="Books">
-                                        Книги
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-controller="Admin" asp-action="Reviews">
-                                        Коментарі
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-controller="Admin" asp-action="Reports">
-                                        Скарги
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="nav-link text-dark" asp-controller="Admin" asp-action="Transactions">
-                                        Транзакції
-                                    </a>
+                                <li class="nav-item dropdown">
+                                                            <a class="nav-link dropdown-toggle text-dark @(currentController == "Admin" ? "active" : "")" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                                Адмін-панель
+                                                            </a>
+                                    <ul class="dropdown-menu shadow-sm border-0 mt-2" aria-labelledby="adminDropdown" style="border-radius: 12px;">
+                                        <li>
+                                            <a class="dropdown-item py-2" asp-controller="Admin" asp-action="Users">
+                                                <i class="bi bi-people text-muted me-2"></i> Користувачі
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item py-2" asp-controller="Admin" asp-action="Books">
+                                                <i class="bi bi-book text-muted me-2"></i> Книги
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item py-2" asp-controller="Admin" asp-action="Reviews">
+                                                <i class="bi bi-chat-left-dots text-muted me-2"></i> Коментарі
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item py-2" asp-controller="Admin" asp-action="Reports">
+                                                <i class="bi bi-exclamation-octagon text-muted me-2"></i> Скарги
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item py-2" asp-controller="Admin" asp-action="Transactions">
+                                                <i class="bi bi-arrow-left-right text-muted me-2"></i> Транзакції
+                                            </a>
+                                        </li>
+                                    </ul>
                                 </li>
                             }
                         </ul>
@@ -122,21 +149,32 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
+    <footer class="site-footer mt-auto">
+        <div class="container text-center">
+            <div class="row align-items-center">
+                <div class="col-md-4 text-md-start mb-2 mb-md-0">
+                    <span class="fw-bold text-primary">LNU<span class="text-dark">BookShare</span></span>
+                </div>
+                <div class="col-md-4 mb-2 mb-md-0 small text-muted">
+                    &copy; @DateTime.Now.Year — Всі права захищено.
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+
     <environment include="Development">
         <script src="~/js/site.js" asp-append-version="true"></script>
         <script src="~/js/chat.js" asp-append-version="true"></script>
         <script src="~/js/profile.js" asp-append-version="true"></script>
+        <script src="~/js/notifications.js" asp-append-version="true"></script>
+        <script src="~/js/autoHideAlerts.js" asp-append-version="true"></script>
     </environment>
 
     <environment exclude="Development">
         <script src="~/js/site.min.js" asp-append-version="true"></script>
     </environment>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
-    <script src="~/js/notifications.js" asp-append-version="true"></script>
-    <script src="~/js/autoHideAlerts.js" asp-append-version="true"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>

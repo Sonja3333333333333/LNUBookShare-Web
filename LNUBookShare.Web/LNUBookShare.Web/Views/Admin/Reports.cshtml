@@ -10,43 +10,40 @@
     var currentReason = ViewBag.CurrentReasonFilter as string ?? "";
 }
 
+@section Styles {
+    <environment include="Development">
+        <link rel="stylesheet" href="~/css/modules/admin.css" asp-append-version="true" />
+    </environment>
+}
+
 <div class="container mt-5">
-    @* Повідомлення *@
     @if (TempData["SuccessMessage"] != null)
     {
-        <div class="alert alert-success alert-dismissible fade show shadow-sm">
-            @TempData["SuccessMessage"] <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
+        <div class="alert alert-success alert-pill mb-4"><i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]</div>
     }
 
     <form asp-action="SearchReports" method="get" class="mb-4">
         <div class="row">
-            
             <div class="col-lg-9">
-                <div class="row g-2 mb-4">
-                    <div class="col-md-3">
-                        <select name="searchBy" class="form-select border-secondary-subtle shadow-sm" style="border-radius: 8px;" onchange="this.form.submit()">
-                            <option value="sender" selected="@(currentSearchBy == "sender")">Відправник</option>
-                            <option value="reported" selected="@(currentSearchBy == "reported")">Порушник</option>
-                            <option value="details" selected="@(currentSearchBy == "details")">Текст</option>
-                        </select>
-                    </div>
-                    <div class="col-md-9">
-                        <div class="position-relative">
-                            <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
-                            <input type="text" name="query" value="@currentQuery" class="form-control border-secondary-subtle ps-5 shadow-sm" style="border-radius: 8px;" placeholder="Введіть текст для пошуку..." autocomplete="off" />
-                        </div>
+                <div class="d-flex gap-2 mb-4">
+                    <select name="searchBy" class="form-select border-secondary-subtle admin-search-select" onchange="this.form.submit()">
+                        <option value="sender" selected="@(currentSearchBy == "sender")">Відправник</option>
+                        <option value="reported" selected="@(currentSearchBy == "reported")">Порушник</option>
+                        <option value="details" selected="@(currentSearchBy == "details")">Текст</option>
+                    </select>
+
+                    <div class="position-relative flex-grow-1" style="min-width: 0;">
+                        <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted search-icon-pos"></i>
+                        <input type="text" name="query" value="@currentQuery" class="form-control border-secondary-subtle ps-5 py-2 admin-search-input" placeholder="Введіть текст для пошуку..." autocomplete="off" />
                     </div>
                 </div>
 
                 @if (!string.IsNullOrEmpty(currentQuery))
                 {
-                    <div class="mb-3">
-                        <span class="text-muted small">Знайдено результатів для: <strong>"@currentQuery"</strong></span>
-                    </div>
+                    <div class="mb-3"><span class="text-muted small">Знайдено результатів для: <strong>"@currentQuery"</strong></span></div>
                 }
 
-                <div class="card shadow-sm border-0">
+                <div class="card admin-table-card">
                     <div class="card-body p-0">
                         <div class="table-responsive">
                             <table class="table table-hover align-middle mb-0">
@@ -64,12 +61,7 @@
                                 <tbody>
                                     @if (!Model.Any())
                                     {
-                                        <tr>
-                                            <td colspan="7" class="text-center py-5 text-muted">
-                                                <i class="bi bi-search d-block fs-1 mb-2"></i>
-                                                За вашим запитом нічого не знайдено.
-                                            </td>
-                                        </tr>
+                                        <tr><td colspan="7" class="text-center py-5 text-muted"><i class="bi bi-search d-block fs-1 mb-2"></i>Нічого не знайдено.</td></tr>
                                     }
                                     else
                                     {
@@ -77,51 +69,24 @@
                                         {
                                             <tr>
                                                 <td class="px-4 small text-muted">@r.CreatedAt.ToString("g")</td>
-                                                <a asp-controller="OtherProfile" asp-action="Index" asp-route-userId="@r.Sender.Id" class="text-decoration-none fw-bold" title="Перейти на профіль відправника">
-                                                    @r.Sender.FirstName @r.Sender.LastName
-                                                </a>
-                                                <td>
-                                                    <a asp-controller="OtherProfile" asp-action="Index" asp-route-userId="@r.ReportedUser.Id" class="text-decoration-none fw-bold" title="Перейти на профіль порушника">
-                                                        @r.ReportedUser.FirstName @r.ReportedUser.LastName
-                                                    </a>
-                                                </td>
-
-                                                <td>
-                                                    @{
-                                                        var reasonText = r.Reason switch
-                                                        {
-                                                            ReportReason.Spam => "Спам",
-                                                            ReportReason.Insults => "Образи",
-                                                            ReportReason.Fraud => "Шахрайство",
-                                                            ReportReason.BookReturnIssue => "Повернення книги",
-                                                            ReportReason.Other => "Інше",
-                                                            _ => r.Reason.ToString()
-                                                        };
-                                                    }
-                                                    <span class="badge bg-light text-dark border shadow-sm" style="border-radius: 6px;">
-                                                        @reasonText
-                                                    </span>
-                                                </td>
-
+                                                <td><a asp-controller="OtherProfile" asp-action="Index" asp-route-userId="@r.Sender.Id" class="text-decoration-none fw-bold">@r.Sender.FirstName @r.Sender.LastName</a></td>
+                                                <td><a asp-controller="OtherProfile" asp-action="Index" asp-route-userId="@r.ReportedUser.Id" class="text-decoration-none fw-bold">@r.ReportedUser.FirstName @r.ReportedUser.LastName</a></td>
+                                                <td><span class="badge bg-light text-dark border">@(r.Reason.ToString())</span></td>
                                                 <td class="small text-wrap" style="max-width: 200px;">@r.Details</td>
-                                                <td>
-                                                    <span class="badge @(r.Status == ReportStatus.Pending ? "bg-warning text-dark" : "bg-success")">
-                                                        @(r.Status == ReportStatus.Pending ? "Нова" : "Вирішена")
-                                                    </span>
-                                                </td>
+                                                <td><span class="badge @(r.Status == ReportStatus.Pending ? "bg-warning text-dark" : "bg-success")">@(r.Status == ReportStatus.Pending ? "Нова" : "Вирішена")</span></td>
                                                 <td class="text-end px-4">
                                                     @if (r.Status == ReportStatus.Pending)
                                                     {
                                                         <form asp-action="ResolveReport" method="post" class="d-inline">
                                                             <input type="hidden" name="reportId" value="@r.Id" />
-                                                            <button type="submit" class="btn btn-sm btn-success shadow-sm">Вирішити</button>
+                                                            <button type="submit" class="btn btn-sm btn-primary">Вирішити</button>
                                                         </form>
                                                     }
                                                     else
                                                     {
                                                         <form asp-action="DeleteReport" method="post" class="d-inline" onsubmit="return confirm('Видалити остаточно?');">
                                                             <input type="hidden" name="reportId" value="@r.Id" />
-                                                            <button type="submit" class="btn btn-sm btn-outline-danger border-0"><i class="bi bi-trash"></i></button>
+                                                            <button type="submit" class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></button>
                                                         </form>
                                                     }
                                                 </td>
@@ -132,71 +97,35 @@
                             </table>
                         </div>
                     </div>
-                    <div class="card-footer bg-white text-center py-3">
-                        <small class="text-muted">Всього в списку: @Model.Count()</small>
-                    </div>
+                    <div class="card-footer bg-white text-center py-3"><small class="text-muted">Всього в списку: @Model.Count()</small></div>
                 </div>
             </div>
 
             <div class="col-lg-3">
-                <div class="card shadow-sm border-0" style="border-radius: 8px;">
+                <div class="card admin-filter-card">
                     <div class="card-header bg-white border-bottom-0 pt-3 pb-0 d-flex justify-content-between align-items-center">
                         <span class="fw-bold text-dark"><i class="bi bi-funnel me-1 text-muted"></i> Фільтри</span>
-                        <a asp-action="Reports" class="btn btn-link btn-sm text-muted text-decoration-none p-0">Скинути</a>
+                        <a asp-action="Reports" class="btn btn-light btn-sm">Скинути</a>
                     </div>
-                    
                     <div class="card-body">
-                        
                         <h6 class="text-muted small fw-bold text-uppercase mb-3">За статусом</h6>
                         <div class="mb-4">
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="radio" name="statusFilter" id="statusAll" value="all" checked="@(currentStatus == "all")" onchange="this.form.submit()">
-                                <label class="form-check-label text-dark" for="statusAll">Всі</label>
-                            </div>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="radio" name="statusFilter" id="statusActive" value="active" checked="@(currentStatus == "active" || string.IsNullOrEmpty(currentStatus))" onchange="this.form.submit()">
-                                <label class="form-check-label text-dark" for="statusActive">Активні (Нові)</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="statusFilter" id="statusResolved" value="resolved" checked="@(currentStatus == "resolved")" onchange="this.form.submit()">
-                                <label class="form-check-label text-dark" for="statusResolved">Вирішені</label>
-                            </div>
+                            <div class="form-check mb-2"><input class="form-check-input" type="radio" name="statusFilter" id="statusAll" value="all" checked="@(currentStatus == "all")" onchange="this.form.submit()"><label class="form-check-label" for="statusAll">Всі</label></div>
+                            <div class="form-check mb-2"><input class="form-check-input" type="radio" name="statusFilter" id="statusActive" value="active" checked="@(currentStatus == "active" || string.IsNullOrEmpty(currentStatus))" onchange="this.form.submit()"><label class="form-check-label" for="statusActive">Активні</label></div>
+                            <div class="form-check"><input class="form-check-input" type="radio" name="statusFilter" id="statusResolved" value="resolved" checked="@(currentStatus == "resolved")" onchange="this.form.submit()"><label class="form-check-label" for="statusResolved">Вирішені</label></div>
                         </div>
-
                         <hr class="text-secondary opacity-25" />
-
                         <h6 class="text-muted small fw-bold text-uppercase mb-3 mt-3">За причиною</h6>
                         <div>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="radio" name="reasonFilter" id="reasonAll" value="" checked="@(string.IsNullOrEmpty(currentReason))" onchange="this.form.submit()">
-                                <label class="form-check-label text-dark" for="reasonAll">Всі причини</label>
-                            </div>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="radio" name="reasonFilter" id="reasonSpam" value="Spam" checked="@(currentReason == "Spam")" onchange="this.form.submit()">
-                                <label class="form-check-label text-dark" for="reasonSpam">Спам / Фейк</label>
-                            </div>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="radio" name="reasonFilter" id="reasonInsults" value="Insults" checked="@(currentReason == "Insults")" onchange="this.form.submit()">
-                                <label class="form-check-label text-dark" for="reasonInsults">Образи</label>
-                            </div>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="radio" name="reasonFilter" id="reasonFraud" value="Fraud" checked="@(currentReason == "Fraud")" onchange="this.form.submit()">
-                                <label class="form-check-label text-dark" for="reasonFraud">Шахрайство</label>
-                            </div>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="radio" name="reasonFilter" id="reasonBook" value="BookReturnIssue" checked="@(currentReason == "BookReturnIssue")" onchange="this.form.submit()">
-                                <label class="form-check-label text-dark" for="reasonBook">Повернення книги</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="reasonFilter" id="reasonOther" value="Other" checked="@(currentReason == "Other")" onchange="this.form.submit()">
-                                <label class="form-check-label text-dark" for="reasonOther">Інше</label>
-                            </div>
+                            <div class="form-check mb-2"><input class="form-check-input" type="radio" name="reasonFilter" id="reasonAll" value="" checked="@(string.IsNullOrEmpty(currentReason))" onchange="this.form.submit()"><label class="form-check-label" for="reasonAll">Всі причини</label></div>
+                            <div class="form-check mb-2"><input class="form-check-input" type="radio" name="reasonFilter" id="reasonSpam" value="Spam" checked="@(currentReason == "Spam")" onchange="this.form.submit()"><label class="form-check-label" for="reasonSpam">Спам</label></div>
+                            <div class="form-check mb-2"><input class="form-check-input" type="radio" name="reasonFilter" id="reasonInsults" value="Insults" checked="@(currentReason == "Insults")" onchange="this.form.submit()"><label class="form-check-label" for="reasonInsults">Образи</label></div>
+                            <div class="form-check mb-2"><input class="form-check-input" type="radio" name="reasonFilter" id="reasonFraud" value="Fraud" checked="@(currentReason == "Fraud")" onchange="this.form.submit()"><label class="form-check-label" for="reasonFraud">Шахрайство</label></div>
+                            <div class="form-check"><input class="form-check-input" type="radio" name="reasonFilter" id="reasonOther" value="Other" checked="@(currentReason == "Other")" onchange="this.form.submit()"><label class="form-check-label" for="reasonOther">Інше</label></div>
                         </div>
-
                     </div>
                 </div>
             </div>
-
         </div>
         <button type="submit" class="d-none"></button>
     </form>
