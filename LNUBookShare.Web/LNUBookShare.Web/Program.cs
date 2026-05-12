@@ -1,7 +1,7 @@
 // <copyright file="Program.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
-
+using Azure.Identity;
 using LNUBookShare.Application.Interfaces;
 using LNUBookShare.Application.Models;
 using LNUBookShare.Application.Services;
@@ -21,6 +21,11 @@ using Serilog;
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 var builder = WebApplication.CreateBuilder(args);
+if (builder.Environment.IsProduction())
+{
+    var keyVaultUri = new Uri("https://lnubookshare-vault.vault.azure.net/");
+    builder.Configuration.AddAzureKeyVault(keyVaultUri, new DefaultAzureCredential());
+}
 
 Console.WriteLine($"  ПОТОЧНЕ СЕРЕДОВИЩЕ: {builder.Environment.EnvironmentName}");
 
