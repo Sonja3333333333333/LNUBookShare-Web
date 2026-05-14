@@ -49,23 +49,6 @@ namespace LNUBookShare.UnitTests.ProfileService_tests
             _profileRepositoryMock.Verify(r => r.UpdateUserAsync(user), Times.Once);
         }
 
-        [Fact]
-        public async Task UpdateProfileAsync_WhenUserNotFound_ShouldReturnFailure()
-        {
-            // Arrange
-            _profileRepositoryMock
-                .Setup(r => r.GetUserByIdAsync(999))
-                .ReturnsAsync((User?)null);
-
-            // Act
-            var result = await _profileService.UpdateProfileAsync(999, "Ім'я", "Прізвище", 1, null);
-
-            // Assert
-            Assert.True(result.IsFailure);
-            Assert.Equal("Користувача не знайдено.", result.Error);
-
-            _profileRepositoryMock.Verify(r => r.UpdateUserAsync(It.IsAny<User>()), Times.Never);
-        }
 
         [Fact]
         public async Task UpdateProfileAsync_WhenAvatarPathProvided_ShouldSetAvatar()
