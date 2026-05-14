@@ -30,8 +30,8 @@ jobs:
 
       - name: dotnet publish
         run: |
-          PROJ_FILE=$(find LNUBookShare.Web -name "LNUBookShare.Web.csproj" | head -n 1)
-          echo "Found project at: $PROJ_FILE"
+          PROJ_FILE=$(find . -name "LNUBookShare.Web.csproj" | head -n 1)
+          echo "Робот знайшов проект тут: $PROJ_FILE"
           dotnet publish "$PROJ_FILE" -c Release -o ./publish
 
   deploy:
