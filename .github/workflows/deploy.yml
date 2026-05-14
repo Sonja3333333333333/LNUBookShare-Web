@@ -3,7 +3,7 @@ name: Build and deploy ASP.Net Core app to Azure
 env:
   AZURE_WEBAPP_NAME: 'lnu-bookshare-pmi33'    # Твоя назва в Azure
   AZURE_WEBAPP_PACKAGE_PATH: '.'             # Корінь репозиторію
-  DOTNET_VERSION: '8.0.x'                    # Твоя версія .NET (якщо 10, то міняй на 10)
+  DOTNET_VERSION: '10.0.x'                    # Твоя версія .NET (якщо 10, то міняй на 10)
 
 on:
   push:
