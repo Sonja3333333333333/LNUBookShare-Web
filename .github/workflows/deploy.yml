@@ -2,7 +2,7 @@ name: Build and deploy ASP.Net Core app to Azure
 
 on:
   push:
-    branches: [ "main" ] # Оскільки на скрінах у тебе main
+    branches: [ "main" ] # Спрацює, коли ти пушнеш у main
   workflow_dispatch:
 
 jobs:
@@ -16,18 +16,19 @@ jobs:
         with:
           dotnet-version: '10.0.x' 
 
-      - name: Restore dependencies
-        run: dotnet restore LNUBookShare.sln # Або LNUBookShare.slnx, якщо .sln зник
+      - name: Restore
+        # Вказуємо чітко твій новий формат .slnx
+        run: dotnet restore LNUBookShare.slnx
 
-      - name: Build with dotnet
-        run: dotnet build LNUBookShare.sln --configuration Release --no-restore
+      - name: Build
+        run: dotnet build LNUBookShare.slnx --configuration Release --no-restore
 
       - name: Run Tests
-        run: dotnet test LNUBookShare.sln --configuration Release --no-build
+        run: dotnet test LNUBookShare.slnx --configuration Release --no-build
 
       - name: Publish
-        # Тут вказуємо шлях до веб-проекту (перевір назву папки!)
-        run: dotnet publish LNUBookShare.Web/*.csproj -c Release -o ./publish
+        # Публікуємо саме веб-проект (перевір, щоб назва папки збігалася)
+        run: dotnet publish LNUBookShare.Web/LNUBookShare.Web.csproj -c Release -o ./publish
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
