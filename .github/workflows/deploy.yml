@@ -16,14 +16,14 @@ jobs:
         with:
           dotnet-version: '10.0.x' 
 
-      - name: Restore
-        run: dotnet restore *.sln* # Знайде рішення автоматично
+      - name: Restore dependencies
+        run: dotnet restore LNUBookShare.sln # Або LNUBookShare.slnx, якщо .sln зник
 
-      - name: Build
-        run: dotnet build *.sln* --configuration Release --no-restore
+      - name: Build with dotnet
+        run: dotnet build LNUBookShare.sln --configuration Release --no-restore
 
-      - name: Test
-        run: dotnet test *.sln* --configuration Release --no-build
+      - name: Run Tests
+        run: dotnet test LNUBookShare.sln --configuration Release --no-build
 
       - name: Publish
         # Тут вказуємо шлях до веб-проекту (перевір назву папки!)
