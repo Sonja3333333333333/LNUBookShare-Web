@@ -4,6 +4,8 @@ using LNUBookShare.Domain.Entities;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace LNUBookShare.UnitTests.NotificationService_tests
 {
@@ -11,18 +13,21 @@ namespace LNUBookShare.UnitTests.NotificationService_tests
     {
         private readonly Mock<INotificationRepository> _notificationRepoMock;
         private readonly Mock<ILogger<NotificationService>> _loggerMock;
+        private readonly Mock<IRealTimeNotificationSender> _realTimeMock; // ДОДАЛИ ЦЕЙ РЯДОК
         private readonly NotificationService _notificationService;
 
         public NotificationServiceTests()
         {
             _notificationRepoMock = new Mock<INotificationRepository>();
             _loggerMock = new Mock<ILogger<NotificationService>>();
+            _realTimeMock = new Mock<IRealTimeNotificationSender>(); // ІНІЦІАЛІЗУЄМО ТУТ
 
+            // Тепер передаємо ВСІ ТРИ об'єкти в конструктор
             _notificationService = new NotificationService(
                 _notificationRepoMock.Object,
-                _loggerMock.Object);
+                _loggerMock.Object,
+                _realTimeMock.Object);
         }
-
 
         [Fact]
         public async Task MarkAsReadAsync_WhenNotificationExistsAndBelongsToUser_ShouldDeleteAndReturnSuccess()
@@ -36,7 +41,6 @@ namespace LNUBookShare.UnitTests.NotificationService_tests
             var result = await _notificationService.MarkAsReadAsync(notificationId, userId);
 
             Assert.True(result.IsSuccess);
-
             _notificationRepoMock.Verify(r => r.DeleteAsync(notification), Times.Once);
         }
 
@@ -51,7 +55,7 @@ namespace LNUBookShare.UnitTests.NotificationService_tests
             var result = await _notificationService.MarkAsReadAsync(notificationId, userId);
 
             Assert.True(result.IsFailure);
-            Assert.Equal("Сповіщення не знайдено.", result.Error);
+            Assert.Equal("Сповіщення не знайдено або немає доступу.", result.Error); // Текст має збігатися з сервісом
             _notificationRepoMock.Verify(r => r.DeleteAsync(It.IsAny<Notification>()), Times.Never);
         }
 
@@ -60,7 +64,7 @@ namespace LNUBookShare.UnitTests.NotificationService_tests
         {
             int notificationId = 1;
             int currentUserId = 10;
-            int anotherUserId = 99; 
+            int anotherUserId = 99;
             var notification = new Notification { Id = notificationId, UserId = anotherUserId };
 
             _notificationRepoMock.Setup(r => r.GetByIdAsync(notificationId)).ReturnsAsync(notification);
@@ -68,7 +72,7 @@ namespace LNUBookShare.UnitTests.NotificationService_tests
             var result = await _notificationService.MarkAsReadAsync(notificationId, currentUserId);
 
             Assert.True(result.IsFailure);
-            Assert.Equal("Немає доступу до цього сповіщення.", result.Error);
+            Assert.Equal("Сповіщення не знайдено або немає доступу.", result.Error);
             _notificationRepoMock.Verify(r => r.DeleteAsync(It.IsAny<Notification>()), Times.Never);
         }
     }
