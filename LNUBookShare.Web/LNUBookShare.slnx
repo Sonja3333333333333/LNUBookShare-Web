@@ -1,8 +1,6 @@
 <Solution>
   <Folder Name="/.github/" />
-  <Folder Name="/.github/workflows/">
-    <File Path="deploy.yml" />
-  </Folder>
+  <Folder Name="/.github/workflows/" />
   <Folder Name="/Solution Items/">
     <File Path="appsettings.json" />
   </Folder>
