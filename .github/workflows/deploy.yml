@@ -17,7 +17,6 @@ jobs:
           dotnet-version: '10.0.x' 
 
       - name: Restore
-        # Вказуємо шлях до папки, де реально лежить файл рішення
         run: dotnet restore LNUBookShare.Web/LNUBookShare.slnx
 
       - name: Build
@@ -27,14 +26,13 @@ jobs:
         run: dotnet test LNUBookShare.Web/LNUBookShare.slnx --configuration Release --no-build
 
       - name: Publish
-        # Публікуємо веб-проект
         run: dotnet publish LNUBookShare.Web/LNUBookShare.Web.csproj -c Release -o ./publish
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: web-app
-          path: ./publish
+      - name: dotnet publish
+        run: |
+          PROJ_FILE=$(find LNUBookShare.Web -name "LNUBookShare.Web.csproj" | head -n 1)
+          echo "Found project at: $PROJ_FILE"
+          dotnet publish "$PROJ_FILE" -c Release -o ./publish
 
   deploy:
     needs: build
