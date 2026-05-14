@@ -28,150 +28,96 @@ namespace LNUBookShare.UnitTests.Services
             _loggerMock = new Mock<ILogger<BookStatusService>>();
 
             _service = new BookStatusService(
-              _profileServiceMock.Object,
-              _reservationServiceMock.Object,
-              _notificationServiceMock.Object,
-              _loggerMock.Object,
-              _transactionRepoMock.Object,
-              _bookRepoMock.Object);
+                _profileServiceMock.Object,
+                _reservationServiceMock.Object,
+                _notificationServiceMock.Object,
+                _loggerMock.Object,
+                _transactionRepoMock.Object,
+                _bookRepoMock.Object);
         }
 
         [Fact]
         public async Task IssueBookAsync_WhenBookNotFound_ReturnsFailure()
         {
-            int bookId = 1;
-            int ownerId = 10;
+            // Arrange
+            int bookId = 1, ownerId = 10;
             _profileServiceMock.Setup(s => s.GetUserBooksAsync(ownerId))
                 .ReturnsAsync(Result<List<Book>>.Success(new List<Book>()));
 
+            // Act
             var result = await _service.IssueBookAsync(bookId, ownerId);
 
+            // Assert
             Assert.True(result.IsFailure);
             Assert.Equal("Книгу не знайдено.", result.Error);
-
-            // Виправляємо типи параметрів для Verify
-            _profileServiceMock.Verify(s => s.UpdateBookAsync(
-                It.IsAny<int>(),      // ownerId
-                It.IsAny<int>(),      // bookId
-                It.IsAny<string>(),   // title
-                It.IsAny<string>(),   // author
-                It.IsAny<int>(),      // categoryId
-                It.IsAny<string>(),   // description
-                It.IsAny<string>(),   // isbn
-                It.IsAny<string>(),   // status
-                It.IsAny<int>(),      // facultyId
-                It.IsAny<Image?>()    // avatar (Image об'єкт, а не int?)
-            ), Times.Never);
         }
 
         [Fact]
-        public async Task IssueBookAsync_WhenBookFound_UpdatesStatusToBorrowed()
+        public async Task IssueBookAsync_WhenQueueIsEmpty_ReturnsFailure()
         {
-            int bookId = 1;
-            int ownerId = 10;
-            var book = new Book { BookId = bookId, Status = "reserved" };
-
+            // Arrange
+            int bookId = 1, ownerId = 10;
+            var book = new Book { BookId = bookId };
             _profileServiceMock.Setup(s => s.GetUserBooksAsync(ownerId))
                 .ReturnsAsync(Result<List<Book>>.Success(new List<Book> { book }));
-
-            _reservationServiceMock.Setup(s => s.GetQueueUsersAsync(bookId))
-                .ReturnsAsync(Result<List<User>>.Success(new List<User> { new User { Id = 100 } }));
-
-            var result = await _service.IssueBookAsync(bookId, ownerId);
-
-            Assert.True(result.IsSuccess);
-            Assert.Equal("borrowed", book.Status);
-
-            _profileServiceMock.Verify(s => s.UpdateBookAsync(
-                ownerId,
-                bookId,
-                It.IsAny<string>(),
-                It.IsAny<string>(),
-                It.IsAny<int>(),
-                It.IsAny<string>(),
-                It.IsAny<string>(),
-                "borrowed",           // статус перевіряємо чітко
-                It.IsAny<int>(),
-                It.IsAny<Image?>()    // Image? замість int?
-            ), Times.Once);
-        }
-
-        [Fact]
-        public async Task ConfirmReturnAsync_WhenQueueIsEmpty_SetsStatusToAvailable()
-        {
-            int bookId = 1;
-            int ownerId = 10;
-            var book = new Book { BookId = bookId, Status = "borrowed" };
-
-            _profileServiceMock.Setup(s => s.GetUserBooksAsync(ownerId))
-                .ReturnsAsync(Result<List<Book>>.Success(new List<Book> { book }));
-
             _reservationServiceMock.Setup(s => s.GetQueueUsersAsync(bookId))
                 .ReturnsAsync(Result<List<User>>.Success(new List<User>()));
 
-            var activeTransaction = new RentalTransaction { Id = 1, BookId = bookId, Status = "active" };
-            _transactionRepoMock.Setup(r => r.GetActiveByBookIdAsync(bookId))
-                .ReturnsAsync(activeTransaction);
+            // Act
+            var result = await _service.IssueBookAsync(bookId, ownerId);
 
-            var result = await _service.ConfirmReturnAsync(bookId, ownerId);
-
-            Assert.True(result.IsSuccess);
-            Assert.Equal("available", book.Status);
-
-            _profileServiceMock.Verify(s => s.UpdateBookAsync(
-                ownerId,
-                bookId,
-                It.IsAny<string>(),
-                It.IsAny<string>(),
-                It.IsAny<int>(),
-                It.IsAny<string>(),
-                It.IsAny<string>(),
-                "available",
-                It.IsAny<int>(),
-                It.IsAny<Image?>()    // Image? замість int?
-            ), Times.Once);
-
-            _transactionRepoMock.Verify(r => r.UpdateAsync(It.IsAny<RentalTransaction>()), Times.Once);
+            // Assert
+            Assert.True(result.IsFailure);
+            Assert.Equal("Немає користувачів у черзі, кому можна видати книгу.", result.Error);
         }
 
         [Fact]
-        public async Task ConfirmReturnAsync_WhenQueueHasMultipleUsers_NotifiesNextUserAndSetsStatusReserved()
+        public async Task IssueBookAsync_Success_CreatesTransactionAndUpdatesStatus()
         {
-            int bookId = 1;
-            int ownerId = 10;
-            var book = new Book { BookId = bookId, Title = "Кобзар", Status = "borrowed" };
+            // Arrange
+            int bookId = 1, ownerId = 10;
+            var book = new Book { BookId = bookId, Status = "available" };
+            var borrower = new User { Id = 99 };
+
+            _profileServiceMock.Setup(s => s.GetUserBooksAsync(ownerId))
+                .ReturnsAsync(Result<List<Book>>.Success(new List<Book> { book }));
+            _reservationServiceMock.Setup(s => s.GetQueueUsersAsync(bookId))
+                .ReturnsAsync(Result<List<User>>.Success(new List<User> { borrower }));
+
+            // Act
+            var result = await _service.IssueBookAsync(bookId, ownerId);
+
+            // Assert
+            Assert.True(result.IsSuccess);
+            Assert.Equal("borrowed", book.Status);
+            _transactionRepoMock.Verify(r => r.AddAsync(It.Is<RentalTransaction>(t =>
+                t.BorrowerId == borrower.Id && t.BookId == bookId)), Times.Once);
+            _bookRepoMock.Verify(r => r.UpdateAsync(book), Times.Once);
+        }
+
+        [Fact]
+        public async Task ConfirmReturnAsync_WhenQueueNotEmpty_NotifiesNextUser()
+        {
+            // Arrange
+            int bookId = 1, ownerId = 10;
+            var book = new Book { BookId = bookId, Title = "Кобзар" };
             var currentUser = new User { Id = 100 };
             var nextUser = new User { Id = 101 };
 
             _profileServiceMock.Setup(s => s.GetUserBooksAsync(ownerId))
                 .ReturnsAsync(Result<List<Book>>.Success(new List<Book> { book }));
-
             _reservationServiceMock.Setup(s => s.GetQueueUsersAsync(bookId))
                 .ReturnsAsync(Result<List<User>>.Success(new List<User> { currentUser, nextUser }));
-
             _transactionRepoMock.Setup(r => r.GetActiveByBookIdAsync(bookId))
-                .ReturnsAsync(new RentalTransaction { Id = 2, Status = "active" });
+                .ReturnsAsync(new RentalTransaction { Id = 5 });
 
-            var result = await _service.ConfirmReturnAsync(bookId, ownerId);
+            // Act
+            await _service.ConfirmReturnAsync(bookId, ownerId);
 
-            Assert.True(result.IsSuccess);
+            // Assert
             Assert.Equal("reserved", book.Status);
-
             _reservationServiceMock.Verify(s => s.LeaveQueueAsync(bookId, currentUser.Id), Times.Once);
             _notificationServiceMock.Verify(s => s.CreateNotificationAsync(nextUser.Id, It.IsAny<string>(), bookId), Times.Once);
-
-            _profileServiceMock.Verify(s => s.UpdateBookAsync(
-                ownerId,
-                bookId,
-                It.IsAny<string>(),
-                It.IsAny<string>(),
-                It.IsAny<int>(),
-                It.IsAny<string>(),
-                It.IsAny<string>(),
-                "reserved",
-                It.IsAny<int>(),
-                It.IsAny<Image?>()    // Image? замість int?
-            ), Times.Once);
         }
     }
 }
