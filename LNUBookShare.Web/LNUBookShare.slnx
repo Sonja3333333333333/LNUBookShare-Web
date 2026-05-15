@@ -1,8 +1,8 @@
 <Solution>
-  <Folder Name="/.github/">
+  <Folder Name="/.github/" />
+  <Folder Name="/.github/workflows/">
     <File Path="sonar.yml" />
   </Folder>
-  <Folder Name="/.github/workflows/" />
   <Folder Name="/Solution Items/">
     <File Path="appsettings.json" />
   </Folder>
