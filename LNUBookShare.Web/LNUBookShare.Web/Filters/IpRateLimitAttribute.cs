@@ -16,24 +16,19 @@ public class IpRateLimitAttribute : ActionFilterAttribute
 
     public override void OnActionExecuting(ActionExecutingContext context)
     {
-        // Отримуємо сервіс кешування з контейнера залежностей (DI)
         var cache = context.HttpContext.RequestServices.GetRequiredService<IMemoryCache>();
 
-        // Визначаємо IP-адресу користувача
         var ip = context.HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
         var cacheKey = $"{CacheKeyPrefix}{ip}";
 
-        // Перевіряємо, скільки запитів вже було
         if (cache.TryGetValue(cacheKey, out int requestCount))
         {
             if (requestCount >= _requestLimit)
             {
-                // ПЕРЕВИЩЕНО: Редірект на помилку
                 context.Result = new RedirectToActionResult("Error", "Home", new { message = "Занадто багато запитів. Відпочиньте хвилину!" });
                 return;
             }
 
-            // Оновлюємо лічильник
             cache.Set(cacheKey, requestCount + 1, TimeSpan.FromMinutes(1));
         }
         else
