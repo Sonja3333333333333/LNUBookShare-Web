@@ -33,7 +33,6 @@ public class IpRateLimitAttribute : ActionFilterAttribute
         }
         else
         {
-            // ПЕРШИЙ ЗАПИТ: Створюємо запис у кеші на 1 хвилину
             cache.Set(cacheKey, 1, TimeSpan.FromMinutes(1));
         }
 
