@@ -3,6 +3,8 @@ name: Build and deploy ASP.Net Core app to Azure
 on:
   push:
     branches: [ "main" ] 
+  pull_request:
+    branches: [ "main" ] # ТУТ МАГІЯ 1: Тепер білд запускається і під час Pull Request!
   workflow_dispatch:
 
 jobs:
@@ -27,7 +29,7 @@ jobs:
 
       - name: Publish
         run: |
-          PROJ_FILE=$(find . -name "LNUBookShare.Web.csproj")
+          PROJ_FILE=$(find . -name "LNUBookShare.Web.csproj" | head -n 1)
           echo "Знайдено проект: $PROJ_FILE"
           dotnet publish "$PROJ_FILE" -c Release -o ./publish
 
@@ -39,6 +41,7 @@ jobs:
 
   deploy:
     needs: build
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
       - name: Download artifact
